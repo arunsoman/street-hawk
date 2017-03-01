@@ -22,7 +22,7 @@ public final class ELMConnector implements AutoCloseable {
 
     private BluetoothSocket bluetoothSocket;
     private Pipe pipe;
-    private String[] initSeqCmds = {"ATL1\r", "ATH1\r", "ATS1\r", "ATAL\r", "ATSPO\r"};
+    private String[] initSeqCmds = {"ATL1\r", "ATH1\r", "ATS1\r", "ATAL\r", "ATSPO\r", "ATCRA", "ATCRA0C9\r"};
     private String streamCmd = "ATMA\n\r";
     private String deviceID = "ATI\r";
 
