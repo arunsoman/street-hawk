@@ -1,4 +1,4 @@
-package com.ar.myfirstapp;
+package com.ar.myfirstapp.elm;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -7,12 +7,10 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
@@ -20,15 +18,20 @@ import java.util.UUID;
  * Created by Arun Soman on 2/28/2017.
  */
 
-public class ELMConnector {
+public final class ELMConnector implements AutoCloseable {
 
     private BluetoothSocket bluetoothSocket;
     private Pipe pipe;
-    private String[] initSeqCmds = {"ATL1", "ATH1", "ATS1", "ATAL"};
-    private String streamCmd = "ATSP0";
-    private String deviceID = "AT1";
+    private String[] initSeqCmds = {"ATL1\r", "ATH1\r", "ATS1\r", "ATAL\r", "ATSPO\r"};
+    private String streamCmd = "ATMA\n\r";
+    private String deviceID = "ATI\r";
 
-    class Pipe implements Closeable {
+    @Override
+    public void close() throws Exception {
+        pipe.close();
+    }
+
+    private final class Pipe implements AutoCloseable {
         InputStream is;
         OutputStream os;
 
@@ -74,15 +77,14 @@ public class ELMConnector {
     }
 
     public boolean initSequence() throws IOException {
+        //sreset();
         String resp = sendNreceiveCmd(deviceID);
-        if (!resp.toUpperCase().contains("ELM327")) {
+        /*if (!resp.toUpperCase().contains("ELM327")) {
             throw new IOException("Unknown device:" + resp);
-        }
+        }*/
         for (String cmd : initSeqCmds) {
             resp = sendNreceiveCmd(cmd);
-            if (!resp.toUpperCase().contains("ELM327")) {
-                throw new IOException("Unexpected res:" + resp + " for cmd:" + cmd);
-            }
+            Log.e("Response for "+cmd,resp);
         }
         return true;
     }
@@ -91,14 +93,27 @@ public class ELMConnector {
         pipe.os.write(streamCmd.getBytes());
         pipe.os.flush();
         BufferedReader br = new BufferedReader(new InputStreamReader(pipe.is));
-        String line;
-        while ((line = br.readLine()) != null) {
-            handler.handle(line);
+
+        String line = br.readLine();
+        StringBuilder res = new StringBuilder();
+
+        // read until '>' arrives OR end of stream reached
+        char c;
+        byte b;
+        // -1 if the end of the stream is reached
+        while (((b = (byte) pipe.is.read()) > -1)) {
+            c = (char) b;
+            if (c == '\n') // read until '>' arrives
+            {
+                handler.handle(res.toString());
+                res.delete(0,res.length());
+            }
+            res.append(c);
         }
     }
 
     public boolean reset() throws IOException {
-        String resp = sendNreceiveCmd("ATZ");
+        String resp = sendNreceiveCmd("AT Z\r");
         Log.d("reset", resp);
         return true;
     }
@@ -108,8 +123,22 @@ public class ELMConnector {
     public String sendNreceiveCmd(String cmd) throws IOException {
         pipe.os.write(cmd.getBytes());
         pipe.os.flush();
-        int readBytes = pipe.is.read(resp);
-        return new String(resp, 0, readBytes);
+
+        StringBuilder res = new StringBuilder();
+
+        // read until '>' arrives OR end of stream reached
+        char c;
+        byte b;
+        // -1 if the end of the stream is reached
+        while (((b = (byte) pipe.is.read()) > -1)) {
+            c = (char) b;
+            if (c == '>') // read until '>' arrives
+            {
+                break;
+            }
+            res.append(c);
+        }
+        return res.toString();
 
     }
 

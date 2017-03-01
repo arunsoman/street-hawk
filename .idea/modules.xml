@@ -3,11 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/bluetoothreader.iml" filepath="$PROJECT_DIR$/bluetoothreader.iml" />
-      <module fileurl="file://$PROJECT_DIR$/bluetoothreader1.iml" filepath="$PROJECT_DIR$/bluetoothreader1.iml" />
-      <module fileurl="file://$PROJECT_DIR$/myFirstApp.iml" filepath="$PROJECT_DIR$/myFirstApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/street-hawk.iml" filepath="$PROJECT_DIR$/street-hawk.iml" />
     </modules>
   </component>
 </project>

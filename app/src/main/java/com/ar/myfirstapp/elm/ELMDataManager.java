@@ -1,4 +1,4 @@
-package com.ar.myfirstapp;
+package com.ar.myfirstapp.elm;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.HashMap;
  * Created by Arun Soman on 2/28/2017.
  */
 
-public class ELMDataManager {
+class ELMDataManager {
     private HashMap<String, ArrayList<Tupple>> store = new HashMap<>();
 
     class Tupple {
