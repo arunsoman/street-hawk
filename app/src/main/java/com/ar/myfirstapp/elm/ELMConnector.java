@@ -22,11 +22,15 @@ public final class ELMConnector implements AutoCloseable {
 
     private BluetoothSocket bluetoothSocket;
     private Pipe pipe;
-    private byte CR = 0x0D;
-    private byte DONE = 0x3E;
-    private String[] initSeqCmds = {"ATL1", "ATH1", "ATS1", "ATAL", "ATSPO","ATSH7DF"};
+    private static final byte LINEFEED = (byte)('\n'); //\n
+    private static final byte CR = 0x0D; //\r
+    private static final byte DONE = 0x3E; //'>'
+    private static final int SENDERID = 0xF1;
+    private String[] initSeqCmds = {"ATH1", "ATS1", "ATAL", "ATSPO","ATSH7DF"};
     private String streamCmd = "ATMA";
     private String deviceID = "ATI";
+    private State state;
+    private enum State  {Connected, Disconnected, Initialized, Reset, Interrupted, Scanning};
 
     @Override
     public void close() throws Exception {
@@ -49,7 +53,7 @@ public final class ELMConnector implements AutoCloseable {
         }
     }
 
-    public boolean connect(String deviceAddress) throws IOException {
+    public void connect(String deviceAddress) throws IOException {
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice device = btAdapter.getRemoteDevice(deviceAddress);
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -59,6 +63,7 @@ public final class ELMConnector implements AutoCloseable {
             bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid);
             bluetoothSocket.connect();
             pipe = new Pipe(bluetoothSocket);
+            state = State.Connected;
         } catch (IOException e) {
             String TAG = BluetoothManager.class.getName();
             Class<?> clazz = bluetoothSocket.getRemoteDevice().getClass();
@@ -70,94 +75,92 @@ public final class ELMConnector implements AutoCloseable {
                 sockFallback.connect();
                 bluetoothSocket = sockFallback;
                 pipe = new Pipe(bluetoothSocket);
+                state = State.Connected;
             } catch (Exception e2) {
                 Log.e(TAG, "Couldn't fallback while establishing Bluetooth connection.", e2);
                 throw new IOException(e2.getMessage());
             }
         }
-        return bluetoothSocket != null;
     }
 
-    public boolean initSequence() throws IOException {
+    public void initSequence() throws IOException {
         //sreset();
-        String resp = sendNreceiveCmd(deviceID);
+        String resp = sendNreceive(deviceID);
         /*if (!resp.toUpperCase().contains("ELM327")) {
             throw new IOException("Unknown device:" + resp);
         }*/
         for (String cmd : initSeqCmds) {
-            resp = sendNreceiveCmd(cmd);
+            resp = sendNreceive(cmd);
             Log.e("Response for "+cmd,resp);
         }
-        return true;
+        state = State.Initialized;
     }
 
     public void setToDefault() throws IOException{
-        sendNreceiveCmd("AT D");
+        sendNreceive("AT D");
     }
 
     public int describeCurrentProtocolByNumber() throws IOException{
-        return Integer.parseInt(sendNreceiveCmd("AT DPN").trim());
+        return Integer.parseInt(sendNreceive("AT DPN").trim());
     }
 
     public String describeCurrentProtocol() throws IOException{
-        return sendNreceiveCmd("AT DP").trim();
+        return sendNreceive("AT DP").trim();
     }
 
-    public void scan(ELMStreamHandler handler) throws IOException {
-        sendNreceiveCmd( "AT CRA XX XX XX XX");
+    public void interruptScan()throws IOException{
+        synchronized (pipe.os){
+            pipe.os.write((byte)'!');
+            pipe.os.flush();
+            state = State.Interrupted;
+        }
+    }
+    public void scan(ELMStreamHandler handler, String filter) throws IOException {
+        if(filter == null)
+            sendNreceive( "AT CRA XX XX XX XX");
+        else sendNreceive("AT CRA "+filter);
         pipe.os.write(streamCmd.getBytes());
         pipe.os.write(CR);
         pipe.os.flush();
-        BufferedReader br = new BufferedReader(new InputStreamReader(pipe.is));
-
-        String line = br.readLine();
-        StringBuilder res = new StringBuilder();
-
-        // read until '>' arrives OR end of stream reached
-        char c;
-        byte b;
-        // -1 if the end of the stream is reached
-        while (((b = (byte) pipe.is.read()) > -1)) {
-            c = (char) b;
-            if (c == '\n') // read until '>' arrives
-            {
-                handler.handle(res.toString());
-                res.delete(0,res.length());
-            }
-            res.append((char)b);
+        readResponse();
+        state = State.Scanning;
+        String response = readResponse();
+        while (response != null) {
+            handler.handle(response);
+            response = readResponse();
         }
     }
 
-    public boolean reset() throws IOException {
-        String resp = sendNreceiveCmd("AT Z");
+    private final StringBuilder sb = new StringBuilder();
+    private String readResponse() throws IOException{
+        String rep = null;
+        byte b;
+        // -1 if the end of the stream is reached
+        while (((b = (byte) pipe.is.read()) > -1)) {
+            if(b == LINEFEED){
+                //Ignore
+            }
+            if (b == CR || b == DONE){
+                rep = sb.toString();
+            }
+            sb.append(b);
+        }
+        sb.delete(0,sb.length());
+        return rep;
+    }
+    public void reset() throws IOException {
+        String resp = sendNreceive("AT Z");
         Log.d("reset", resp);
-        return true;
+        state = State.Reset;
     }
 
     private byte[] resp = new byte[30];
 
-    public String sendNreceiveCmd(String cmd) throws IOException {
+    public String sendNreceive(String cmd) throws IOException {
         pipe.os.write(cmd.getBytes());
         pipe.os.write(CR);
         pipe.os.flush();
 
-        StringBuilder res = new StringBuilder();
-
-        // read until '>' arrives OR end of stream reached
-        char c;
-        byte b;
-        // -1 if the end of the stream is reached
-        while (((b = (byte) pipe.is.read()) > -1)) {
-            c = (char) b;
-            if (c == '>') // read until '>' arrives
-            {
-                break;
-            }
-            res.append(c);
-        }
-        return "";//res.toString();
-
+        return readResponse();
     }
-
-
 }
