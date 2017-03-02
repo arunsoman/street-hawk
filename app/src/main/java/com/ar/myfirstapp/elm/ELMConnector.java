@@ -22,7 +22,7 @@ public final class ELMConnector implements AutoCloseable {
 
     private BluetoothSocket bluetoothSocket;
     private Pipe pipe;
-    private String[] initSeqCmds = {"ATL1\r", "ATH1\r", "ATS1\r", "ATAL\r", "ATSPO\r", "ATCRA", "ATCRA0C9\r"};
+    private String[] initSeqCmds = {"ATL1\r", "ATH1\r", "ATS1\r", "ATAL\r", "ATSPO\r","ATSH7DF\r", "ATCRA\r", "ATCRA0C9\r"};
     private String streamCmd = "ATMA\n\r";
     private String deviceID = "ATI\r";
 
@@ -108,7 +108,7 @@ public final class ELMConnector implements AutoCloseable {
                 handler.handle(res.toString());
                 res.delete(0,res.length());
             }
-            res.append(c);
+            res.append((char)b);
         }
     }
 
@@ -138,7 +138,7 @@ public final class ELMConnector implements AutoCloseable {
             }
             res.append(c);
         }
-        return res.toString();
+        return "";//res.toString();
 
     }
 

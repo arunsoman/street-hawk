@@ -24,6 +24,7 @@ public class ELMStreamLogger implements ELMStreamHandler, Closeable{
     private OutputStreamWriter myOutWriter;
 
     public ELMStreamLogger(){
+        /*
       File  myFile = new File(Environment.getExternalStorageDirectory().getPath()+"/streetHwak.txt");
             if(!myFile.exists()) {
                 try {
@@ -39,7 +40,7 @@ public class ELMStreamLogger implements ELMStreamHandler, Closeable{
         } catch (FileNotFoundException e) {
             Toast.makeText(MainActivity.me, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-
+*/
     }
     @Override
     public void handle(String line) {
@@ -54,7 +55,10 @@ public class ELMStreamLogger implements ELMStreamHandler, Closeable{
 
     @Override
     public void close() throws IOException {
+            /*
             myOutWriter.close();
+
             fOut.close();
+             */
     }
 }
