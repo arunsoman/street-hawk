@@ -22,9 +22,11 @@ public final class ELMConnector implements AutoCloseable {
 
     private BluetoothSocket bluetoothSocket;
     private Pipe pipe;
-    private String[] initSeqCmds = {"ATL1\r", "ATH1\r", "ATS1\r", "ATAL\r", "ATSPO\r","ATSH7DF\r", "ATCRA\r", "ATCRA0C9\r"};
-    private String streamCmd = "ATMA\n\r";
-    private String deviceID = "ATI\r";
+    private byte CR = 0x0D;
+    private byte DONE = 0x3E;
+    private String[] initSeqCmds = {"ATL1", "ATH1", "ATS1", "ATAL", "ATSPO","ATSH7DF"};
+    private String streamCmd = "ATMA";
+    private String deviceID = "ATI";
 
     @Override
     public void close() throws Exception {
@@ -89,8 +91,22 @@ public final class ELMConnector implements AutoCloseable {
         return true;
     }
 
+    public void setToDefault() throws IOException{
+        sendNreceiveCmd("AT D");
+    }
+
+    public int describeCurrentProtocolByNumber() throws IOException{
+        return Integer.parseInt(sendNreceiveCmd("AT DPN").trim());
+    }
+
+    public String describeCurrentProtocol() throws IOException{
+        return sendNreceiveCmd("AT DP").trim();
+    }
+
     public void scan(ELMStreamHandler handler) throws IOException {
+        sendNreceiveCmd( "AT CRA XX XX XX XX");
         pipe.os.write(streamCmd.getBytes());
+        pipe.os.write(CR);
         pipe.os.flush();
         BufferedReader br = new BufferedReader(new InputStreamReader(pipe.is));
 
@@ -113,7 +129,7 @@ public final class ELMConnector implements AutoCloseable {
     }
 
     public boolean reset() throws IOException {
-        String resp = sendNreceiveCmd("AT Z\r");
+        String resp = sendNreceiveCmd("AT Z");
         Log.d("reset", resp);
         return true;
     }
@@ -122,6 +138,7 @@ public final class ELMConnector implements AutoCloseable {
 
     public String sendNreceiveCmd(String cmd) throws IOException {
         pipe.os.write(cmd.getBytes());
+        pipe.os.write(CR);
         pipe.os.flush();
 
         StringBuilder res = new StringBuilder();
@@ -141,5 +158,6 @@ public final class ELMConnector implements AutoCloseable {
         return "";//res.toString();
 
     }
+
 
 }
