@@ -26,7 +26,7 @@ public final class ELMConnector implements AutoCloseable {
     private static final byte CR = 0x0D; //\r
     private static final byte DONE = 0x3E; //'>'
     private static final int SENDERID = 0xF1;
-    private String[] initSeqCmds = {"ATH1", "ATS1", "ATAL", "ATSPO","ATSH7DF"};
+    private String[] initSeqCmds = {"ATH1", "ATS1", "ATAL", "ATSP0","ATSH7DF","ATDPN"};
     private String streamCmd = "ATMA";
     private String deviceID = "ATI";
     private State state;
@@ -137,13 +137,17 @@ public final class ELMConnector implements AutoCloseable {
         byte b;
         // -1 if the end of the stream is reached
         while (((b = (byte) pipe.is.read()) > -1)) {
-            if(b == LINEFEED){
+            if(b == LINEFEED || b == CR ) {
                 //Ignore
             }
-            if (b == CR || b == DONE){
+            else if (b == DONE){
                 rep = sb.toString();
+                break;
             }
-            sb.append(b);
+            else{
+                sb.append((char) b);
+            }
+
         }
         sb.delete(0,sb.length());
         return rep;
@@ -165,6 +169,13 @@ public final class ELMConnector implements AutoCloseable {
     }
 
     public String getSupportedJ1979PIDs() throws IOException {
-        return sendNreceive("01 00");
+        String result = sendNreceive("01 00");
+        String resultArray[] = result.split(" ");
+        StringBuilder hexString = new StringBuilder();
+        for(int i=4;i<resultArray.length;i++){
+            hexString.append(resultArray[i]);
+        }
+        Mode0Pids.printSupportedPIDs(hexString.toString());
+        return null;
     }
 }

@@ -28,9 +28,11 @@ public class BtManager {
                         try(ELMConnector connector = new ELMConnector()) {
                             connector.connect(deviceAddress);
                             connector.initSequence();
-                            try(ELMStreamLogger logger =new ELMStreamLogger()) {
-                                connector.scan(logger);
-                            }
+//                            try(ELMStreamLogger logger =new ELMStreamLogger()) {
+//                                connector.scan(logger,null);
+//                            }
+
+                            connector.getSupportedJ1979PIDs();
                         }
                     }catch (Exception e){
                         boolean connected = false;

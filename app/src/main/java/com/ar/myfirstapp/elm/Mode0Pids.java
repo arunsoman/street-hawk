@@ -151,7 +151,7 @@ public class Mode0Pids {
             "?"};
 
     public static BitSet hexStringToBitSet(String hexString) {
-        return BitSet.valueOf(new long[]{Long.valueOf(hexString.substring(2), 16)});
+        return BitSet.valueOf(new long[]{Long.valueOf(hexString,16)});
     }
 
     public static void printSupportedPIDs(String hexString){
