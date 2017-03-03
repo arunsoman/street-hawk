@@ -163,4 +163,8 @@ public final class ELMConnector implements AutoCloseable {
 
         return readResponse();
     }
+
+    public String getSupportedJ1979PIDs() throws IOException {
+        return sendNreceive("01 00");
+    }
 }
