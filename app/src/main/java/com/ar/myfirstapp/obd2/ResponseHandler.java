@@ -8,6 +8,6 @@ import java.io.InputStream;
  */
 
 public interface ResponseHandler {
-    void parse(InputStream is) throws IOException, BadResponseException;
+    void parse(InputStream is) throws IOException, BadResponseException, UnknownCommandException;
     String getResult();
 }

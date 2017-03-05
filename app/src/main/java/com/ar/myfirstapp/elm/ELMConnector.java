@@ -5,6 +5,7 @@
     import com.ar.myfirstapp.bt.BtManager;
     import com.ar.myfirstapp.obd2.BadResponseException;
     import com.ar.myfirstapp.obd2.Command;
+    import com.ar.myfirstapp.obd2.UnknownCommandException;
     import com.ar.myfirstapp.obd2.at.AtCommands;
     import com.ar.myfirstapp.obd2.saej1979.Mode1;
 
@@ -41,7 +42,7 @@
                 os.close();
             }
 
-            public String sendNreceive(Command command) throws IOException, BadResponseException {
+            public String sendNreceive(Command command) throws IOException, BadResponseException, UnknownCommandException {
                 os.write(command.cmd);
                 os.flush();
                 command.response.parse(is);
@@ -60,7 +61,7 @@
             pipe = new Pipe(btManager.connect(deviceAddress));
 
         }
-        public String sendNreceive(Command command) throws IOException, BadResponseException {
+        public String sendNreceive(Command command) throws IOException, BadResponseException, UnknownCommandException {
             return pipe.sendNreceive(command);
         }
 

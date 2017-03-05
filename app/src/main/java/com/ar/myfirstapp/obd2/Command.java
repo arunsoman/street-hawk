@@ -11,21 +11,32 @@ import java.io.IOException;
 
 public class Command {
     final String name;
+    final String modeID;
+    final String id;
     public final byte[] cmd;
     public final ResponseHandler response;
 
     public Command(String modeID, String id, String name, ResponseHandler response) {
+        this.modeID = modeID;
+        this.id = id;
         this.name = name;
         this.response = response;
         this.cmd = (modeID + " " + id).getBytes();
     }
     protected Command(byte[] cmd, ResponseHandler response){
+        this.modeID = null;
+        this.id = null;
         this.name = null;
         this.cmd = cmd;
         this.response = response;
     }
 
-    String send(ELMConnector.Pipe pipe) throws IOException, BadResponseException {
-        return pipe.sendNreceive(this);
+    @Override
+    public String toString() {
+        return "Command{" +
+                "id='" + id + '\'' +
+                ", modeID='" + modeID + '\'' +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

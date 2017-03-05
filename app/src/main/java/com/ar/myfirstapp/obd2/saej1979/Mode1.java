@@ -6,43 +6,37 @@ package com.ar.myfirstapp.obd2.saej1979;
 
 import com.ar.myfirstapp.obd2.BadResponseException;
 import com.ar.myfirstapp.obd2.Command;
+import com.ar.myfirstapp.obd2.LineReader;
 import com.ar.myfirstapp.obd2.ResponseHandler;
-import com.ar.myfirstapp.obd2.ResponseHandlerUtils;
 import com.ar.myfirstapp.obd2.SaeJ1979Response;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.BitSet;
 
-import static com.ar.myfirstapp.obd2.ResponseHandlerUtils.m1Pid1;
-import static java.lang.String.valueOf;
+import static com.ar.myfirstapp.obd2.ResponseHandlerUtils.m1Pid1ResponseHandler;
 
 public class Mode1 extends Mode {
 
 
-    public final static Command commands[] = {
+    public static final  Command commands[] = {
             new Command("01", "00", "PIDs supported [01 - 20]", new ResponseHandler(){
                 String result=null;
                 @Override
                 public void parse(InputStream is) throws IOException, BadResponseException {
                     String line = null;
                     StringBuilder sb = new StringBuilder();
-                    try (InputStreamReader bufferedInputStream = new InputStreamReader(is);) {
-                        try (BufferedReader bufferedReader = new BufferedReader(bufferedInputStream);) {
-                            while ((line = bufferedReader.readLine()) != null) {
-                                line.replaceAll("\\s+", "");
-                                BitSet bitSet = BitSet.valueOf(new long[]{Long.parseLong(line, 16)});
-                                for (int i = 0; i < bitSet.length(); i++) {
-                                    if (bitSet.get(i))
-                                        sb.append(i).append(',');
-                                }
-                                sb.append('\n');
-                            }
-                            result = sb.toString();
+                    LineReader lineReader = new LineReader(is);
+                    while ((line = lineReader.nextLine()) != null) {
+                        line.replaceAll("\\s+", "");
+                        BitSet bitSet = BitSet.valueOf(new long[]{Long.parseLong(line, 16)});
+                        for (int i = 0; i < bitSet.length(); i++) {
+                            if (bitSet.get(i))
+                                sb.append(i).append(',');
                         }
+                        sb.append('\n');
                     }
+                    result = sb.toString();
                 }
 
                 @Override
@@ -51,7 +45,7 @@ public class Mode1 extends Mode {
                 }
             }),
             new Command("01", "1",
-                    "Monitor status since DTCs cleared. status and number of DTCs.)", m1Pid1 ),
+                    "Monitor status since DTCs cleared. status and number of DTCs.)", m1Pid1ResponseHandler ),
             new Command("01", "2", "Freeze DTC", new SaeJ1979Response() {
                 @Override
                 public String getResult() {

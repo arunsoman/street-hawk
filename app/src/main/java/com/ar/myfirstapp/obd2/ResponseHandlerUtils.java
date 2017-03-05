@@ -1,5 +1,7 @@
 package com.ar.myfirstapp.obd2;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,14 +13,27 @@ import java.util.BitSet;
  */
 
 public class ResponseHandlerUtils {
+
     public static final ResponseHandler okResponse = new ResponseHandler() {
         private boolean status;
         private static final String ok = "ok";
+        private final byte[] okBytes = ok.getBytes();
+        private final byte unknown = (byte) '?';
 
-        public void parse(InputStream is) throws IOException {
-            int a = is.read();
-            int b = is.read();
-            while (is.read() != -1) ;
+        public void parse(InputStream is) throws IOException, UnknownCommandException, BadResponseException {
+            byte aByte = (byte)is.read();
+            byte[] data = new byte[is.available()+1];
+            data[0] = aByte;
+            int available, readCnt, previousLoc = 1;
+            while ((available= is.available())> 0) {
+                readCnt = is.read(data, previousLoc, available);
+                previousLoc += readCnt;
+            }
+            if(data[0] == unknown)
+                throw new UnknownCommandException();
+            if((data[0] != okBytes[0] || data[0] != okBytes[0]-32) &&
+                    (data[1] != okBytes[1] || data[1] != okBytes[1]-32))
+                throw new BadResponseException();
         }
 
         @Override
@@ -27,19 +42,14 @@ public class ResponseHandlerUtils {
         }
     };
 
-    public final static ResponseHandler singleLineHandler = new ResponseHandler() {
+    public static final ResponseHandler singleLineHandler = new ResponseHandler() {
         String result;
 
         @Override
         public void parse(InputStream is) throws IOException, BadResponseException {
-            String line = null;
-            try (InputStreamReader bufferedInputStream = new InputStreamReader(is);) {
-                try (BufferedReader bufferedReader = new BufferedReader(bufferedInputStream);) {
-                    line = bufferedReader.readLine();
-                    while ((bufferedReader.readLine()) != null) ;
-                    result = line;
-                }
-            }
+            LineReader lineReader = new LineReader(is);
+            result = lineReader.nextLine();
+            lineReader.drain();
         }
 
         @Override
@@ -48,21 +58,18 @@ public class ResponseHandlerUtils {
         }
     };
 
-    public final static ResponseHandler multiLineHandler = new ResponseHandler() {
+    public static final ResponseHandler multiLineHandler = new ResponseHandler() {
         String result;
 
         @Override
         public void parse(InputStream is) throws IOException, BadResponseException {
-            String line = null;
             StringBuilder sb = new StringBuilder();
-            try (InputStreamReader bufferedInputStream = new InputStreamReader(is);) {
-                try (BufferedReader bufferedReader = new BufferedReader(bufferedInputStream);) {
-                    while ((line = bufferedReader.readLine()) != null) {
-                        sb.append(line).append('\n');
-                    }
-                    result = sb.toString();
-                }
+            LineReader lineReader = new LineReader(is);
+            String line = null;
+            while ((line = lineReader.nextLine()) != null) {
+                sb.append(line).append('\n');
             }
+            result = sb.toString();
         }
 
         @Override
@@ -93,7 +100,7 @@ public class ResponseHandlerUtils {
             this.available = available;
             this.test = test;
         }
-        }
+    }
 
     enum petrol {
         OxygenSensorHeater(false, false),
@@ -121,7 +128,7 @@ public class ResponseHandlerUtils {
 
     ;
 
-    public enum basicTest{
+    public enum basicTest {
         Components(false, false),
         FuelSystem(false, false),
         Misfire(false, false);
@@ -139,8 +146,10 @@ public class ResponseHandlerUtils {
             this.test = test;
         }
     }
-    enum  EngineType{ petrolType, dieselType}
-    public static final ResponseHandler m1Pid1 = new ResponseHandler() {
+
+    private enum EngineType {petrolType, dieselType}
+
+    public static final ResponseHandler m1Pid1ResponseHandler = new ResponseHandler() {
         private final static byte msbSet = (byte) 0x80;
         private final static byte allSet6Till0 = 0x7f;
         private final static byte b3Set = 0x4;
@@ -154,41 +163,40 @@ public class ResponseHandlerUtils {
 
         @Override
         public void parse(InputStream is) throws IOException, BadResponseException {
-            String line;
-            try (InputStreamReader bufferedInputStream = new InputStreamReader(is);) {
-                try (BufferedReader bufferedReader = new BufferedReader(bufferedInputStream);) {
-                    while ((line = bufferedReader.readLine()) != null) {
-                        String abcd[] = line.split(" ");
-                        CIL = (((byte)Integer.parseInt(abcd[0],16))&msbSet) == (byte)1;
-                        counter = (((byte)Integer.parseInt(abcd[0],16)) | allSet6Till0);
-                        BitSet bBitSet = BitSet.valueOf(new long[]{Long.parseLong(abcd[2], 16)});
-                        int i = 0;
-                        for(basicTest b : basicTest.values()){
-                            b.set(bBitSet.get(i),bBitSet.get(i+4));
-                        }
-                        engineType = (((byte)Integer.parseInt(abcd[1],16))& b3Set) == (byte)1
-                                ?EngineType.dieselType:EngineType.petrolType;
-                        /*
-                        0 = Spark ignition monitors supported (e.g. Otto or Wankel engines)
-                        1 = Compression ignition monitors supported (e.g. Diesel engines)
-                         */
-                        BitSet cBitSet = BitSet.valueOf(new long[]{Long.parseLong(abcd[2], 16)});
-                        BitSet dBitSet = BitSet.valueOf(new long[]{Long.parseLong(abcd[3], 16)});
-                        i = 0;
-                        if(engineType == EngineType.petrolType) {
-                            for (petrol p : petrol.values()) {
-                                p.set(cBitSet.get(i), dBitSet.get(i));
-                                i++;
-                            }
-                        }else{
-                            for (diesel p : diesel.values()) {
-                                p.set(cBitSet.get(i), dBitSet.get(i));
-                                i++;
-                            }
-                        }
+            StringBuilder sb = new StringBuilder();
+            LineReader lineReader = new LineReader(is);
+            String line = null;
+            while ((line = lineReader.nextLine()) != null) {
+                String abcd[] = line.split(" ");
+                CIL = (((byte) Integer.parseInt(abcd[0], 16)) & msbSet) == (byte) 1;
+                counter = (((byte) Integer.parseInt(abcd[0], 16)) | allSet6Till0);
+                BitSet bBitSet = BitSet.valueOf(new long[]{Long.parseLong(abcd[2], 16)});
+                int i = 0;
+                for (basicTest b : basicTest.values()) {
+                    b.set(bBitSet.get(i), bBitSet.get(i + 4));
+                }
+                engineType = (((byte) Integer.parseInt(abcd[1], 16)) & b3Set) == (byte) 1
+                        ? EngineType.dieselType : EngineType.petrolType;
+                /*
+                0 = Spark ignition monitors supported (e.g. Otto or Wankel engines)
+                1 = Compression ignition monitors supported (e.g. Diesel engines)
+                 */
+                BitSet cBitSet = BitSet.valueOf(new long[]{Long.parseLong(abcd[2], 16)});
+                BitSet dBitSet = BitSet.valueOf(new long[]{Long.parseLong(abcd[3], 16)});
+                i = 0;
+                if (engineType == EngineType.petrolType) {
+                    for (petrol p : petrol.values()) {
+                        p.set(cBitSet.get(i), dBitSet.get(i));
+                        i++;
+                    }
+                } else {
+                    for (diesel p : diesel.values()) {
+                        p.set(cBitSet.get(i), dBitSet.get(i));
+                        i++;
                     }
                 }
             }
+            lineReader.drain();
         }
 
         @Override
@@ -199,8 +207,8 @@ public class ResponseHandlerUtils {
         @Override
         public String toString() {
             return "$classname{" +
-                    ", counter=" +counter+
-                    ", basicTest" +test+
+                    ", counter=" + counter +
+                    ", basicTest" + test +
                     ", petrolEngStatus=" + petrolEngStatus +
                     ", dieselEngStatus=" + dieselEngStatus +
                     ", engineType=" + engineType +

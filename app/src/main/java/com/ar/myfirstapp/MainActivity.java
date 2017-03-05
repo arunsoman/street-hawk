@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.ar.myfirstapp.bt.BtManager;
 import com.ar.myfirstapp.elm.ELMConnector;
+import com.ar.myfirstapp.obd2.UnknownCommandException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -192,7 +193,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             }, SCAN_PERIOD);
 
-            this.readFromObdDevice();
+            try {
+                this.readFromObdDevice();
+            } catch (UnknownCommandException e) {
+                e.printStackTrace();
+            }
             mBluetoothLeScanner.startScan(scanCallback);
             mScanning = true;
             btnScan.setEnabled(false);
@@ -207,7 +212,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
-
             addBluetoothDevice(result.getDevice());
         }
 
@@ -236,11 +240,12 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    public void readFromObdDevice() throws Exception {
+    public void readFromObdDevice() throws Exception, UnknownCommandException {
         String deviceAddress = BtManager.getELMAddres();
-
         Device device = new Device(deviceAddress);
         device.initSequence();
-        device.queryCan((byte) 1, (byte)0x7DF);
+        String pidList = device.getMode1PIDs();
+        String queryResult = device.queryCan((byte) 1, (byte)0x7DF);
+        device.initScan();
     }
 }
