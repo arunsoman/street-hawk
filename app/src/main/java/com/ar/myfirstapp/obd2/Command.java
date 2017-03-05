@@ -9,7 +9,7 @@ import java.io.IOException;
  * Created by arunsoman on 04/03/17.
  */
 
-public final class Command {
+public class Command {
     final String name;
     public final byte[] cmd;
     public final ResponseHandler response;
@@ -19,8 +19,13 @@ public final class Command {
         this.response = response;
         this.cmd = (modeID + " " + id).getBytes();
     }
+    protected Command(byte[] cmd, ResponseHandler response){
+        this.name = null;
+        this.cmd = cmd;
+        this.response = response;
+    }
 
     String send(ELMConnector.Pipe pipe) throws IOException, BadResponseException {
-        return pipe.sendNreceive(cmd, response);
+        return pipe.sendNreceive(this);
     }
 }
