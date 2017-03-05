@@ -21,18 +21,12 @@ public class ResponseHandlerUtils {
         private final byte unknown = (byte) '?';
 
         public void parse(InputStream is) throws IOException, UnknownCommandException, BadResponseException {
-            byte aByte = (byte)is.read();
-            byte[] data = new byte[is.available()+1];
-            data[0] = aByte;
-            int available, readCnt, previousLoc = 1;
-            while ((available= is.available())> 0) {
-                readCnt = is.read(data, previousLoc, available);
-                previousLoc += readCnt;
-            }
-            if(data[0] == unknown)
+            LineReader lineReader = new LineReader(is);
+            String result = lineReader.nextLine();
+            lineReader.drain();
+            if(result.startsWith("?"))
                 throw new UnknownCommandException();
-            if((data[0] != okBytes[0] || data[0] != okBytes[0]-32) &&
-                    (data[1] != okBytes[1] || data[1] != okBytes[1]-32))
+            if(!result.toLowerCase().startsWith(ok))
                 throw new BadResponseException();
         }
 

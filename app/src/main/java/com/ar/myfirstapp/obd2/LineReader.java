@@ -8,7 +8,7 @@ import java.io.InputStream;
  */
 
 public class LineReader {
-    private byte[] data = new byte[130];
+    private byte[] data ;
     private int eom;
     private int start;
     private int end;
@@ -16,7 +16,10 @@ public class LineReader {
     private static final byte lf = (byte)('\n');
 
     public LineReader(InputStream is) throws IOException {
-        int available, readCnt, previousLoc = 0;
+        byte aByte = (byte) is.read();
+        data = new byte[is.available()+1];
+        data[0] = aByte;
+        int available, readCnt, previousLoc = 1;
         while ((available= is.available())> 0) {
             readCnt = is.read(data, previousLoc, available);
             previousLoc += readCnt;
@@ -28,11 +31,13 @@ public class LineReader {
        String result = null;
         for(int i = end; i < eom; i++){
             if(data[i] == cr) {
-                result = new String(data, 0, eom-1, "US-ASCII");
+                result = new String(data, start, end, "US-ASCII");
                 end = (data[i+1] == lf)? i +2 : i+1;
                 start = end;
+                return result;
             }
         }
+        result = new String(data, start, eom, "US-ASCII");
         return result;
     }
 
