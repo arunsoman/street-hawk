@@ -2,12 +2,14 @@ package com.ar.myfirstapp.bt;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothSocket;
+import android.util.Log;
 
-import com.ar.myfirstapp.elm.ELMConnector;
-import com.ar.myfirstapp.elm.ELMStreamLogger;
-
-import java.util.ArrayList;
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Created by Arun Soman on 2/28/2017.
@@ -24,19 +26,7 @@ public class BtManager {
             {
                 if (device.getName().equals("OBDII")) {
                     deviceAddress = device.getAddress();
-                    try {
-                        try(ELMConnector connector = new ELMConnector()) {
-                            connector.connect(deviceAddress);
-                            connector.initSequence();
-//                            try(ELMStreamLogger logger =new ELMStreamLogger()) {
-//                                connector.scan(logger,null);
-//                            }
-
-                            connector.getSupportedJ1979PIDs();
-                        }
-                    }catch (Exception e){
-                        boolean connected = false;
-                    }
+                    return deviceAddress;
                 }
             }
         }
@@ -64,6 +54,33 @@ public class BtManager {
         }
 
         return type;
+    }
+    public BluetoothSocket connect(String deviceAddress) throws IOException {
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothDevice device = btAdapter.getRemoteDevice(deviceAddress);
+        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+        BluetoothSocket bluetoothSocket = null ,sockFallback = null;
+
+        try {
+            bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid);
+            bluetoothSocket.connect();
+            return bluetoothSocket;
+        } catch (IOException e) {
+            String TAG = BluetoothManager.class.getName();
+            Class<?> clazz = bluetoothSocket.getRemoteDevice().getClass();
+            Class<?>[] paramTypes = new Class<?>[]{Integer.TYPE};
+            try {
+                Method m = clazz.getMethod("createRfcommSocket", paramTypes);
+                Object[] params = new Object[]{Integer.valueOf(1)};
+                sockFallback = (BluetoothSocket) m.invoke(bluetoothSocket.getRemoteDevice(), params);
+                sockFallback.connect();
+                bluetoothSocket = sockFallback;
+                return bluetoothSocket;
+            } catch (Exception e2) {
+                Log.e(TAG, "Couldn't fallback while establishing Bluetooth connection.", e2);
+                throw new IOException(e2.getMessage());
+            }
+        }
     }
 
 }

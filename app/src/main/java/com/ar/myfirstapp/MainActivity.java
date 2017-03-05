@@ -25,7 +25,6 @@ import android.widget.Toast;
 
 import com.ar.myfirstapp.bt.BtManager;
 import com.ar.myfirstapp.elm.ELMConnector;
-import com.ar.myfirstapp.elm.ELMStreamLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,14 +73,18 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        btnScan = (Button)findViewById(R.id.scan);
+        btnScan = (Button) findViewById(R.id.scan);
         btnScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                scanLeDevice(true);
+                try {
+                    scanLeDevice(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
-        listViewLE = (ListView)findViewById(R.id.lelist);
+        listViewLE = (ListView) findViewById(R.id.lelist);
 
         listBluetoothDevice = new ArrayList<>();
         adapterLeScanResult = new ArrayAdapter<BluetoothDevice>(
@@ -94,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     AdapterView.OnItemClickListener scanResultOnItemClickListener =
-            new AdapterView.OnItemClickListener(){
+            new AdapterView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -153,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void getBluetoothAdapterAndLeScanner(){
+    private void getBluetoothAdapterAndLeScanner() {
         // Get BluetoothAdapter and BluetoothLeScanner.
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -168,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     Requires BLUETOOTH_ADMIN permission.
     Must hold ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission to get results.
      */
-    private void scanLeDevice(final boolean enable) {
+    private void scanLeDevice(final boolean enable) throws Exception {
         if (enable) {
             listBluetoothDevice.clear();
             listViewLE.invalidateViews();
@@ -211,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
-            for(ScanResult result : results){
+            for (ScanResult result : results) {
                 addBluetoothDevice(result.getDevice());
             }
         }
@@ -224,8 +227,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG).show();
         }
 
-        private void addBluetoothDevice(BluetoothDevice device){
-            if(!listBluetoothDevice.contains(device)){
+        private void addBluetoothDevice(BluetoothDevice device) {
+            if (!listBluetoothDevice.contains(device)) {
                 listBluetoothDevice.add(device);
                 listViewLE.invalidateViews();
             }
@@ -233,19 +236,11 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    public void readFromObdDevice(){
+    public void readFromObdDevice() throws Exception {
         String deviceAddress = BtManager.getELMAddres();
-        try {
-            try(ELMConnector connector = new ELMConnector()) {
-                connector.connect(deviceAddress);
-                connector.initSequence();
-//                try(ELMStreamLogger logger =new ELMStreamLogger()) {
-//                    connector.scan(logger,null);
-//                }
-                connector.getSupportedJ1979PIDs();
-            }
-        }catch (Exception e){
-            boolean connected = false;
-        }
+
+        Device device = new Device(deviceAddress);
+        device.initSequence();
+        device.queryCan((byte) 1, (byte)0x7DF);
     }
 }
