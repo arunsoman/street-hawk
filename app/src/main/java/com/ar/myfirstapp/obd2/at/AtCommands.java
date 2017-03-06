@@ -2,6 +2,7 @@ package com.ar.myfirstapp.obd2.at;
 
 import com.ar.myfirstapp.obd2.Command;
 
+import static com.ar.myfirstapp.obd2.ResponseHandlerUtils.crResponse;
 import static com.ar.myfirstapp.obd2.ResponseHandlerUtils.multiLineHandler;
 import static com.ar.myfirstapp.obd2.ResponseHandlerUtils.okResponse;
 import static com.ar.myfirstapp.obd2.ResponseHandlerUtils.singleLineHandler;
@@ -21,7 +22,7 @@ public class AtCommands {
     public static final Command spaceOn = new Command("AT", " S1 \r", "", okResponse);
     public static final Command[] initCommands = {
 
-            new Command("AT", " Z\r", "", okResponse),
+            new Command("AT", " Z\r", "", crResponse),
             new Command("AT", " E0\r", "", okResponse),
             new Command("AT", " L1\r", "", okResponse),
             new Command("AT", " I\r", "", singleLineHandler),

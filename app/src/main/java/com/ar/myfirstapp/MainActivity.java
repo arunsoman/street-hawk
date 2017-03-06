@@ -5,9 +5,12 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothSocket;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,6 +18,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -23,12 +27,17 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.ar.myfirstapp.bt.BtManager;
 import com.ar.myfirstapp.elm.ELMConnector;
 import com.ar.myfirstapp.obd2.UnknownCommandException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,13 +56,12 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler mHandler;
     private static final long SCAN_PERIOD = 10000;
-    public static MainActivity me;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        me = this;
+
         // Check if BLE is supported on the device.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this,
@@ -74,18 +82,14 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        btnScan = (Button) findViewById(R.id.scan);
+        btnScan = (Button)findViewById(R.id.scan);
         btnScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    scanLeDevice(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                scanLeDevice(true);
             }
         });
-        listViewLE = (ListView) findViewById(R.id.lelist);
+        listViewLE = (ListView)findViewById(R.id.lelist);
 
         listBluetoothDevice = new ArrayList<>();
         adapterLeScanResult = new ArrayAdapter<BluetoothDevice>(
@@ -98,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     AdapterView.OnItemClickListener scanResultOnItemClickListener =
-            new AdapterView.OnItemClickListener() {
+            new AdapterView.OnItemClickListener(){
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -106,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
                     String msg = device.getAddress() + "\n"
                             + device.getBluetoothClass().toString() + "\n"
-                            + BtManager.getBTDevieType(device);
+                            + getBTDevieType(device);
 
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle(device.getName())
@@ -122,6 +126,28 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
 
+    private String getBTDevieType(BluetoothDevice d){
+        String type = "";
+
+        switch (d.getType()){
+            case BluetoothDevice.DEVICE_TYPE_CLASSIC:
+                type = "DEVICE_TYPE_CLASSIC";
+                break;
+            case BluetoothDevice.DEVICE_TYPE_DUAL:
+                type = "DEVICE_TYPE_DUAL";
+                break;
+            case BluetoothDevice.DEVICE_TYPE_LE:
+                type = "DEVICE_TYPE_LE";
+                break;
+            case BluetoothDevice.DEVICE_TYPE_UNKNOWN:
+                type = "DEVICE_TYPE_UNKNOWN";
+                break;
+            default:
+                type = "unknown...";
+        }
+
+        return type;
+    }
 
     @Override
     protected void onResume() {
@@ -157,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void getBluetoothAdapterAndLeScanner() {
+    private void getBluetoothAdapterAndLeScanner(){
         // Get BluetoothAdapter and BluetoothLeScanner.
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -172,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
     Requires BLUETOOTH_ADMIN permission.
     Must hold ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission to get results.
      */
-    private void scanLeDevice(final boolean enable) throws Exception {
+    private void scanLeDevice(final boolean enable) {
         if (enable) {
             listBluetoothDevice.clear();
             listViewLE.invalidateViews();
@@ -193,11 +219,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }, SCAN_PERIOD);
 
-            try {
-                this.readFromObdDevice();
-            } catch (UnknownCommandException e) {
-                e.printStackTrace();
-            }
+            this.readObdDevices();
             mBluetoothLeScanner.startScan(scanCallback);
             mScanning = true;
             btnScan.setEnabled(false);
@@ -212,13 +234,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
+
             addBluetoothDevice(result.getDevice());
         }
 
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
-            for (ScanResult result : results) {
+            for(ScanResult result : results){
                 addBluetoothDevice(result.getDevice());
             }
         }
@@ -231,8 +254,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG).show();
         }
 
-        private void addBluetoothDevice(BluetoothDevice device) {
-            if (!listBluetoothDevice.contains(device)) {
+        private void addBluetoothDevice(BluetoothDevice device){
+            if(!listBluetoothDevice.contains(device)){
                 listBluetoothDevice.add(device);
                 listViewLE.invalidateViews();
             }
@@ -240,16 +263,42 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    public void readFromObdDevice() throws Exception, UnknownCommandException {
-        String deviceAddress = BtManager.getELMAddres();
-        Device device = new Device(deviceAddress);
-        device.initSequence();
-        String pidList = device.getMode1PIDs();
-        String queryResult = device.queryCan((byte) 1, (byte)0x7DF);
-        device.initScan();
-        device.scan("0C9");
-        device.scan("1E5");
-        device.scan("0C9");
+    public void readObdDevices(){
+        ArrayList deviceStrs = new ArrayList();
+        final ArrayList devices = new ArrayList();
+
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
+        String deviceAddress = new String();
+        if (pairedDevices.size() > 0)
+        {
+            for (BluetoothDevice device : pairedDevices)
+            {
+                if (device.getName().equals("OBDII")) {
+                    deviceAddress = device.getAddress();
+                    try {
+                    Device device1 = new Device(deviceAddress);
+                        device1.initSequence();
+                        device1.queryCan((byte)1,(byte) (0x7DF));
+
+//                        ELMConnector connector = new ELMConnector();
+//                        connector.connect(deviceAddress);
+//                        connector.initSequence();
+//                        connector.scan(new ELMStreamLogger());
+                    }catch (IOException e){
+                        boolean connected = false;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } catch (UnknownCommandException e) {
+                        e.printStackTrace();
+                    }
+                }
+                deviceStrs.add(device.getName() + "\n" + device.getAddress());
+                devices.add(device.getAddress());
+            }
+        }
 
     }
+
+
 }

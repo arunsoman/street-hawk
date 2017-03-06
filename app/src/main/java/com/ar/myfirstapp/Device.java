@@ -5,6 +5,7 @@ import android.util.Log;
 import com.ar.myfirstapp.elm.ELMConnector;
 import com.ar.myfirstapp.obd2.BadResponseException;
 import com.ar.myfirstapp.obd2.Command;
+import com.ar.myfirstapp.obd2.ResponseHandlerUtils;
 import com.ar.myfirstapp.obd2.UnknownCommandException;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.can.CanRequest8;
@@ -24,11 +25,13 @@ public class Device {
     private  ELMConnector connector;
     private boolean spaceOff;
     private State state;
+    private final  ResponseHandlerUtils.StreamHandler streamHandler;
 
     private enum State {Connected, Disconnected, Initialized, Reset, Interrupted, Scanning};
 
 
     public Device(String deviceAddress) throws Exception {
+        streamHandler = new ResponseHandlerUtils.StreamHandler(this);
         connector = new ELMConnector();
             connector.connect(deviceAddress);
 
@@ -93,6 +96,17 @@ public class Device {
     }
     public void scan(String id) throws BadResponseException, UnknownCommandException, IOException {
         connector.sendNreceive(new Command("AT", " CRA"+id+"\r", "", singleLineHandler));
-        connector.sendNreceive(new Command("AT", " MA\r", "", multiLineHandler));
+        connector.sendNreceive(new Command("AT", " MA\r", "", streamHandler));
+        state = State.Scanning;
+    }
+
+    public void killScan(){
+        if(state == State.Scanning){
+            try {
+                connector.interrupt();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -43,8 +43,10 @@
             }
 
             public String sendNreceive(Command command) throws IOException, BadResponseException, UnknownCommandException {
-                os.write(command.cmd);
-                os.flush();
+                synchronized (pipe.os) {
+                    os.write(command.cmd);
+                    os.flush();
+                }
                 command.response.parse(is);
                 return command.response.getResult();
             }

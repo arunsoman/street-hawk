@@ -2,17 +2,38 @@ package com.ar.myfirstapp.obd2;
 
 import android.util.Log;
 
+import com.ar.myfirstapp.Device;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 
 /**
  * Created by arunsoman on 04/03/17.
  */
 
 public class ResponseHandlerUtils {
+    public static final ResponseHandler crResponse = new ResponseHandler() {
+        private static final String ok = "ok";
+        private final byte cr = (byte) '\r';
+
+        public void parse(InputStream is) throws IOException, UnknownCommandException, BadResponseException {
+            byte read = (byte) is.read();
+            int available = is.available();
+            while ((available = is.read()) != 0 );
+            if(read != cr)
+                throw new BadResponseException();
+        }
+
+        @Override
+        public String getResult() {
+            return ok;
+        }
+    };
 
     public static final ResponseHandler okResponse = new ResponseHandler() {
         private boolean status;
@@ -52,6 +73,43 @@ public class ResponseHandlerUtils {
         }
     };
 
+    public static final class StreamHandler implements ResponseHandler {
+        List<String> result = new ArrayList<>();
+        private Device device;
+        public StreamHandler(Device device) {
+            this.device = device;
+        }
+
+        @Override
+        public void parse(final InputStream is) throws IOException, BadResponseException {
+            Thread worker = new Thread(new Runnable(){
+                @Override
+                public void run() {
+                    LineReader lineReader = null;
+                    String line = null;
+                    try {
+                        lineReader = new LineReader(is);
+                        while ((line = lineReader.nextLine()) != null) {
+                            result.add(line);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            worker.start();
+            //TODO kill thread when user terminates the scan;
+        }
+
+        @Override
+        public String getResult() {
+            return result.remove(0);
+        }
+
+        public void killStream(){
+            device.killScan();
+        }
+    };
     public static final ResponseHandler multiLineHandler = new ResponseHandler() {
         String result;
 
@@ -118,9 +176,7 @@ public class ResponseHandlerUtils {
             this.available = available;
             this.test = test;
         }
-    }
-
-    ;
+    };
 
     public enum basicTest {
         Components(false, false),
