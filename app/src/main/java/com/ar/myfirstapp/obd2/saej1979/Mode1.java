@@ -19,8 +19,8 @@ import static com.ar.myfirstapp.obd2.ResponseHandlerUtils.m1Pid1ResponseHandler;
 public class Mode1 extends Mode {
 
 
-    public static final  Command commands[] = {
-            new Command("01", "00", "PIDs supported [01 - 20]", new ResponseHandler(){
+    public static final Command commands[] = {
+            new Command("1", "0", "PIDs supported [01 - 20]",  new ResponseHandler(){
                 String result=null;
                 @Override
                 public void parse(InputStream is) throws IOException, BadResponseException {
@@ -44,836 +44,660 @@ public class Mode1 extends Mode {
                     return result;
                 }
             }),
-            new Command("01", "1",
-                    "Monitor status since DTCs cleared. status and number of DTCs.)", m1Pid1ResponseHandler ),
-            new Command("01", "2", "Freeze DTC", new SaeJ1979Response() {
+            new Command("1", "1", "Monitor status since DTCs cleared. (Includes malfunction indicator lamp (MIL) status and number of DTCs.)", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");//return "" + (Bit encoded. See below.);
                 }
             }),
-            new Command("01", "3", "Fuel system status", new SaeJ1979Response() {
+            new Command("1", "2", "Freeze DTC", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "";
                 }
             }),
-            new Command("01", "4", "Calculated engine load", new SaeJ1979Response() {
+            new Command("1", "3", "Fuel system status", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");//return "" + (Bit encoded. See below.);
                 }
             }),
-            new Command("01", "5", "Engine coolant temperature", new SaeJ1979Response() {
+            new Command("1", "4", "Calculated engine load value0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 100 / 255);
                 }
             }),
-            new Command("01", "6", "Short term fuel trim—Bank 1", new SaeJ1979Response() {
+            new Command("1", "5", "Engine coolant temperature-40215°C", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A - 40);
                 }
             }),
-            new Command("01", "7", "Long term fuel trim—Bank 1", new SaeJ1979Response() {
+            new Command("1", "6", "Short term fuel % trim—Bank 1-100 (Rich)99.22 (Lean)%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A - 128) * 100 / 128);
                 }
             }),
-            new Command("01", "8", "Short term fuel trim—Bank 2", new SaeJ1979Response() {
+            new Command("1", "7", "Long term fuel % trim—Bank 1-100 (Rich)99.22 (Lean)%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A - 128) * 100 / 128);
                 }
             }),
-            new Command("01", "9", "Long term fuel trim—Bank 2", new SaeJ1979Response() {
+            new Command("1", "8", "Short term fuel % trim—Bank 2-100 (Rich)99.22 (Lean)%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A - 128) * 100 / 128);
                 }
             }),
-            new Command("01", "0A", "Fuel pressure (gauge pressure)", new SaeJ1979Response() {
+            new Command("1", "9", "Long term fuel % trim—Bank 2-100 (Rich)99.22 (Lean)%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A - 128) * 100 / 128);
                 }
             }),
-            new Command("01", "0B", "Intake manifold absolute pressure", new SaeJ1979Response() {
+            new Command("1", "0A", "Fuel pressure0765kPa (gauge)", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 3);
                 }
             }),
-            new Command("01", "0C", "Engine RPM", new SaeJ1979Response() {
+            new Command("1", "0B", "Intake manifold absolute pressure0255kPa (absolute)", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A);
                 }
             }),
-            new Command("01", "0D", "Vehicle speed", new SaeJ1979Response() {
+            new Command("1", "0C", "Engine RPM016383.75rpm", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 4);
                 }
             }),
-            new Command("01", "0E", "Timing advance", new SaeJ1979Response() {
+            new Command("1", "0D", "Vehicle speed0255km/h", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A);
                 }
             }),
-            new Command("01", "0F", "Intake air temperature", new SaeJ1979Response() {
+            new Command("1", "0E", "Timing advance-6463.5° relative to #1 cylinder", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A / 2) -64);
                 }
             }),
-            new Command("01", "10", "MAF air flow rate", new SaeJ1979Response() {
+            new Command("1", "0F", "Intake air temperature-40215°C", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A - 40);
                 }
             }),
-            new Command("01", "11", "Throttle position", new SaeJ1979Response() {
+            new Command("1", "10", "MAF air flow rate0655.35g/s", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 100);
                 }
             }),
-            new Command("01", "12", "Commanded secondary air status", new SaeJ1979Response() {
+            new Command("1", "11", "Throttle position0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 100 / 255);
                 }
             }),
-            new Command("01", "13", "Oxygen sensors present (in 2 banks)", new SaeJ1979Response() {
+            new Command("1", "12", "Commanded secondary air status", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");//return "" + (Bit encoded. See below.);
                 }
             }),
-            new Command("01", "14", "Oxygen Sensor 1 A: Voltage B: Short term fuel trim", new SaeJ1979Response() {
+            new Command("1", "13", "Oxygen sensors present", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");//return "" + ([A0..A3] ==Bank 1, Sensors 1 - 4.[A4..A7] ==Bank 2…);
                 }
             }),
-            new Command("01", "15", "Oxygen Sensor 2 A: Voltage B: Short term fuel trim", new SaeJ1979Response() {
+            new Command("1", "14", "Bank 1, Sensor 1:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    if (B == 0xFF)return "" + (A * 0.005 *(B - 128) * 100 / 128);
+                    return "";
                 }
             }),
-            new Command("01", "16", "Oxygen Sensor 3 A: Voltage B: Short term fuel trim", new SaeJ1979Response() {
+            new Command("", "", "Short term fuel trim", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "17", "Oxygen Sensor 4 A: Voltage B: Short term fuel trim", new SaeJ1979Response() {
+            new Command("1", "15", "Bank 1, Sensor 2:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    if (B == 0xFF)return "" + (A * 0.005 *(B - 128) * 100 / 128); 
+                    return "";
                 }
             }),
-            new Command("01", "18", "Oxygen Sensor 5 A: Voltage B: Short term fuel trim", new SaeJ1979Response() {
+            new Command("", "", "Short term fuel trim", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "19", "Oxygen Sensor 6 A: Voltage B: Short term fuel trim", new SaeJ1979Response() {
+            new Command("1", "16", "Bank 1, Sensor 3:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    if (B == 0xFF)return "" + (A * 0.005 * (B - 128) * 100 / 128);
+                    return "";
                 }
             }),
-            new Command("01", "1A", "Oxygen Sensor 7 A: Voltage B: Short term fuel trim", new SaeJ1979Response() {
+            new Command("", "", "Short term fuel trim", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "1B", "Oxygen Sensor 8 A: Voltage B: Short term fuel trim", new SaeJ1979Response() {
+            new Command("1", "17", "Bank 1, Sensor 4:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    if (B == 0xFF)return "" + (A * 0.005* (B - 128) * 100 / 128); 
+                    return "";
                 }
             }),
-            new Command("01", "1C", "OBD standards this vehicle conforms to", new SaeJ1979Response() {
+            new Command("", "", "Short term fuel trim", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "1D", "Oxygen sensors present (in 4 banks)", new SaeJ1979Response() {
+            new Command("1", "18", "Bank 2, Sensor 1:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    if (B == 0xFF)return "" + (A * 0.005 *(B - 128) * 100 / 128);
+                    return "";
                 }
             }),
-            new Command("01", "1E", "Auxiliary input status", new SaeJ1979Response() {
+            new Command("", "", "Short term fuel trim", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "1F", "Run time since engine start", new SaeJ1979Response() {
+            new Command("1", "19", "Bank 2, Sensor 2:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    if (B == 0xFF)return "" + (A * 0.005 *(B - 128) * 100 / 128 );
+                    return "";
                 }
             }),
-            new Command("01", "20", "PIDs supported [21 - 40]", new SaeJ1979Response() {
+            new Command("", "", "Short term fuel trim", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "21", "Distance traveled with malfunction indicator lamp (MIL) on", new SaeJ1979Response() {
+            new Command("1", "1A", "Bank 2, Sensor 3:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    if (B == 0xFF)
+                    return "" + (A * 0.005 *(B - 128) * 100 / 128 );
+                    return "";
                 }
             }),
-            new Command("01", "22", "Fuel Rail Pressure (relative to manifold vacuum)", new SaeJ1979Response() {
+            new Command("", "", "Short term fuel trim", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "23", "Fuel Rail Gauge Pressure (diesel, or gasoline direct injection)", new SaeJ1979Response() {
+            new Command("1", "1B", "Bank 2, Sensor 4:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    if (B == 0xFF)
+                    return "" + (A * 0.005 *(B - 128) * 100 / 128 );
+                    return "";
                 }
             }),
-            new Command("01", "24", "Oxygen Sensor 1 AB: Fuel–Air Equivalence Ratio CD: Voltage", new SaeJ1979Response() {
+            new Command("", "", "Short term fuel trim", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "25", "Oxygen Sensor 2 AB: Fuel–Air Equivalence Ratio CD: Voltage", new SaeJ1979Response() {
+            new Command("1", "1C", "OBD standards this vehicle conforms to", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");//return "" + (Bit encoded. See below.);
                 }
             }),
-            new Command("01", "26", "Oxygen Sensor 3 AB: Fuel–Air Equivalence Ratio CD: Voltage", new SaeJ1979Response() {
+            new Command("1", "1D", "Oxygen sensors present", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");// return "" + (Similar to PID 13, but[A0..A7] == [
+                    //B1S1, B1S2, B2S1, B2S2, B3S1, B3S2, B4S1, B4S2]);
                 }
             }),
-            new Command("01", "27", "Oxygen Sensor 4 AB: Fuel–Air Equivalence Ratio CD: Voltage", new SaeJ1979Response() {
+            new Command("1", "1E", "Auxiliary input status", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");//return "" + (A0 == Power Take Off (PTO) status(1 == active)[A1..A7]not used);
                 }
             }),
-            new Command("01", "28", "Oxygen Sensor 5 AB: Fuel–Air Equivalence Ratio CD: Voltage", new SaeJ1979Response() {
+            new Command("1", "1F", "Run time since engine start065535seconds", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A * 256) + B);
                 }
             }),
-            new Command("01", "29", "Oxygen Sensor 6 AB: Fuel–Air Equivalence Ratio CD: Voltage", new SaeJ1979Response() {
+            new Command("1", "20", "PIDs supported 21-40", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");//return "" + (Bit encoded[A7..D0] == [PID 0x21..PID 0x40]);
                 }
             }),
-            new Command("01", "2A", "Oxygen Sensor 7 AB: Fuel–Air Equivalence Ratio CD: Voltage", new SaeJ1979Response() {
+            new Command("1", "21", "Distance traveled with malfunction indicator lamp (MIL) on065535km", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A * 256) + B);
                 }
             }),
-            new Command("01", "2B", "Oxygen Sensor 8 AB: Fuel–Air Equivalence Ratio CD: Voltage", new SaeJ1979Response() {
+            new Command("1", "22", "Fuel Rail Pressure (relative to manifold vacuum)05177.265kPa", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((((A * 256) + B) * 10) / 128);
                 }
             }),
-            new Command("01", "2C", "Commanded EGR", new SaeJ1979Response() {
+            new Command("1", "23", "Fuel Rail Pressure (diesel)0655350kPa (gauge)", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) * 10);
                 }
             }),
-            new Command("01", "2D", "EGR Error", new SaeJ1979Response() {
+            new Command("1", "24", "O2S1_WR_lambda(1):Equivalence Ratio028N/AV", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 32768 *((C * 256) + D) / 8192);
                 }
             }),
-            new Command("01", "2E", "Commanded evaporative purge", new SaeJ1979Response() {
+            new Command("", "", "Voltage", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "2F", "Fuel Tank Level Input", new SaeJ1979Response() {
+            new Command("1", "25", "O2S2_WR_lambda(1):Equivalence Ratio028N/AV", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 32768 *((C * 256) + D) / 8192);
                 }
             }),
-            new Command("01", "30", "Warm-ups since codes cleared", new SaeJ1979Response() {
+            new Command("", "", "Voltage", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "31", "Distance traveled since codes cleared", new SaeJ1979Response() {
+            new Command("1", "26", "O2S3_WR_lambda(1):Equivalence Ratio028N/AV", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 32768* ((C * 256) + D) / 8192);
                 }
             }),
-            new Command("01", "32", "Evap. System Vapor Pressure", new SaeJ1979Response() {
+            new Command("", "", "Voltage", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "33", "Absolute Barometric Pressure", new SaeJ1979Response() {
+            new Command("1", "27", "O2S4_WR_lambda(1):Equivalence Ratio028N/AV", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 32768 *((C * 256) + D) / 8192);
                 }
             }),
-            new Command("01", "34", "Oxygen Sensor 1    AB: Fuel–Air Equivalence Ratio CD: Current", new SaeJ1979Response() {
+            new Command("", "", "Voltage", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "35", "Oxygen Sensor 2 AB: Fuel–Air Equivalence Ratio CD: Current", new SaeJ1979Response() {
+            new Command("1", "28", "O2S5_WR_lambda(1):Equivalence Ratio028N/AV", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 32768 *((C * 256) + D) / 8192);
                 }
             }),
-            new Command("01", "36", "Oxygen Sensor 3 AB: Fuel–Air Equivalence Ratio CD: Current", new SaeJ1979Response() {
+            new Command("", "", "Voltage", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "37", "Oxygen Sensor 4 AB: Fuel–Air Equivalence Ratio CD: Current", new SaeJ1979Response() {
+            new Command("1", "29", "O2S6_WR_lambda(1):Equivalence Ratio028N/AV", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 32768 *((C * 256) + D) / 8192);
                 }
             }),
-            new Command("01", "38", "Oxygen Sensor 5 AB: Fuel–Air Equivalence Ratio CD: Current", new SaeJ1979Response() {
+            new Command("", "", "Voltage", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "39", "Oxygen Sensor 6 AB: Fuel–Air Equivalence Ratio CD: Current", new SaeJ1979Response() {
+            new Command("1", "2A", "O2S7_WR_lambda(1):Equivalence Ratio028N/AV", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 32768 *((C * 256) + D) / 8192);
                 }
             }),
-            new Command("01", "3A", "Oxygen Sensor 7 AB: Fuel–Air Equivalence Ratio CD: Current", new SaeJ1979Response() {
+            new Command("", "", "Voltage", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "3B", "Oxygen Sensor 8 AB: Fuel–Air Equivalence Ratio CD: Current", new SaeJ1979Response() {
+            new Command("1", "2B", "O2S8_WR_lambda(1):Equivalence Ratio028N/AV", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 32768 *((C * 256) + D) / 8192);
                 }
             }),
-            new Command("01", "3C", "Catalyst Temperature: Bank 1, Sensor 1", new SaeJ1979Response() {
+            new Command("", "", "Voltage", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "3D", "Catalyst Temperature: Bank 2, Sensor 1", new SaeJ1979Response() {
+            new Command("1", "2C", "Commanded EGR0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (100 * A / 255);
                 }
             }),
-            new Command("01", "3E", "Catalyst Temperature: Bank 1, Sensor 2", new SaeJ1979Response() {
+            new Command("1", "2D", "EGR Error-10099.22%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A - 128) * 100 / 128);
                 }
             }),
-            new Command("01", "3F", "Catalyst Temperature: Bank 2, Sensor 2", new SaeJ1979Response() {
+            new Command("1", "2E", "Commanded evaporative purge0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (100 * A / 255);
                 }
             }),
-            new Command("01", "40", "PIDs supported [41 - 60]", new SaeJ1979Response() {
+            new Command("1", "2F", "Fuel Level Input0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (100 * A / 255);
                 }
             }),
-            new Command("01", "41", "Monitor status this drive cycle", new SaeJ1979Response() {
+            new Command("1", "30", "# of warm-ups since codes cleared0255N/A", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A);
                 }
             }),
-            new Command("01", "42", "Control module voltage", new SaeJ1979Response() {
+            new Command("1", "31", "Distance traveled since codes cleared065535km", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A * 256) + B);
                 }
             }),
-            new Command("01", "43", "Absolute load value", new SaeJ1979Response() {
+            new Command("1", "32", "Evap. System Vapor Pressure-81928192Pa", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 4 );
                 }
             }),
-            new Command("01", "44", "Fuel–Air commanded equivalence ratio", new SaeJ1979Response() {
+            new Command("1", "33", "Barometric pressure0255kPa (Absolute)", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A);
                 }
             }),
-            new Command("01", "45", "Relative throttle position", new SaeJ1979Response() {
+            new Command("1", "34", "O2S1_WR_lambda(1):Equivalence Ratio0-1282128N/AmA", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((((A * 256) + B) / 32768)* ((C * 256) + D) / 256) - 128);
                 }
             }),
-            new Command("01", "46", "Ambient air temperature", new SaeJ1979Response() {
+            new Command("", "", "Current", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "47", "Absolute throttle position B", new SaeJ1979Response() {
+            new Command("1", "35", "O2S2_WR_lambda(1):Equivalence Ratio0-1282128N/AmA", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((((A * 256) + B) / 32768)* ((C * 256) + D) / 256) - 128);
                 }
             }),
-            new Command("01", "48", "Absolute throttle position C", new SaeJ1979Response() {
+            new Command("", "", "Current", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "49", "Accelerator pedal position D", new SaeJ1979Response() {
+            new Command("1", "36", "O2S3_WR_lambda(1):Equivalence Ratio0-1282128N/AmA", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((((A * 256) + B) / 327685)* (((C * 256) + D) / 256 ))-128);
                 }
             }),
-            new Command("01", "4A", "Accelerator pedal position E", new SaeJ1979Response() {
+            new Command("", "", "Current", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "4B", "Accelerator pedal position F", new SaeJ1979Response() {
+            new Command("1", "37", "O2S4_WR_lambda(1):Equivalence Ratio0-1282128N/AmA", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((((A * 256) + B) / 32768)* ((C * 256) + D) / 256) - 128);
                 }
             }),
-            new Command("01", "4C", "Commanded throttle actuator", new SaeJ1979Response() {
+            new Command("", "", "Current", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "4D", "Time run with MIL on", new SaeJ1979Response() {
+            new Command("1", "38", "O2S5_WR_lambda(1):Equivalence Ratio0-1282128N/AmA", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((((A * 256) + B) / 32768)* ((C * 256) + D) / 256) - 128);
                 }
             }),
-            new Command("01", "4E", "Time since trouble codes cleared", new SaeJ1979Response() {
+            new Command("", "", "Current", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "4F", "Maximum value for Fuel–Air equivalence ratio, oxygen sensor voltage, oxygen sensor current, and intake manifold absolute pressure", new SaeJ1979Response() {
+            new Command("1", "39", "O2S6_WR_lambda(1):Equivalence Ratio0-1282128N/AmA", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" +(((((A * 256) + B) / 32768)* ((C * 256) + D) / 256) - 128);
                 }
             }),
-            new Command("01", "50", "Maximum value for air flow rate from mass air flow sensor", new SaeJ1979Response() {
+            new Command("", "", "Current", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "51", "Fuel Type", new SaeJ1979Response() {
+            new Command("1", "3A", "O2S7_WR_lambda(1):Equivalence Ratio0-1282128N/AmA", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((((A * 256) + B) / 32768)* ((C * 256) + D) / 256) - 128);
                 }
             }),
-            new Command("01", "52", "Ethanol fuel %", new SaeJ1979Response() {
+            new Command("", "", "Current", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "53", "Absolute Evap system Vapor Pressure", new SaeJ1979Response() {
+            new Command("1", "3B", "O2S8_WR_lambda(1):Equivalence Ratio0-1282128N/AmA", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((((A * 256) + B) / 32768)* ((C * 256) + D) / 256) - 128);
                 }
             }),
-            new Command("01", "54", "Evap system vapor pressure", new SaeJ1979Response() {
+            new Command("", "", "Current", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("01", "55", "Short term secondary oxygen sensor trim, A: bank 1, B: bank 3", new SaeJ1979Response() {
+            new Command("1", "3C", "Catalyst TemperatureBank 1, Sensor 1-406513.5°C", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((((A * 256) + B) / 10)-40);
                 }
             }),
-            new Command("01", "56", "Long term secondary oxygen sensor trim, A: bank 1, B: bank 3", new SaeJ1979Response() {
+            new Command("1", "3D", "Catalyst TemperatureBank 2, Sensor 1-406513.5°C", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((((A * 256) + B) / 10)-40);
                 }
             }),
-            new Command("01", "57", "Short term secondary oxygen sensor trim, A: bank 2, B: bank 4", new SaeJ1979Response() {
+            new Command("1", "3E", "Catalyst TemperatureBank 1, Sensor 2-406513.5°C", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((((A * 256) + B) / 10) -40);
                 }
             }),
-            new Command("01", "58", "Long term secondary oxygen sensor trim, A: bank 2, B: bank 4", new SaeJ1979Response() {
+            new Command("1", "3F", "Catalyst TemperatureBank 2, Sensor 2-406513.5°C", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((((A * 256) + B) / 10)-40);
                 }
             }),
-            new Command("01", "59", "Fuel rail absolute pressure", new SaeJ1979Response() {
+            new Command("1", "40", "PIDs supported 41-60", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("ÿet to implement");//return "" + (Bit encoded[A7..D0] == [PID 0x41..PID 0x60]);
                 }
             }),
-            new Command("01", "5A", "Relative accelerator pedal position", new SaeJ1979Response() {
+            new Command("1", "41", "Monitor status this drive cycle", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("ÿet to implement");//return "" + (Bit encoded. See below.);
                 }
             }),
-            new Command("01", "5B", "Hybrid battery pack remaining life", new SaeJ1979Response() {
+            new Command("1", "42", "Control module voltage065.535V", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 1000);
                 }
             }),
-            new Command("01", "5C", "Engine oil temperature", new SaeJ1979Response() {
+            new Command("1", "43", "Absolute load value025700%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) * 100 / 255);
                 }
             }),
-            new Command("01", "5D", "Fuel injection timing", new SaeJ1979Response() {
+            new Command("1", "44", "Command equivalence ratio02N/A", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (((A * 256) + B) / 32768);
                 }
             }),
-            new Command("01", "5E", "Engine fuel rate", new SaeJ1979Response() {
+            new Command("1", "45", "Relative throttle position0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 100 / 255);
                 }
             }),
-            new Command("01", "5F", "Emission requirements to which vehicle is designed", new SaeJ1979Response() {
+            new Command("1", "46", "Ambient air temperature-40215°C", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A - 40);
                 }
             }),
-            new Command("01", "60", "PIDs supported [61 - 80]", new SaeJ1979Response() {
+            new Command("1", "47", "Absolute throttle position B0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 100 / 255);
                 }
             }),
-            new Command("01", "61", "Driver's demand engine - percent torque", new SaeJ1979Response() {
+            new Command("1", "48", "Absolute throttle position C0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 100 / 255);
                 }
             }),
-            new Command("01", "62", "Actual engine - percent torque", new SaeJ1979Response() {
+            new Command("1", "49", "Accelerator pedal position D0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 100 / 255);
                 }
             }),
-            new Command("01", "63", "Engine reference torque", new SaeJ1979Response() {
+            new Command("1", "4A", "Accelerator pedal position E0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 100 / 255);
                 }
             }),
-            new Command("01", "64", "Engine percent torque data", new SaeJ1979Response() {
+            new Command("1", "4B", "Accelerator pedal position F0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 100 / 255);
                 }
             }),
-            new Command("01", "65", "Auxiliary input / output supported", new SaeJ1979Response() {
+            new Command("1", "4C", "Commanded throttle actuator0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 100 / 255);
                 }
             }),
-            new Command("01", "66", "Mass air flow sensor", new SaeJ1979Response() {
+            new Command("1", "4D", "Time run with MIL on065535minutes", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A * 256) + B);
                 }
             }),
-            new Command("01", "67", "Engine coolant temperature", new SaeJ1979Response() {
+            new Command("1", "4E", "Time since trouble codes cleared065535minutes", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + ((A * 256) + B);
                 }
             }),
-            new Command("01", "68", "Intake air temperature sensor", new SaeJ1979Response() {
+            new Command("1", "51", "Fuel Type", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("ÿet to implement");//return "" + (From fuel type table see below);
                 }
             }),
-            new Command("01", "69", "Commanded EGR and EGR Error", new SaeJ1979Response() {
+            new Command("1", "52", "Ethanol fuel %0100%", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    return "" + (A * 100 / 255);
                 }
             }),
-            new Command("01", "6A", "Commanded Diesel intake air flow control and relative intake air flow position", new SaeJ1979Response() {
+            new Command("1", "53", "Absoulute Evap system Vapour Pressure0327675kpa", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("ÿet to implement");//return "" + (1 / 200 per bit);
                 }
             }),
-            new Command("01", "6B", "Exhaust gas recirculation temperature", new SaeJ1979Response() {
+            new Command("1", "C3", "????", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    //return "" + (Returns numerous data, including Drive Condition ID and Engine Speed*);
+                    throw new RuntimeException("ÿet to implement");
                 }
             }),
-            new Command("01", "6C", "Commanded throttle actuator control and relative throttle position", new SaeJ1979Response() {
+            new Command("1", "C4", "????", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("ÿet to implement");//return "" + (B5 is Engine Idle RequestB6 is Engine Stop Request*);
                 }
             }),
-            new Command("01", "6D", "Fuel pressure control system", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "6E", "Injection pressure control system", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "6F", "Turbocharger compressor inlet pressure", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "70", "Boost pressure control", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "71", "Variable Geometry turbo (VGT) control", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "72", "Wastegate control", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "73", "Exhaust pressure", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "74", "Turbocharger RPM", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "75", "Turbocharger temperature", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "76", "Turbocharger temperature", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "77", "Charge air cooler temperature (CACT)", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "78", "Exhaust Gas temperature (EGT) Bank 1", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "79", "Exhaust Gas temperature (EGT) Bank 2", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "7A", "Diesel particulate filter (DPF)", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "7B", "Diesel particulate filter (DPF)", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "7C", "Diesel Particulate filter (DPF) temperature", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "7D", "NOx NTE (Not-To-Exceed) control area status", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "7E", "PM NTE (Not-To-Exceed) control area status", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "7F", "Engine run time", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "80", "PIDs supported [81 - A0]", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "81", "Engine run time for Auxiliary Emissions Control Device(AECD)", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "82", "Engine run time for Auxiliary Emissions Control Device(AECD)", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "83", "NOx sensor", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "84", "Manifold surface temperature", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "85", "NOx reagent system", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "86", "Particulate matter (PM) sensor", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "87", "Intake manifold absolute pressure", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "A0", "PIDs supported [A1 - C0]", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "C0", "PIDs supported [C1 - E0]", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "C3", "?", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("01", "C4", "?", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            })
     };
 
     public Mode1() {

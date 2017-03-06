@@ -10,16 +10,16 @@ import java.io.InputStream;
  */
 
 public abstract class SaeJ1979Response implements ResponseHandler {
-    private boolean status;
-    private int a;
-    private int b;
-    private int c;
-    private int d;
+    protected boolean status;
+    protected int A;
+    protected int B;
+    protected int C;
+    protected int D;
 
     public void parse(InputStream is)throws IOException {
-        a = is.read();
-        b = is.read();
-        c = is.read();
-        d = is.read();
+        A = is.read();
+        B = is.read();
+        C = is.read();
+        D = is.read();
     }
 }

@@ -247,5 +247,9 @@ public class MainActivity extends AppCompatActivity {
         String pidList = device.getMode1PIDs();
         String queryResult = device.queryCan((byte) 1, (byte)0x7DF);
         device.initScan();
+        device.scan("0C9");
+        device.scan("1E5");
+        device.scan("0C9");
+
     }
 }

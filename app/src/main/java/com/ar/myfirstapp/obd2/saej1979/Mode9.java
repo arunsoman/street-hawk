@@ -9,78 +9,32 @@ import com.ar.myfirstapp.obd2.SaeJ1979Response;
 
 public class Mode9 extends Mode {
     public static final Command[] commands = {
-            new Command("09 ", "0", "Mode 9 supported PIDs (01 to 20)", new SaeJ1979Response() {
+
+            new Command("9", "0", "mode 9 supported PIDs 01 to 20", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("ÿet to implement");//return "" + (Bit encoded);
                 }
             }),
-            new Command("09 ", "1", "VIN Message Count in PID 02. Only for ISO 9141-2, ISO 14230-4 and SAE J1850.", new SaeJ1979Response() {
+            new Command("9", "2", "Vehicle identification number (VIN)", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("ÿet to implement");//return "" + (Returns 5 lines, A is line ordering flag, B -E ASCII coded VIN digits.);
                 }
             }),
-            new Command("09 ", "2", "Vehicle Identification Number (VIN)", new SaeJ1979Response() {
+            new Command("9", "4", "calibration ID", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("ÿet to implement");//return "" + (Returns multiple lines, ASCII coded);
                 }
             }),
-            new Command("09 ", "3", "Calibration ID message count for PID 04. Only for ISO 9141-2, ISO 14230-4 and SAE J1850.", new SaeJ1979Response() {
+            new Command("9", "6", "calibration", new SaeJ1979Response() {
                 @Override
                 public String getResult() {
-                    return null;
+                    throw new RuntimeException("yet to implement");
                 }
             }),
-            new Command("09 ", "4", "Calibration ID", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("09 ", "5", "Calibration verification numbers (CVN) message count for PID 06. Only for ISO 9141-2, ISO 14230-4 and SAE J1850.", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("09 ", "6", "Calibration Verification Numbers (CVN)", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("09 ", "7", "In-use performance tracking message count for PID 08 and 0B. Only for ISO 9141-2, ISO 14230-4 and SAE J1850.", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("09 ", "8", "In-use performance tracking for spark ignition vehicles", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("09 ", "9", "ECU name message count for PID 0A", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("09 ", "0A", "ECU name", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            }),
-            new Command("09 ", "0B", "In-use performance tracking for compression ignition vehicles", new SaeJ1979Response() {
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            })
+
     };
 
     public Mode9() {

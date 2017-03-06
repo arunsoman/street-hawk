@@ -28,7 +28,7 @@ public class AtCommands {
             new Command("AT", " H1\r", "", singleLineHandler),
             new Command("AT", " S1\r", "", singleLineHandler),
             new Command("AT", " AL\r", "", singleLineHandler),
-            new Command("AT", "SP 0\r", "", singleLineHandler),
+            new Command("AT", "SP 6\r", "", singleLineHandler),
             new Command("AT", " DPN\r", "", singleLineHandler),
             //"AT SH 7DF",
     };

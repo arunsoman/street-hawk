@@ -13,6 +13,9 @@ import com.ar.myfirstapp.obd2.saej1979.Mode1;
 
 import java.io.IOException;
 
+import static com.ar.myfirstapp.obd2.ResponseHandlerUtils.multiLineHandler;
+import static com.ar.myfirstapp.obd2.ResponseHandlerUtils.singleLineHandler;
+
 /**
  * Created by arunsoman on 05/03/17.
  */
@@ -87,5 +90,9 @@ public class Device {
         for (Command c : AtCommands.initCommands) {
             connector.sendNreceive(c);
         }
+    }
+    public void scan(String id) throws BadResponseException, UnknownCommandException, IOException {
+        connector.sendNreceive(new Command("AT", " CRA"+id+"\r", "", singleLineHandler));
+        connector.sendNreceive(new Command("AT", " MA\r", "", multiLineHandler));
     }
 }
