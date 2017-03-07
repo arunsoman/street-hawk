@@ -2,8 +2,11 @@ package com.ar.myfirstapp.obd2;
 
 import android.util.Log;
 
+import com.ar.myfirstapp.MainActivity;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Created by arunsoman on 05/03/17.
@@ -29,37 +32,49 @@ public class LineReader {
         eom = previousLoc;
         start = (data[0] == cr ? 1 : 0);
         end = start;
+        MainActivity.tvLog.append("\nRESP: "+toString());
     }
 
     public String nextLine() throws IOException {
-       String result = null;
-        for(int i = end; i < eom; i++){
-
-            if(data[i] == cr) {
-                end = i-start;
-                try {
-                    if(end == 0){
-                        return "";
-                    }
-                    result = new String(data, start, end, "US-ASCII");
-                } catch(Throwable e){
-                    Log.e("Error",e.getMessage());
-                }
-                end = (data[i+1] == lf)? i +2 : i+1;
-                start = end;
-                return result;
+        if(start == eom) return null;
+        StringBuilder sb = new StringBuilder();
+        for(int i = start; i < eom; i++){
+            if(data[i] == cr){
+                start = i+1;
+                return sb.toString();
             }
+            if(data[i]< 32){
+                sb.append("[").append(data[i]).append("]");
+            }
+            else if(data[i]> 126){
+                sb.append("<").append(data[i]).append(">");
+            }
+            else sb.append(data[i]).append(',');
         }
-
-        if(eom == start){
-            return  "";
-        }
-
-        result = new String(data, start, eom, "US-ASCII");
-        return result;
+        start = eom;
+        return sb.toString();
     }
 
     public void drain()  {
         eom = 0;
+    }
+
+
+    public static String toString(byte[] data){
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < data.length; i++){
+            sb.append(data[i]);
+            sb.append(',');
+        }
+        return  sb.toString();
+    }
+
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < eom; i++){
+            sb.append(data[i]);
+            sb.append(',');
+        }
+        return  sb.toString();
     }
 }

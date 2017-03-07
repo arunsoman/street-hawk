@@ -20,6 +20,10 @@ public class AtCommands {
     public static final Command silentOff = new Command("AT", " CS M0 \r", "", okResponse);
     public static final Command spaceOff = new Command("AT", " S0 \r", "", okResponse);
     public static final Command spaceOn = new Command("AT", " S1 \r", "", okResponse);
+    public static final Command headerON = new Command("AT", " H1\r", "", singleLineHandler);
+    public static final Command canStatus = new Command("AT", " CS\r", "", singleLineHandler);
+
+
     public static final Command[] initCommands = {
 
             new Command("AT", " Z\r", "", crResponse),
@@ -30,16 +34,13 @@ public class AtCommands {
             new Command("AT", " S1\r", "", singleLineHandler),
             new Command("AT", " AL\r", "", singleLineHandler),
             new Command("AT", "SP 6\r", "", singleLineHandler),
-            new Command("AT", " DPN\r", "", singleLineHandler),
-            //"AT SH 7DF",
+            new Command("AT", " DPN\r", "", singleLineHandler)
     };
 
     public static final Command[] initCanScan={
             new Command("AT", " CA\r", "", singleLineHandler),
             new Command("AT", " CS\r", "", singleLineHandler),
             new Command("AT", " CSM1\r", "", okResponse),
-            new Command("AT", " CA\r", "", okResponse),
-            new Command("AT", " CA\r", "", okResponse),
             new Command("AT", " MA\r", "", multiLineHandler),
     };
 }

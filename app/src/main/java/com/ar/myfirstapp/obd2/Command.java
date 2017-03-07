@@ -33,10 +33,6 @@ public class Command {
 
     @Override
     public String toString() {
-        return "Command{" +
-                "id='" + id + '\'' +
-                ", modeID='" + modeID + '\'' +
-                ", name='" + name + '\'' +
-                '}';
+        return "Command{modeID:" + modeID + " id:" + id + ", name='" + name + '}';
     }
 }

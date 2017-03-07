@@ -17,15 +17,17 @@ import java.util.List;
  */
 
 public class ResponseHandlerUtils {
-    public static final ResponseHandler crResponse = new ResponseHandler() {
-        private static final String ok = "ok";
-        private final byte cr = (byte) '\r';
+        private static final String ok = new StringBuilder().append((byte)'o').append((byte)'k').toString();
+        private static final String OK = new StringBuilder().append((byte)'O').append((byte)'K').toString();
+        private static final String CR = new StringBuilder().append((byte)'\r').toString();
 
+    public static final ResponseHandler crResponse = new ResponseHandler() {
         public void parse(InputStream is) throws IOException, UnknownCommandException, BadResponseException {
             byte read = (byte) is.read();
-            int available = is.available();
-            while ((available = is.read()) != 0 );
-            if(read != cr)
+            LineReader lineReader = new LineReader(is);
+            String str = lineReader.nextLine();
+            lineReader.drain();
+            if(read != (byte)('\r') )
                 throw new BadResponseException();
         }
 
@@ -36,19 +38,14 @@ public class ResponseHandlerUtils {
     };
 
     public static final ResponseHandler okResponse = new ResponseHandler() {
-        private boolean status;
-        private static final String ok = "ok";
-        private final byte[] okBytes = ok.getBytes();
-        private final byte unknown = (byte) '?';
-
         public void parse(InputStream is) throws IOException, UnknownCommandException, BadResponseException {
             LineReader lineReader = new LineReader(is);
             String result = lineReader.nextLine();
             lineReader.drain();
-            if(result.startsWith("?"))
-                throw new UnknownCommandException();
-            if(!result.toLowerCase().startsWith(ok))
-                throw new BadResponseException();
+//            if(result.startsWith("?"))
+//                throw new UnknownCommandException();
+//            if(!result.toLowerCase().startsWith(ok))
+//                throw new BadResponseException();
         }
 
         @Override

@@ -25,6 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ar.myfirstapp.elm.ELMConnector;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler mHandler;
     private static final long SCAN_PERIOD = 10000;
+    public static TextView tvLog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +83,9 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return;
         }
-
+        tvLog=(TextView)findViewById(R.id.log);
+        Test test=new Test();
+        test.print("");
         btnScan = (Button)findViewById(R.id.scan);
         btnScan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -279,6 +283,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                     Device device1 = new Device(deviceAddress);
                         device1.initSequence();
+                        device1.getMode1PIDs();
                         device1.queryCan((byte)1,(byte) (0x7DF));
 
 //                        ELMConnector connector = new ELMConnector();

@@ -1,6 +1,9 @@
 package com.ar.myfirstapp.obd2.can;
 
+import android.util.Log;
+
 import com.ar.myfirstapp.obd2.BadResponseException;
+import com.ar.myfirstapp.obd2.LineReader;
 import com.ar.myfirstapp.obd2.ResponseHandler;
 
 import java.io.IOException;
@@ -18,34 +21,13 @@ public class CanResponseHandlers {
             this.pid = pid;
         }
 
-        private String process(InputStream is) throws IOException{
-            byte a0 = (byte) is.read();
-            if(a0 == -1)
-                return null;
-            byte a1 = (byte) is.read();
-            byte a2 = (byte) is.read();
-            byte a3 = (byte) is.read();
-            byte a4 = (byte) is.read();
-            byte a5 = (byte) is.read();
-            byte a6 = (byte) is.read();
-            byte a7 = (byte) is.read();
-            if(a0 == 3 && a3 == 0x31){
-
-            }
-            else if(a0 >=3 && a0 <= 6 && a3 ==pid){
-
-            }
-            else if(a0 >=4 && a0 <= 7){
-
-            }
-            return null;
-        }
         @Override
         public void parse(InputStream is) throws IOException, BadResponseException {
-            process(is);
-            is.read();//cr
-            is.read();//lf
-            parse(is);
+            LineReader lineReader = new LineReader(is);
+            String line;
+                while ((line = lineReader.nextLine()) != null){
+                Log.e("CAN", line);
+            }
         }
 
         @Override
