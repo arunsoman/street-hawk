@@ -15,7 +15,7 @@ public abstract class AbstractResponseHandler implements ResponseHandler {
     public void readResponse(InputStream is) {
         byte read = 0;
         try {
-            read = (byte) is.read();
+//            read = (byte) is.read();
             LineReader lineReader = new LineReader(is);
             dataStr = lineReader.toString();
             status = ResponseStatus.Ok;
@@ -23,8 +23,8 @@ public abstract class AbstractResponseHandler implements ResponseHandler {
             status = ResponseStatus.NetworkError;
             return;
         }
-        if(read != (byte)('\r') )
-            status = ResponseStatus.BadResponse;
+//        if(read != (byte)('\r') )
+//            status = ResponseStatus.BadResponse;
     }
     @Override
     public ResponseStatus getStatus() {

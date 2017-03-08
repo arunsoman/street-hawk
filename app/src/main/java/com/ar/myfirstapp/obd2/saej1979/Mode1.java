@@ -4,6 +4,7 @@ package com.ar.myfirstapp.obd2.saej1979;
  " Created by Arun Soman on 3/3/2017.
  "*/
 
+import com.ar.myfirstapp.obd2.AbstractResponseHandler;
 import com.ar.myfirstapp.obd2.BadResponseException;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.LineReader;
@@ -20,28 +21,10 @@ public class Mode1 extends Mode {
 
 
     public static final Command commands[] = {
-            new Command("1", "0", "PIDs supported [01 - 20]",  new ResponseHandler(){
-                String result=null;
+            new Command("1", "0", "PIDs supported [01 - 20]",  new AbstractResponseHandler(){
                 @Override
-                public void parse(InputStream is) throws IOException, BadResponseException {
-                    String line = null;
-                    StringBuilder sb = new StringBuilder();
-                    LineReader lineReader = new LineReader(is);
-                    while ((line = lineReader.nextLine()) != null) {
-                        line.replaceAll("\\s+", "");
-                        BitSet bitSet = BitSet.valueOf(new long[]{Long.parseLong(line, 16)});
-                        for (int i = 0; i < bitSet.length(); i++) {
-                            if (bitSet.get(i))
-                                sb.append(i).append(',');
-                        }
-                        sb.append('\n');
-                    }
-                    result = sb.toString();
-                }
+                public void parse() {
 
-                @Override
-                public String getResult() {
-                    return result;
                 }
             }),
             new Command("1", "1", "Monitor status since DTCs cleared. (Includes malfunction indicator lamp (MIL) status and number of DTCs.)", new SaeJ1979Response() {

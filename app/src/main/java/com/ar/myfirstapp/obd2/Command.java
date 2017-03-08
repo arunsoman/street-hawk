@@ -36,6 +36,6 @@ public class Command {
 
         return "Command:{type: " + modeID + " id: " + id + ", name'" + name + "}\n"+
                 "Response:{status: "+response.getStatus() + ", data: " + response.getData()+"}\n"+
-                "Result: "+ response.getResult();
+                "Result: "+ response.getResult()+"\n";
     }
 }

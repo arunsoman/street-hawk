@@ -1,7 +1,8 @@
     package com.ar.myfirstapp.elm;
 
     import android.bluetooth.BluetoothSocket;
-import android.os.Handler;
+    import android.content.Context;
+    import android.os.Handler;
 
 import com.ar.myfirstapp.async.ReadWriteAsyncTask;
 import com.ar.myfirstapp.bt.BtManager;
@@ -21,9 +22,11 @@ import java.io.OutputStream;
         private Pipe pipe;
         private ReadWriteAsyncTask readWriteAsyncTask;
         private final Handler  responseCallback;
+        private Context context;
 
         public ELMConnector(Handler responseCallback) {
             this.responseCallback = responseCallback;
+
         }
 
         @Override
