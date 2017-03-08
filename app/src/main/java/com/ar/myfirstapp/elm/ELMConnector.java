@@ -1,20 +1,15 @@
     package com.ar.myfirstapp.elm;
 
     import android.bluetooth.BluetoothSocket;
+import android.os.Handler;
 
-    import com.ar.myfirstapp.MainActivity;
-    import com.ar.myfirstapp.async.ReaderWriter;
-    import com.ar.myfirstapp.bt.BtManager;
-    import com.ar.myfirstapp.obd2.BadResponseException;
-    import com.ar.myfirstapp.obd2.Command;
-    import com.ar.myfirstapp.obd2.LineReader;
-    import com.ar.myfirstapp.obd2.UnknownCommandException;
-    import com.ar.myfirstapp.obd2.at.AtCommands;
-    import com.ar.myfirstapp.obd2.saej1979.Mode1;
+import com.ar.myfirstapp.async.ReadWriteAsyncTask;
+import com.ar.myfirstapp.bt.BtManager;
+import com.ar.myfirstapp.obd2.Command;
 
-    import java.io.IOException;
-    import java.io.InputStream;
-    import java.io.OutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
     /**
      * Created by Arun Soman on 2/28/2017.
@@ -24,12 +19,18 @@
 
         private BluetoothSocket bluetoothSocket;
         private Pipe pipe;
-        private ReaderWriter readerWriter;
+        private ReadWriteAsyncTask readWriteAsyncTask;
+        private final Handler  responseCallback;
+
+        public ELMConnector(Handler responseCallback) {
+            this.responseCallback = responseCallback;
+        }
 
         @Override
         public void close() throws Exception {
             pipe.close();
             bluetoothSocket.close();
+            readWriteAsyncTask.stop();
         }
 
         public final class Pipe implements AutoCloseable {
@@ -47,14 +48,12 @@
                 os.close();
             }
 
-            public String sendNreceive(Command command) throws IOException, BadResponseException, UnknownCommandException {
+            public void sendNreceive(Command command) throws IOException {
                 synchronized (pipe.os) {
                     os.write(command.cmd);
                     os.flush();
                 }
-                MainActivity.tvLog.append("\nREQ: " + LineReader.toString(command.cmd));
-                command.response.parse(is);
-                return command.response.getResult();
+                command.response.readResponse(is);
             }
         }
         public void interrupt() throws IOException {
@@ -64,11 +63,12 @@
         public void connect(String deviceAddress) throws IOException {
             BtManager btManager = new BtManager();
             pipe = new Pipe(btManager.connect(deviceAddress));
-            readerWriter = new ReaderWriter(pipe);
-            readerWriter.execute();
+            readWriteAsyncTask = new ReadWriteAsyncTask(pipe,  responseCallback);
+            readWriteAsyncTask.execute();
         }
-        public void sendNreceive(Command command) throws IOException, BadResponseException, UnknownCommandException {
-            readerWriter.submit(command);
+
+        public void sendNreceive(Command command) throws IOException {
+            readWriteAsyncTask.submit(command);
         }
 
     }

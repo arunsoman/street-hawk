@@ -8,6 +8,10 @@ import java.io.InputStream;
  */
 
 public interface ResponseHandler {
-    void parse(InputStream is) throws IOException, BadResponseException, UnknownCommandException;
+    enum ResponseStatus{Unknown, Ok, UnSupportedReq, BadResponse, NetworkError};
+    void parse();
+    void readResponse(InputStream is);
+    ResponseStatus getStatus();
+    String getData();
     String getResult();
 }

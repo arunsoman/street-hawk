@@ -21,56 +21,39 @@ public class ResponseHandlerUtils {
         private static final String OK = new StringBuilder().append((byte)'O').append((byte)'K').toString();
         private static final String CR = new StringBuilder().append((byte)'\r').toString();
 
-    public static final ResponseHandler crResponse = new ResponseHandler() {
-        public void parse(InputStream is) throws IOException, UnknownCommandException, BadResponseException {
-            byte read = (byte) is.read();
-            LineReader lineReader = new LineReader(is);
-            String str = lineReader.nextLine();
-            lineReader.drain();
-            if(read != (byte)('\r') )
-                throw new BadResponseException();
-        }
+    public static final ResponseHandler crResponse = new AbstractResponseHandler() {
 
         @Override
-        public String getResult() {
-            return ok;
+        public void parse() {
+            if(dataStr.contains(CR)){
+                status = ResponseStatus.Ok;
+                resultStr = "ÖK";
+            }
+            else {
+                status = ResponseStatus.BadResponse;
+            }
         }
     };
 
-    public static final ResponseHandler okResponse = new ResponseHandler() {
-        public void parse(InputStream is) throws IOException, UnknownCommandException, BadResponseException {
-            LineReader lineReader = new LineReader(is);
-            String result = lineReader.nextLine();
-            lineReader.drain();
-//            if(result.startsWith("?"))
-//                throw new UnknownCommandException();
-//            if(!result.toLowerCase().startsWith(ok))
-//                throw new BadResponseException();
-        }
-
-        @Override
-        public String getResult() {
-            return ok;
+    public static final ResponseHandler okResponse = new AbstractResponseHandler() {
+        public void parse( ) {
+            if (dataStr.contains(ok) || dataStr.contains(OK)){
+                status = ResponseStatus.Ok;
+            }
+            else {
+                status = ResponseStatus.BadResponse;
+            }
         }
     };
 
-    public static final ResponseHandler singleLineHandler = new ResponseHandler() {
-        String result;
-
+    public static final ResponseHandler singleLineHandler = new AbstractResponseHandler() {
         @Override
-        public void parse(InputStream is) throws IOException, BadResponseException {
-            LineReader lineReader = new LineReader(is);
-            result = lineReader.nextLine();
-            lineReader.drain();
-        }
+        public void parse() {
 
-        @Override
-        public String getResult() {
-            return result;
         }
     };
 
-    public static final class StreamHandler implements ResponseHandler {
+    public static final class StreamHandler extends AbstractResponseHandler {
         List<String> result = new ArrayList<>();
         private Device device;
         public StreamHandler(Device device) {
@@ -78,52 +61,16 @@ public class ResponseHandlerUtils {
         }
 
         @Override
-        public void parse(final InputStream is) throws IOException, BadResponseException {
-            Thread worker = new Thread(new Runnable(){
-                @Override
-                public void run() {
-                    LineReader lineReader = null;
-                    String line = null;
-                    try {
-                        lineReader = new LineReader(is);
-                        while ((line = lineReader.nextLine()) != null) {
-                            result.add(line);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            worker.start();
-            //TODO kill thread when user terminates the scan;
+        public void parse() {
+
         }
+    }
+
+    public static final ResponseHandler multiLineHandler = new AbstractResponseHandler() {
 
         @Override
-        public String getResult() {
-            return result.remove(0);
-        }
+        public void parse() {
 
-        public void killStream(){
-            device.killScan();
-        }
-    };
-    public static final ResponseHandler multiLineHandler = new ResponseHandler() {
-        String result;
-
-        @Override
-        public void parse(InputStream is) throws IOException, BadResponseException {
-            StringBuilder sb = new StringBuilder();
-            LineReader lineReader = new LineReader(is);
-            String line = null;
-            while ((line = lineReader.nextLine()) != null) {
-                sb.append(line).append('\n');
-            }
-            result = sb.toString();
-        }
-
-        @Override
-        public String getResult() {
-            return result;
         }
     };
 
@@ -173,7 +120,7 @@ public class ResponseHandlerUtils {
             this.available = available;
             this.test = test;
         }
-    };
+    }
 
     public enum basicTest {
         Components(false, false),
@@ -196,7 +143,7 @@ public class ResponseHandlerUtils {
 
     private enum EngineType {petrolType, dieselType}
 
-    public static final ResponseHandler m1Pid1ResponseHandler = new ResponseHandler() {
+    public static final ResponseHandler m1Pid1ResponseHandler = new AbstractResponseHandler() {
         private final static byte msbSet = (byte) 0x80;
         private final static byte allSet6Till0 = 0x7f;
         private final static byte b3Set = 0x4;
@@ -209,12 +156,9 @@ public class ResponseHandlerUtils {
 
 
         @Override
-        public void parse(InputStream is) throws IOException, BadResponseException {
-            StringBuilder sb = new StringBuilder();
-            LineReader lineReader = new LineReader(is);
-            String line = null;
-            while ((line = lineReader.nextLine()) != null) {
-                String abcd[] = line.split(" ");
+        public void parse()  {
+            /*
+            String abcd[] = line.split(" ");
                 CIL = (((byte) Integer.parseInt(abcd[0], 16)) & msbSet) == (byte) 1;
                 counter = (((byte) Integer.parseInt(abcd[0], 16)) | allSet6Till0);
                 BitSet bBitSet = BitSet.valueOf(new long[]{Long.parseLong(abcd[2], 16)});
@@ -224,10 +168,10 @@ public class ResponseHandlerUtils {
                 }
                 engineType = (((byte) Integer.parseInt(abcd[1], 16)) & b3Set) == (byte) 1
                         ? EngineType.dieselType : EngineType.petrolType;
-                /*
-                0 = Spark ignition monitors supported (e.g. Otto or Wankel engines)
-                1 = Compression ignition monitors supported (e.g. Diesel engines)
-                 */
+                //
+                //0 = Spark ignition monitors supported (e.g. Otto or Wankel engines)
+                //1 = Compression ignition monitors supported (e.g. Diesel engines)
+              //
                 BitSet cBitSet = BitSet.valueOf(new long[]{Long.parseLong(abcd[2], 16)});
                 BitSet dBitSet = BitSet.valueOf(new long[]{Long.parseLong(abcd[3], 16)});
                 i = 0;
@@ -242,8 +186,7 @@ public class ResponseHandlerUtils {
                         i++;
                     }
                 }
-            }
-            lineReader.drain();
+                */
         }
 
         @Override

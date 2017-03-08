@@ -1,13 +1,13 @@
 package com.ar.myfirstapp.async;
 
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.ar.myfirstapp.elm.ELMConnector;
-import com.ar.myfirstapp.obd2.BadResponseException;
 import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.obd2.ResponseHandler;
-import com.ar.myfirstapp.obd2.UnknownCommandException;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -18,13 +18,15 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Created by Arun Soman on 3/7/2017.
  */
 
-public class ReaderWriter extends AsyncTask<Void, Void, Boolean> {
+public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
     private ELMConnector.Pipe pipe;
     private Queue<Command> commands = new ArrayBlockingQueue<Command>(10);
-    private ResponseHandler responseHandler;
+    private Handler responseCallback;
+    private boolean stop;
 
-    public ReaderWriter(ELMConnector.Pipe pipe){
+    public ReadWriteAsyncTask(ELMConnector.Pipe pipe, Handler responseCallback ){
         this.pipe = pipe;
+        this.responseCallback = responseCallback;
     }
 
     public void submit(Command c){
@@ -44,9 +46,8 @@ public class ReaderWriter extends AsyncTask<Void, Void, Boolean> {
         }
     }
     @Override
-    protected Boolean doInBackground(Void... params) {
-        while (true){
-
+    protected Void doInBackground(Void... params) {
+        while (!stop){
             Command command;
             synchronized (commands){
                 if(commands.size() ==  0)
@@ -55,16 +56,20 @@ public class ReaderWriter extends AsyncTask<Void, Void, Boolean> {
             }
             try {
                 pipe.sendNreceive(command);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (BadResponseException e) {
-                e.printStackTrace();
-            } catch (UnknownCommandException e) {
-                e.printStackTrace();
-            }catch (Throwable tr){
+                Bundle bundle = new Bundle(1);
+                bundle.putString("cmd", command.toString());
+                Message message = responseCallback.obtainMessage();
+                message.what = 1;
+                message.setData(bundle);
+            } catch (Throwable tr){
                 if(tr instanceof InterruptedIOException)
-                    throw tr;
+                    break;
             }
         }
+        return null;
+    }
+
+    public void stop() {
+        stop = true;
     }
 }

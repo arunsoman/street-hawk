@@ -9,17 +9,13 @@ import java.io.InputStream;
  * Created by arunsoman on 04/03/17.
  */
 
-public abstract class SaeJ1979Response implements ResponseHandler {
+public abstract class SaeJ1979Response extends AbstractResponseHandler {
     protected boolean status;
     protected int A;
     protected int B;
     protected int C;
     protected int D;
 
-    public void parse(InputStream is)throws IOException {
-        A = is.read();
-        B = is.read();
-        C = is.read();
-        D = is.read();
+    public void parse(){
     }
 }

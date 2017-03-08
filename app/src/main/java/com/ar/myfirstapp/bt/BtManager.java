@@ -6,6 +6,8 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.ar.myfirstapp.Device;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -33,7 +35,7 @@ public class BtManager {
         return deviceAddress;
     }
 
-    public static String getBTDevieType(BluetoothDevice d){
+    private static String getBTDevieType(BluetoothDevice d){
         String type = "";
 
         switch (d.getType()){
@@ -55,7 +57,7 @@ public class BtManager {
 
         return type;
     }
-    public BluetoothSocket connect(String deviceAddress) throws IOException {
+    public static BluetoothSocket connect(String deviceAddress) throws IOException {
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice device = btAdapter.getRemoteDevice(deviceAddress);
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -82,5 +84,4 @@ public class BtManager {
             }
         }
     }
-
 }

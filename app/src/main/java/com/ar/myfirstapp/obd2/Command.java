@@ -33,6 +33,9 @@ public class Command {
 
     @Override
     public String toString() {
-        return "Command{modeID:" + modeID + " id:" + id + ", name='" + name + '}';
+
+        return "Command:{type: " + modeID + " id: " + id + ", name'" + name + "}\n"+
+                "Response:{status: "+response.getStatus() + ", data: " + response.getData()+"}\n"+
+                "Result: "+ response.getResult();
     }
 }
