@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     public final Handler responseCallback = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            tvLog.append(msg.getData().getString("command"));
+            tvLog.append(msg.getData().getString("cmd"));
             super.handleMessage(msg);
         }
     };
@@ -266,7 +266,10 @@ public class MainActivity extends AppCompatActivity {
             device1.initSequence();
             device1.getMode1PIDs();
             device1.queryCan((byte)1,(byte) (0x7DF));
+
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

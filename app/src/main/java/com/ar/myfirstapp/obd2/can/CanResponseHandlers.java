@@ -2,6 +2,7 @@ package com.ar.myfirstapp.obd2.can;
 
 import android.util.Log;
 
+import com.ar.myfirstapp.obd2.AbstractResponseHandler;
 import com.ar.myfirstapp.obd2.BadResponseException;
 import com.ar.myfirstapp.obd2.LineReader;
 import com.ar.myfirstapp.obd2.ResponseHandler;
@@ -14,7 +15,7 @@ import java.io.InputStream;
  */
 
 public class CanResponseHandlers {
-    public static class Can8QueryHandler implements ResponseHandler {
+    public static class Can8QueryHandler extends AbstractResponseHandler {
         byte pid;
 
         public Can8QueryHandler(byte pid) {
@@ -22,17 +23,8 @@ public class CanResponseHandlers {
         }
 
         @Override
-        public void parse(InputStream is) throws IOException, BadResponseException {
-            LineReader lineReader = new LineReader(is);
-            String line;
-                while ((line = lineReader.nextLine()) != null){
-                Log.e("CAN", line);
-            }
-        }
+        public void parse() {
 
-        @Override
-        public String getResult() {
-            return null;
         }
     }
 }

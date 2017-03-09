@@ -1,10 +1,12 @@
 package com.ar.myfirstapp.async;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.ar.myfirstapp.elm.ELMConnector;
 import com.ar.myfirstapp.obd2.Command;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by Arun Soman on 3/7/2017.
@@ -20,11 +23,12 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
     private ELMConnector.Pipe pipe;
-    private Queue<Command> commands = new ArrayBlockingQueue<Command>(10);
+    private Queue<Command> commands = new ConcurrentLinkedQueue<Command>();
     private Handler responseCallback;
     private boolean stop;
-
-    public ReadWriteAsyncTask(ELMConnector.Pipe pipe, Handler responseCallback ){
+    private Context context;
+    private String text;
+    public ReadWriteAsyncTask(ELMConnector.Pipe pipe, Handler responseCallback){
         this.pipe = pipe;
         this.responseCallback = responseCallback;
     }
@@ -56,11 +60,12 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
             }
             try {
                 pipe.sendNreceive(command);
-                Bundle bundle = new Bundle(1);
+                Bundle bundle = new Bundle(2);
                 bundle.putString("cmd", command.toString());
                 Message message = responseCallback.obtainMessage();
                 message.what = 1;
                 message.setData(bundle);
+                responseCallback.sendMessage(message);
             } catch (Throwable tr){
                 if(tr instanceof InterruptedIOException)
                     break;
