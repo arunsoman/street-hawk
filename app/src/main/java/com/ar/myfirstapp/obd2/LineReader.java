@@ -20,7 +20,9 @@ public class LineReader {
     }
 
     public LineReader(InputStream is, long wait) throws InterruptedException, IOException {
-        this.wait(wait);
+        if(is.available() ==0 ){
+            synchronized (this){this.wait(wait);}
+        }
         read(is);
     }
 
