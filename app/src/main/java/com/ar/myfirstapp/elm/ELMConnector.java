@@ -22,7 +22,6 @@ import java.io.OutputStream;
         private Pipe pipe;
         private ReadWriteAsyncTask readWriteAsyncTask;
         private final Handler  responseCallback;
-        private Context context;
 
         public ELMConnector(Handler responseCallback) {
             this.responseCallback = responseCallback;
@@ -34,6 +33,10 @@ import java.io.OutputStream;
             pipe.close();
             bluetoothSocket.close();
             readWriteAsyncTask.stop();
+        }
+
+        public void send(Command command) {
+            readWriteAsyncTask.submit(command);
         }
 
         public final class Pipe implements AutoCloseable {
@@ -50,15 +53,8 @@ import java.io.OutputStream;
                 is.close();
                 os.close();
             }
-
-            public void sendNreceive(Command command) throws IOException {
-                synchronized (pipe.os) {
-                    os.write(command.cmd);
-                    os.flush();
-                }
-                command.response.readResponse(is);
-            }
         }
+
         public void interrupt() throws IOException {
 
         }
@@ -70,8 +66,9 @@ import java.io.OutputStream;
             readWriteAsyncTask.execute();
         }
 
-        public void sendNreceive(Command command) throws IOException {
-            readWriteAsyncTask.submit(command);
+        public ELMConnector.Pipe getPipe()throws IOException {
+            return pipe;
         }
+
 
     }

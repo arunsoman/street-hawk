@@ -26,7 +26,6 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
     private Queue<Command> commands = new ConcurrentLinkedQueue<Command>();
     private Handler responseCallback;
     private boolean stop;
-    private Context context;
     private String text;
     public ReadWriteAsyncTask(ELMConnector.Pipe pipe, Handler responseCallback){
         this.pipe = pipe;
@@ -36,7 +35,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
     public void submit(Command c){
         synchronized (commands){
             commands.add(c);
-            Log.e("Submit:", c.toString());
+            Log.e("ReadWriteAsyncTask:", c.toString());
         }
     }
 
@@ -59,7 +58,8 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
                 command = commands.remove();
             }
             try {
-                pipe.sendNreceive(command);
+                command.sendNreceive(pipe);
+                Log.e("RWAT",command.toString());
                 Bundle bundle = new Bundle(2);
                 bundle.putString("cmd", command.toString());
                 Message message = responseCallback.obtainMessage();
@@ -71,8 +71,10 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
                     break;
             }
         }
+        Log.e("readeWritethread","stopped");
         return null;
     }
+
 
     public void stop() {
         stop = true;

@@ -20,11 +20,6 @@ public abstract class Mode {
     public Mode(String modeId) {
         this.modeId = modeId;
     }
-
-    void send(Command command, ELMConnector.Pipe pipe) throws IOException, UnknownCommandException, BadResponseException {
-         pipe.sendNreceive(command);
-    }
-
     abstract protected Command getCommand(int index);
 
 }

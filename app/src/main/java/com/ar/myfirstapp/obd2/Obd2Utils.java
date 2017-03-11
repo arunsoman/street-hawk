@@ -41,12 +41,4 @@ public class Obd2Utils {
         }
     }
 
-    public String[] getAllModes00Cmd(){
-        String[] modes = new String[Modes.values().length];
-        int i = 0;
-        for (Modes m: Modes.values()){
-           modes[i++] = m.getId() + " 00";
-        }
-        return modes;
-    }
 }

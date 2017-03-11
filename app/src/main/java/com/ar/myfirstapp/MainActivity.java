@@ -16,20 +16,25 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ar.myfirstapp.bt.BtManager;
+import com.ar.myfirstapp.obd2.Command;
+import com.ar.myfirstapp.obd2.response.reader.ResponseReader;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,11 +42,12 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothLeScanner mBluetoothLeScanner;
     private static final int RQS_ENABLE_BLUETOOTH = 1;
 
-    Button btnScan;
+    Button btnScan, buttonSend;
     ListView listViewLE;
-
+    EditText editTextInput;
     List<BluetoothDevice> listBluetoothDevice;
     ListAdapter adapterLeScanResult;
+    Device device1 = null;
 
     private Handler mHandler;
     private static final long SCAN_PERIOD = 10000;
@@ -80,15 +86,31 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return;
         }
-        tvLog=(TextView)findViewById(R.id.log);
-        btnScan = (Button)findViewById(R.id.scan);
+        tvLog = (TextView) findViewById(R.id.log);
+        btnScan = (Button) findViewById(R.id.scan);
+        buttonSend = (Button) findViewById(R.id.buttonSend);
+        buttonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String message = editTextInput.getText().toString();
+                if (!TextUtils.isEmpty(message)) {
+                    try {
+                        device1.sendCommand(new Command("",message+"\r","", ResponseReader.Readers.multi.getResponseReader(), null));
+                      //  editTextInput.setText("");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        editTextInput = (EditText) findViewById(R.id.editTextInput);
         btnScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 scanLeDevice(true);
             }
         });
-        listViewLE = (ListView)findViewById(R.id.lelist);
+        listViewLE = (ListView) findViewById(R.id.lelist);
 
         listBluetoothDevice = new ArrayList<>();
         adapterLeScanResult = new ArrayAdapter<BluetoothDevice>(
@@ -101,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     AdapterView.OnItemClickListener scanResultOnItemClickListener =
-            new AdapterView.OnItemClickListener(){
+            new AdapterView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -125,10 +147,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
 
-    private String getBTDevieType(BluetoothDevice d){
+    private String getBTDevieType(BluetoothDevice d) {
         String type = "";
 
-        switch (d.getType()){
+        switch (d.getType()) {
             case BluetoothDevice.DEVICE_TYPE_CLASSIC:
                 type = "DEVICE_TYPE_CLASSIC";
                 break;
@@ -182,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void getBluetoothAdapterAndLeScanner(){
+    private void getBluetoothAdapterAndLeScanner() {
         // Get BluetoothAdapter and BluetoothLeScanner.
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -238,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
-            for(ScanResult result : results){
+            for (ScanResult result : results) {
                 addBluetoothDevice(result.getDevice());
             }
         }
@@ -251,8 +273,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG).show();
         }
 
-        private void addBluetoothDevice(BluetoothDevice device){
-            if(!listBluetoothDevice.contains(device)){
+        private void addBluetoothDevice(BluetoothDevice device) {
+            if (!listBluetoothDevice.contains(device)) {
                 listBluetoothDevice.add(device);
                 listViewLE.invalidateViews();
             }
@@ -260,23 +282,17 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void readObdDevices() {
-        Device device1 = null;
         try {
-            device1 = new Device(BtManager.getELMAddres(),responseCallback);
+            device1 = new Device(BtManager.getELMAddres(), responseCallback);
             device1.initSequence();
             device1.getMode1PIDs();
-            device1.queryCan((byte)1,(byte) (0x7DF));
+            //device1.queryCan((byte) 1, (byte) (0x7DF));
 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//                        ELMConnector connector = new ELMConnector();
-//                        connector.connect(deviceAddress);
-//                        connector.initSequence();
-//                        connector.scan(new ELMStreamLogger());
     }
 
 

@@ -1,78 +1,13 @@
 package com.ar.myfirstapp.obd2;
 
-import android.util.Log;
-
-import com.ar.myfirstapp.Device;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
-
 /**
  * Created by arunsoman on 04/03/17.
  */
 
 public class ResponseHandlerUtils {
-        private static final String ok = new StringBuilder().append((byte)'o').append((byte)'k').toString();
-        private static final String OK = new StringBuilder().append((byte)'O').append((byte)'K').toString();
-        private static final String CR = new StringBuilder().append((byte)'\r').toString();
+    public static final String comma = new StringBuilder().append((byte)',').toString();
 
-    public static final ResponseHandler crResponse = new AbstractResponseHandler() {
 
-        @Override
-        public void parse() {
-            if(dataStr.contains(CR)){
-                status = ResponseStatus.Ok;
-                resultStr = "ÖK";
-            }
-            else {
-                status = ResponseStatus.BadResponse;
-            }
-        }
-    };
-
-    public static final ResponseHandler okResponse = new AbstractResponseHandler() {
-        public void parse( ) {
-            if (dataStr.contains(ok) || dataStr.contains(OK)){
-                status = ResponseStatus.Ok;
-            }
-            else {
-                status = ResponseStatus.BadResponse;
-            }
-        }
-    };
-
-    public static final ResponseHandler singleLineHandler = new AbstractResponseHandler() {
-        @Override
-        public void parse() {
-
-        }
-    };
-
-    public static final class StreamHandler extends AbstractResponseHandler {
-        List<String> result = new ArrayList<>();
-        private Device device;
-        public StreamHandler(Device device) {
-            this.device = device;
-        }
-
-        @Override
-        public void parse() {
-
-        }
-    }
-
-    public static final ResponseHandler multiLineHandler = new AbstractResponseHandler() {
-
-        @Override
-        public void parse() {
-
-        }
-    };
 
     enum diesel {
         EGRandorVVTSystem(false, false),
@@ -142,7 +77,7 @@ public class ResponseHandlerUtils {
     }
 
     private enum EngineType {petrolType, dieselType}
-
+/*
     public static final ResponseHandler m1Pid1ResponseHandler = new AbstractResponseHandler() {
         private final static byte msbSet = (byte) 0x80;
         private final static byte allSet6Till0 = 0x7f;
@@ -186,7 +121,7 @@ public class ResponseHandlerUtils {
                         i++;
                     }
                 }
-                */
+
         }
 
         @Override
@@ -206,5 +141,5 @@ public class ResponseHandlerUtils {
                     '}';
         }
     };
-
+*/
 }
