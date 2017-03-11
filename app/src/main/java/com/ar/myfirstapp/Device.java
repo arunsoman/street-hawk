@@ -7,9 +7,7 @@ import com.ar.myfirstapp.obd2.BadResponseException;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.UnknownCommandException;
 import com.ar.myfirstapp.obd2.at.AtCommands;
-import com.ar.myfirstapp.obd2.can.CanRequest8;
 import com.ar.myfirstapp.obd2.can.CanResponseParser;
-import com.ar.myfirstapp.obd2.response.reader.ResponseReader;
 import com.ar.myfirstapp.obd2.saej1979.Mode1;
 
 import java.io.IOException;
@@ -62,17 +60,27 @@ public class Device {
 
     public void queryCan(byte mode, byte pid) throws IOException{
         boolean flip = false;
+        /*
         if(!spaceOff) {
             connector.send(AtCommands.spaceOff);
             spaceOff = true;
             flip = true;
         }
-            CanRequest8 request8 = new CanRequest8(mode, pid, ResponseReader.Readers.multi, new CanResponseParser());
+        */
+        byte[] cmd = new byte[9];
+        cmd[0] = 2;
+        cmd[1] = mode;
+        cmd[2] = pid;
+        cmd[8] = (byte)('\r');
+
+        Command request8 = new Command(cmd,  new CanResponseParser());
         connector.send(request8);
+        /*
         if(flip){
             connector.send(AtCommands.spaceOn);
             spaceOff = true;
         }
+         */
     }
 
     public void initScan() throws IOException{

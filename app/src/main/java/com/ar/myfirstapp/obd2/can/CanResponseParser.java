@@ -9,7 +9,8 @@ import com.ar.myfirstapp.obd2.parser.Parser;
 
 public class CanResponseParser extends Parser{
     @Override
-    public Command.ResponseStatus parse(String[] rawData, Command command) {
-        return null;
+    public void parse( Command command) {
+        byte[] raw = command.getRawResp();
+        //return null;
     }
 }

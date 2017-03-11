@@ -11,8 +11,5 @@ import java.util.Arrays;
  */
 
 public abstract class Parser extends Response {
-    protected String[] result;
-
-    public String toString(){ return Arrays.toString(result);}
-    public abstract Command.ResponseStatus parse( String [] rawData, Command command);
+    public abstract void parse( Command command);
 }

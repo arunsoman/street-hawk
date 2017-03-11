@@ -29,7 +29,8 @@ import android.widget.Toast;
 
 import com.ar.myfirstapp.bt.BtManager;
 import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.obd2.response.reader.ResponseReader;
+import com.ar.myfirstapp.obd2.at.AtCommands;
+import com.ar.myfirstapp.obd2.parser.Parser;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,7 +96,17 @@ public class MainActivity extends AppCompatActivity {
                 String message = editTextInput.getText().toString();
                 if (!TextUtils.isEmpty(message)) {
                     try {
-                        device1.sendCommand(new Command("",message+"\r","", ResponseReader.Readers.multi.getResponseReader(), null));
+                        device1.sendCommand(new Command("", message + "\r", "", new Parser() {
+                            @Override
+                            public void parse(Command command) {
+                                byte[] rawResp = command.getRawResp();
+                                StringBuilder sb = new StringBuilder();
+                                for(byte aByte: rawResp){
+                                    sb.append(aByte).append(' ');
+                                }
+                                command.setResult(sb.toString());
+                            }
+                        }));
                       //  editTextInput.setText("");
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -286,7 +297,8 @@ public class MainActivity extends AppCompatActivity {
             device1 = new Device(BtManager.getELMAddres(), responseCallback);
             device1.initSequence();
             device1.getMode1PIDs();
-            //device1.queryCan((byte) 1, (byte) (0x7DF));
+            device1.sendCommand(AtCommands.activitMonitor);
+            device1.queryCan((byte) 1, (byte) (0x7DF));
 
         } catch (IOException e) {
             e.printStackTrace();

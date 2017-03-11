@@ -5,44 +5,26 @@ package com.ar.myfirstapp.obd2.saej1979;
  "*/
 
 import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.obd2.ResponseHandlerUtils;
 import com.ar.myfirstapp.obd2.parser.Parser;
-import com.ar.myfirstapp.obd2.response.reader.ResponseReader;
 
 import java.util.BitSet;
-
-import static com.ar.myfirstapp.obd2.parser.BasicParser.NO_DATA;
-import static com.ar.myfirstapp.obd2.parser.BasicParser.ko;
 
 public class Mode1 extends Mode {
 
 
     public static final Command commands[] = {
-            new Command("1", "0\r", "PIDs supported [01 - 20]", ResponseReader.Readers.single.getResponseReader(), new Parser(){
+            new Command("1", "0\r", "PIDs supported [01 - 20]",  new Parser(){
 
                 @Override
-                public Command.ResponseStatus parse(String[] rawData, Command command) {
-                    String[] result = new String[1];
-                    for (int i = 0; i < 1;i++) {
-                        String str = rawData[i];
-                        if (str.endsWith(NO_DATA)) {
-                            result[i] = "NO DATA";
-                            return Command.ResponseStatus.NoData;
-                        } else if (str.startsWith(ko)) {
-                            return Command.ResponseStatus.UnSupportedReq;
-                        } else {
-                            str = str.replace(",", "");
-                            BitSet bitSet = BitSet.valueOf(new long[]{Long.valueOf(str)});
-                            StringBuilder sb = new StringBuilder();
-                            for (int j = 0; j < bitSet.length(); j++) {
-                                if (bitSet.get(j))
-                                    sb.append(Integer.toHexString(j)).append(' ');
-                            }
-                            command.setResult(new String[]{ sb.toString()});
-                            return Command.ResponseStatus.Ok;
-                        }
+                public void parse(Command command) {
+                    byte[] rawResp = command.getRawResp();
+                    BitSet bitSet = BitSet.valueOf(new long[]{Long.valueOf(new String(rawResp))});
+                    StringBuilder sb = new StringBuilder();
+                    for (int j = 0; j < bitSet.length(); j++) {
+                        if (bitSet.get(j))
+                            sb.append(Integer.toHexString(j)).append(' ');
                     }
-                    return null;
+                    command.setResult(sb.toString());
                 }
             }),
             new Command("1", "1\r", "Monitor status since DTCs cleared. (Includes malfunction indicator lamp (MIL) status and number of DTCs.)", new SaeJ1979ResponseParser() {

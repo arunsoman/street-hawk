@@ -1,4 +1,4 @@
-package com.ar.myfirstapp.obd2;
+package com.ar.myfirstapp.obd2.response;
 
 import android.util.Log;
 
@@ -16,12 +16,20 @@ import java.util.Arrays;
  * Created by arunsoman on 05/03/17.
  */
 
-public class LineReader {
-    private String resp;
+public class ResponseReader extends ByteArrayOutputStream{
+    private boolean containsNonPrintable = false;
+    private byte[] resp;
     private int state;
-
-    public void read(InputStream is) throws IOException {
-        StringBuilder sb = new StringBuilder();
+    private FlyReader reader = new FlyReader();
+    private class FlyReader extends ByteArrayOutputStream{
+        public void reset(int cnt){
+            this.count = count- cnt;
+            if(this.count <0)
+                count = 0;
+        }
+    }
+    public byte[] read(InputStream is) throws IOException {
+        reader.reset();
         boolean eom = false;
         while (!eom) {
             byte aByte = (byte) is.read();//Sometimes there may be delay in response hence wait
@@ -35,31 +43,25 @@ public class LineReader {
             } else {
                 state = 0;
             }
-            sb.append(aByte).append(',');
+            reader.write(aByte);
         }
-        resp = sb.toString();
+        Log.e("RespReader", Arrays.toString(reader.toByteArray()));
+        if(eom) reader.reset(3);
+        resp = reader.toByteArray();
+        Log.e("RespReader1", Arrays.toString(reader.toByteArray()));
+        return resp;
     }
 
     public byte[] getRawData(){
-        return null;
+        return resp;
     }
 
-    public static String toString(byte[] data){
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < data.length; i++){
-            sb.append(data[i]);
-            sb.append(',');
-        }
-        return  sb.toString();
-    }
 
-    public static String[] toMultilineStringArray(String resp){
-        if(resp.matches(".*13\\,13\\,.*"))
-            return resp.split(".*13\\,13\\,.*");
-        else
-            return resp.split(".*13\\,10\\,.*");
-    }
     public String toString(){
-        return  resp;
+        try{
+            return new String(resp);
+        }catch (Throwable e){
+            return "Non printable chars";
+        }
     }
 }

@@ -7,8 +7,9 @@
 import com.ar.myfirstapp.async.ReadWriteAsyncTask;
 import com.ar.myfirstapp.bt.BtManager;
 import com.ar.myfirstapp.obd2.Command;
+    import com.ar.myfirstapp.obd2.response.ResponseReader;
 
-import java.io.IOException;
+    import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -42,6 +43,7 @@ import java.io.OutputStream;
         public final class Pipe implements AutoCloseable {
             public final InputStream is;
             public final OutputStream os;
+            private final ResponseReader reader = new ResponseReader();
 
             Pipe(BluetoothSocket bs) throws IOException {
                 is = bs.getInputStream();
@@ -53,22 +55,35 @@ import java.io.OutputStream;
                 is.close();
                 os.close();
             }
+
+            public byte[] sendNreceive(byte[] request) throws IOException {
+                synchronized (os) {
+                    pipe.os.write(request);
+                    pipe.os.flush();
+                }
+                byte []rawResp = reader.read(pipe.is);
+                return rawResp;
+            }
+            public void interrupt() throws IOException {
+                synchronized (os) {
+                    pipe.os.write((byte)'!');
+                    pipe.os.flush();
+                }
+            }
         }
 
         public void interrupt() throws IOException {
-
+            pipe.interrupt();
         }
 
         public void connect(String deviceAddress) throws IOException {
             BtManager btManager = new BtManager();
             pipe = new Pipe(btManager.connect(deviceAddress));
-            readWriteAsyncTask = new ReadWriteAsyncTask(pipe,  responseCallback);
+            readWriteAsyncTask = new ReadWriteAsyncTask(this,  responseCallback);
             readWriteAsyncTask.execute();
         }
 
-        public ELMConnector.Pipe getPipe()throws IOException {
-            return pipe;
+        public byte[] sendNreceive(byte[]data) throws IOException {
+            return pipe.sendNreceive(data);
         }
-
-
     }
