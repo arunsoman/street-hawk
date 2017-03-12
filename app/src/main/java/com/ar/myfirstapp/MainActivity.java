@@ -295,9 +295,9 @@ public class MainActivity extends AppCompatActivity {
     public void readObdDevices() {
         try {
             device1 = new Device(BtManager.getELMAddres(), responseCallback);
-            device1.initSequence();
-            device1.getMode1PIDs();
-            device1.sendCommand(AtCommands.activitMonitor);
+//            device1.initSequence();
+ //           device1.getMode1PIDs();
+ //           device1.sendCommand(AtCommands.activitMonitor);
             device1.queryCan((byte) 1, (byte) (0x7DF));
 
         } catch (IOException e) {
