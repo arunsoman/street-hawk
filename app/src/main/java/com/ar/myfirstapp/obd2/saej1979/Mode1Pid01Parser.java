@@ -8,47 +8,13 @@ import com.ar.myfirstapp.obd2.parser.Parser;
  * Created by Arun Soman on 3/12/2017.
  */
 
-public class Mide1Pid1CParser extends Parser {
+public class Mode1Pid01Parser extends SaeJ1979ResponseParser {
     private final static String[] values ={
-            "OBD-II as defined by the CARB",
-            "OBD as defined by the EPA",
-            "OBD and OBD-II",
-            "OBD-I",
-            "Not OBD compliant",
-            "EOBD (Europe)",
-            "EOBD and OBD-II",
-            "EOBD and OBD",
-            "EOBD, OBD and OBD II",
-            "JOBD (Japan)",
-            "JOBD and OBD II",
-            "JOBD and EOBD",
-            "JOBD, EOBD, and OBD II",
-            "Reserved",
-            "Reserved",
-            "Reserved",
-            "Engine Manufacturer Diagnostics (EMD)",
-            "Engine Manufacturer Diagnostics Enhanced (EMD+)",
-            "Heavy Duty On-Board Diagnostics (Child/Partial) (HD OBD-C)",
-            "Heavy Duty On-Board Diagnostics (HD OBD)",
-            "World Wide Harmonized OBD (WWH OBD)",
-            "Reserved",
-            "Heavy Duty Euro OBD Stage I without NOx control (HD EOBD-I)",
-            "Heavy Duty Euro OBD Stage I with NOx control (HD EOBD-I N)",
-            "Heavy Duty Euro OBD Stage II without NOx control (HD EOBD-II)",
-            "Heavy Duty Euro OBD Stage II with NOx control (HD EOBD-II N)",
-            "Reserved",
-            "Brazil OBD Phase 1 (OBDBr-1)",
-            "Brazil OBD Phase 2 (OBDBr-2)",
-            "Korean OBD (KOBD)",
-            "India OBD I (IOBD I)",
-            "India OBD II (IOBD II)",
-            "Heavy Duty Euro OBD Stage VI (HD EOBD-IV)",
-};
+
+    };
     @Override
-    public void parse(Command command) {
-        byte[] rawResp = command.getRawResp();
-        String str = ASCIIUtils.toString(rawResp);
-        int index = getIndex(rawResp);
+    public void setResult(Command command, int argLen) {
+        int index = A;//getIndex(getRespValue(str));
         try {
             command.setResult(values[index]);
         }catch (ArrayIndexOutOfBoundsException e){
@@ -58,9 +24,10 @@ public class Mide1Pid1CParser extends Parser {
                 command.setResult("Not available for assignment (SAE J1939 special meaning)");
             else
                 command.setResponseStatus(Command.ResponseStatus.Unknown);
-        }
+        };
     }
-    private int getIndex(byte[] rawResp){
+
+    private int getIndex(String rawResp){
         return 0;//TODO
     }
 }

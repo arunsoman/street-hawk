@@ -1,5 +1,6 @@
 package com.ar.myfirstapp.obd2.saej1979;
 
+import com.ar.myfirstapp.obd2.ASCIIUtils;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.parser.Parser;
 
@@ -7,7 +8,7 @@ import com.ar.myfirstapp.obd2.parser.Parser;
  * Created by Arun Soman on 3/12/2017.
  */
 
-public class Mide1Pid1CParser extends Parser {
+public class Mide1Pid1CParser extends SaeJ1979ResponseParser {
     private final static String[] values ={
             "OBD-II as defined by the CARB",
             "OBD as defined by the EPA",
@@ -44,9 +45,9 @@ public class Mide1Pid1CParser extends Parser {
             "Heavy Duty Euro OBD Stage VI (HD EOBD-IV)",
 };
     @Override
-    public void parse(Command command) {
-        byte[] rawResp = command.getRawResp();
-        int index = getIndex(rawResp);
+    public void setResult(Command command, int argLen) {
+
+        int index = A;//getIndex(value);
         try {
             command.setResult(values[index]);
         }catch (ArrayIndexOutOfBoundsException e){
@@ -58,7 +59,8 @@ public class Mide1Pid1CParser extends Parser {
                 command.setResponseStatus(Command.ResponseStatus.Unknown);
         }
     }
-    private int getIndex(byte[] rawResp){
+
+    private int getIndex(String rawResp){
         return 0;//TODO
     }
 }

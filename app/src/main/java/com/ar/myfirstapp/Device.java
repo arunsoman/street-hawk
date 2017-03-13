@@ -52,7 +52,7 @@ public class Device {
     public void getMode1PIDs() throws IOException{
 
         //if(state== State.Initialized){
-        connector.send(Mode1.commands[0]);
+        connector.send(Mode1.getCommand("00"));
             //return result;
         //}
         ///return null;

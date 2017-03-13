@@ -11,5 +11,12 @@ import java.util.Arrays;
  */
 
 public abstract class Parser extends Response {
+    protected String header;
+    protected String getRespHeader(String rawString){
+        return rawString.split(header)[0].trim();
+    }
+    protected String getRespValue(String rawString){
+        return rawString.split(header)[1].trim();
+    }
     public abstract void parse( Command command);
 }

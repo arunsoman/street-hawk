@@ -20,6 +20,4 @@ public abstract class Mode {
     public Mode(String modeId) {
         this.modeId = modeId;
     }
-    abstract protected Command getCommand(int index);
-
 }

@@ -31,6 +31,7 @@ import com.ar.myfirstapp.bt.BtManager;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.parser.Parser;
+import com.ar.myfirstapp.obd2.saej1979.Mode1;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -295,9 +296,19 @@ public class MainActivity extends AppCompatActivity {
     public void readObdDevices() {
         try {
             device1 = new Device(BtManager.getELMAddres(), responseCallback);
-//            device1.initSequence();
+            device1.initSequence();
  //           device1.getMode1PIDs();
  //           device1.sendCommand(AtCommands.activitMonitor);
+            Command command = Mode1.getCommand("00");
+            device1.sendCommand(command);
+            command = Mode1.getCommand("1C");
+            device1.sendCommand(command);
+            command = Mode1.getCommand("12");
+            device1.sendCommand(command);
+            command = Mode1.getCommand("51");
+            device1.sendCommand(command);
+            command = Mode1.getCommand("05");
+            device1.sendCommand(command);
             device1.queryCan((byte) 1, (byte) (0x7DF));
 
         } catch (IOException e) {

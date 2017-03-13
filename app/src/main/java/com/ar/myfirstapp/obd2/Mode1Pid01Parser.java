@@ -1,13 +1,28 @@
 package com.ar.myfirstapp.obd2;
 
+import com.ar.myfirstapp.obd2.parser.Parser;
+
 /**
  * Created by arunsoman on 04/03/17.
  */
 
-public class ResponseHandlerUtils {
-    public static final String comma = new StringBuilder().append((byte)',').toString();
+public class Mode1Pid01Parser extends Parser {
 
+    private final static byte msbSet = (byte) 0x80;
+    private final static byte allSet6Till0 = 0x7f;
+    private final static byte b3Set = 0x4;
+    int counter;
+    petrol petrolEngStatus;
+    diesel dieselEngStatus;
+    EngineType engineType;
+    basicTest test;
+    boolean CIL;
 
+    @Override
+    public void parse(Command command) {
+        String str = new String(command.getRawResp());
+
+    }
 
     enum diesel {
         EGRandorVVTSystem(false, false),
@@ -93,16 +108,6 @@ public class ResponseHandlerUtils {
     }
 /*
     public static final ResponseHandler m1Pid1ResponseHandler = new AbstractResponseHandler() {
-        private final static byte msbSet = (byte) 0x80;
-        private final static byte allSet6Till0 = 0x7f;
-        private final static byte b3Set = 0x4;
-        int counter;
-        petrol petrolEngStatus;
-        diesel dieselEngStatus;
-        EngineType engineType;
-        basicTest test;
-        boolean CIL;
-
 
         @Override
         public void parse()  {

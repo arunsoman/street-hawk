@@ -23,7 +23,7 @@ public class Command {
     private byte[] rawResp;
     private String result;
     private ResponseStatus responseStatus;
-    private Parser parser;
+    private final Parser parser;
 
     public byte[] getRawResp() {
         return rawResp;
@@ -36,6 +36,7 @@ public class Command {
         id = s1;
         name = "";
         this.cmd = populateCmd(s, s1);
+        parser = saeJ1979ResponseParser;
     }
     public Parser getParser(){
         return parser;
@@ -89,6 +90,5 @@ public class Command {
         this.result = result;
     }
     private ResponseReader reader = new ResponseReader();
-
 
 }
