@@ -1,78 +1,28 @@
 package com.ar.myfirstapp.obd2;
 
-import android.util.Log;
-
-import com.ar.myfirstapp.Device;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
+import com.ar.myfirstapp.obd2.parser.Parser;
 
 /**
  * Created by arunsoman on 04/03/17.
  */
 
-public class ResponseHandlerUtils {
-        private static final String ok = new StringBuilder().append((byte)'o').append((byte)'k').toString();
-        private static final String OK = new StringBuilder().append((byte)'O').append((byte)'K').toString();
-        private static final String CR = new StringBuilder().append((byte)'\r').toString();
+public class Mode1Pid01Parser extends Parser {
 
-    public static final ResponseHandler crResponse = new AbstractResponseHandler() {
+    private final static byte msbSet = (byte) 0x80;
+    private final static byte allSet6Till0 = 0x7f;
+    private final static byte b3Set = 0x4;
+    int counter;
+    petrol petrolEngStatus;
+    diesel dieselEngStatus;
+    EngineType engineType;
+    basicTest test;
+    boolean CIL;
 
-        @Override
-        public void parse() {
-            if(dataStr.contains(CR)){
-                status = ResponseStatus.Ok;
-                resultStr = "ÖK";
-            }
-            else {
-                status = ResponseStatus.BadResponse;
-            }
-        }
-    };
+    @Override
+    public void parse(Command command) {
+        String str = new String(command.getRawResp());
 
-    public static final ResponseHandler okResponse = new AbstractResponseHandler() {
-        public void parse( ) {
-            if (dataStr.contains(ok) || dataStr.contains(OK)){
-                status = ResponseStatus.Ok;
-            }
-            else {
-                status = ResponseStatus.BadResponse;
-            }
-        }
-    };
-
-    public static final ResponseHandler singleLineHandler = new AbstractResponseHandler() {
-        @Override
-        public void parse() {
-
-        }
-    };
-
-    public static final class StreamHandler extends AbstractResponseHandler {
-        List<String> result = new ArrayList<>();
-        private Device device;
-        public StreamHandler(Device device) {
-            this.device = device;
-        }
-
-        @Override
-        public void parse() {
-
-        }
     }
-
-    public static final ResponseHandler multiLineHandler = new AbstractResponseHandler() {
-
-        @Override
-        public void parse() {
-
-        }
-    };
 
     enum diesel {
         EGRandorVVTSystem(false, false),
@@ -143,17 +93,21 @@ public class ResponseHandlerUtils {
 
     private enum EngineType {petrolType, dieselType}
 
+    public static int indexOf(byte[] outerArray, byte[] smallerArray) {
+        for(int i = 0; i < outerArray.length - smallerArray.length+1; ++i) {
+            boolean found = true;
+            for(int j = 0; j < smallerArray.length; ++j) {
+                if (outerArray[i+j] != smallerArray[j]) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) return i;
+        }
+        return -1;
+    }
+/*
     public static final ResponseHandler m1Pid1ResponseHandler = new AbstractResponseHandler() {
-        private final static byte msbSet = (byte) 0x80;
-        private final static byte allSet6Till0 = 0x7f;
-        private final static byte b3Set = 0x4;
-        int counter;
-        petrol petrolEngStatus;
-        diesel dieselEngStatus;
-        EngineType engineType;
-        basicTest test;
-        boolean CIL;
-
 
         @Override
         public void parse()  {
@@ -186,7 +140,7 @@ public class ResponseHandlerUtils {
                         i++;
                     }
                 }
-                */
+
         }
 
         @Override
@@ -206,5 +160,5 @@ public class ResponseHandlerUtils {
                     '}';
         }
     };
-
+*/
 }

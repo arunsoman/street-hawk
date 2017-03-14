@@ -22,31 +22,27 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 
 public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
-    private ELMConnector.Pipe pipe;
+    private ELMConnector connector;
     private Queue<Command> commands = new ConcurrentLinkedQueue<Command>();
     private Handler responseCallback;
     private boolean stop;
-    private Context context;
     private String text;
-    public ReadWriteAsyncTask(ELMConnector.Pipe pipe, Handler responseCallback){
-        this.pipe = pipe;
+
+    public ReadWriteAsyncTask(ELMConnector connector, Handler responseCallback){
+        this.connector = connector;
         this.responseCallback = responseCallback;
     }
 
     public void submit(Command c){
         synchronized (commands){
             commands.add(c);
-            Log.e("Submit:", c.toString());
+            Log.e("ReadWriteAsyncTask:", c.toString());
         }
     }
 
     public void interruptScan() throws IOException {
         synchronized (commands){
-            //commands.clear();
-            synchronized (pipe.os) {
-                pipe.os.write((byte) '!');
-                pipe.os.flush();
-            }
+            connector.interrupt();
         }
     }
     @Override
@@ -59,7 +55,16 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
                 command = commands.remove();
             }
             try {
-                pipe.sendNreceive(command);
+                byte[] rawResponse;
+                try {
+                    rawResponse = connector.sendNreceive(command.cmd);
+                }catch (IOException e){
+                    command.setResponseStatus(Command.ResponseStatus.NetworkError);
+                    throw e;
+                }
+                command.setRawResp(rawResponse);
+                command.getParser().parse(command);
+                Log.e("RWAT",command.toString());
                 Bundle bundle = new Bundle(2);
                 bundle.putString("cmd", command.toString());
                 Message message = responseCallback.obtainMessage();
@@ -71,8 +76,10 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
                     break;
             }
         }
+        Log.e("readeWritethread","stopped");
         return null;
     }
+
 
     public void stop() {
         stop = true;

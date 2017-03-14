@@ -2,6 +2,7 @@ package com.ar.myfirstapp.obd2;
 
 import com.ar.myfirstapp.obd2.saej1979.Mode;
 import com.ar.myfirstapp.obd2.saej1979.Mode1;
+/*
 import com.ar.myfirstapp.obd2.saej1979.Mode10;
 import com.ar.myfirstapp.obd2.saej1979.Mode2;
 import com.ar.myfirstapp.obd2.saej1979.Mode3;
@@ -11,14 +12,15 @@ import com.ar.myfirstapp.obd2.saej1979.Mode6;
 import com.ar.myfirstapp.obd2.saej1979.Mode7;
 import com.ar.myfirstapp.obd2.saej1979.Mode8;
 import com.ar.myfirstapp.obd2.saej1979.Mode9;
-
+*/
 /**
  * Created by arunsoman on 04/03/17.
  */
 
 public class Obd2Utils {
+  /*
     public enum Modes{
-        CurrentDate("0x01", new Mode1()),
+        CurrentDate("0x01", new Mode1())
         FreezeFrameData("0x02", new Mode2()),
         DiagnosticTroubleCodes("0X3", new Mode3()),
         ClearTroubleCode("0X4", new Mode4()),
@@ -40,13 +42,6 @@ public class Obd2Utils {
             return id;
         }
     }
+    */
 
-    public String[] getAllModes00Cmd(){
-        String[] modes = new String[Modes.values().length];
-        int i = 0;
-        for (Modes m: Modes.values()){
-           modes[i++] = m.getId() + " 00";
-        }
-        return modes;
-    }
 }

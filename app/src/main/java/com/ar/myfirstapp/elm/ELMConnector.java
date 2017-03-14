@@ -7,8 +7,9 @@
 import com.ar.myfirstapp.async.ReadWriteAsyncTask;
 import com.ar.myfirstapp.bt.BtManager;
 import com.ar.myfirstapp.obd2.Command;
+    import com.ar.myfirstapp.obd2.response.ResponseReader;
 
-import java.io.IOException;
+    import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -22,7 +23,6 @@ import java.io.OutputStream;
         private Pipe pipe;
         private ReadWriteAsyncTask readWriteAsyncTask;
         private final Handler  responseCallback;
-        private Context context;
 
         public ELMConnector(Handler responseCallback) {
             this.responseCallback = responseCallback;
@@ -36,9 +36,14 @@ import java.io.OutputStream;
             readWriteAsyncTask.stop();
         }
 
+        public void send(Command command) {
+            readWriteAsyncTask.submit(command);
+        }
+
         public final class Pipe implements AutoCloseable {
             public final InputStream is;
             public final OutputStream os;
+            private final ResponseReader reader = new ResponseReader();
 
             Pipe(BluetoothSocket bs) throws IOException {
                 is = bs.getInputStream();
@@ -51,27 +56,34 @@ import java.io.OutputStream;
                 os.close();
             }
 
-            public void sendNreceive(Command command) throws IOException {
-                synchronized (pipe.os) {
-                    os.write(command.cmd);
-                    os.flush();
+            public byte[] sendNreceive(byte[] request) throws IOException {
+                synchronized (os) {
+                    pipe.os.write(request);
+                    pipe.os.flush();
                 }
-                command.response.readResponse(is);
+                byte []rawResp = reader.read(pipe.is);
+                return rawResp;
+            }
+            public void interrupt() throws IOException {
+                synchronized (os) {
+                    pipe.os.write((byte)'!');
+                    pipe.os.flush();
+                }
             }
         }
-        public void interrupt() throws IOException {
 
+        public void interrupt() throws IOException {
+            pipe.interrupt();
         }
 
         public void connect(String deviceAddress) throws IOException {
             BtManager btManager = new BtManager();
             pipe = new Pipe(btManager.connect(deviceAddress));
-            readWriteAsyncTask = new ReadWriteAsyncTask(pipe,  responseCallback);
+            readWriteAsyncTask = new ReadWriteAsyncTask(this,  responseCallback);
             readWriteAsyncTask.execute();
         }
 
-        public void sendNreceive(Command command) throws IOException {
-            readWriteAsyncTask.submit(command);
+        public byte[] sendNreceive(byte[]data) throws IOException {
+            return pipe.sendNreceive(data);
         }
-
     }
