@@ -18,6 +18,7 @@ public class Mode1Pid01Parser extends Parser {
     basicTest test;
     boolean CIL;
 
+
     @Override
     public void parse(Command command) {
         String str = new String(command.getRawResp());

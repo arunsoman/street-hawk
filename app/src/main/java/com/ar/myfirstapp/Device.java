@@ -8,6 +8,7 @@ import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.UnknownCommandException;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.can.CanResponseParser;
+import com.ar.myfirstapp.obd2.parser.Parser;
 import com.ar.myfirstapp.obd2.saej1979.Mode1;
 
 import java.io.IOException;
@@ -57,6 +58,7 @@ public class Device {
         //}
         ///return null;
     }
+
 
     public void queryCan(byte mode, byte pid) throws IOException{
         boolean flip = false;

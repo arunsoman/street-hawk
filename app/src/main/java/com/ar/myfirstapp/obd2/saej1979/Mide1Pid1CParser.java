@@ -1,8 +1,6 @@
 package com.ar.myfirstapp.obd2.saej1979;
 
-import com.ar.myfirstapp.obd2.ASCIIUtils;
 import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.obd2.parser.Parser;
 
 /**
  * Created by Arun Soman on 3/12/2017.
@@ -44,6 +42,11 @@ public class Mide1Pid1CParser extends SaeJ1979ResponseParser {
             "India OBD II (IOBD II)",
             "Heavy Duty Euro OBD Stage VI (HD EOBD-IV)",
 };
+
+    public Mide1Pid1CParser() {
+        super("41 1C ");
+    }
+
     @Override
     public void setResult(Command command, int argLen) {
 

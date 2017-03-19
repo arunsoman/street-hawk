@@ -3,6 +3,7 @@ package com.ar.myfirstapp.obd2.at;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.parser.BasicParserSet;
 import com.ar.myfirstapp.obd2.parser.Parser;
+import com.ar.myfirstapp.obd2.saej1979.Mode1;
 
 
 /**
@@ -50,11 +51,20 @@ public class AtCommands {
             new Command("AT", " E0\r", "", BasicParserSet.okParser),
             new Command("AT", " L1\r", "", BasicParserSet.okParser),
             new Command("AT", " I\r", "", BasicParserSet.okParser),
-            new Command("AT", " H1\r", "", BasicParserSet.okParser),
+            new Command("AT", " H0\r", "", BasicParserSet.okParser),
             new Command("AT", " S1\r", "", BasicParserSet.okParser),
             new Command("AT", " AL\r", "", BasicParserSet.okParser),
-            dispProtocolNumber,
-            new Command("AT", "SP 6\r", "", BasicParserSet.okParser),
+            new Command("AT", "ST 250\r", "", BasicParserSet.okParser),
+    };
+
+    public static final Command[] protoIter= {
+            new Command("AT", " SP0", "", BasicParserSet.okParser),
+    };
+
+    public static final Command[] testCommands= {
+            Mode1.getCommand("00"),
+            Mode1.getCommand("0C"),
+            Mode1.getCommand("0D"),
     };
 
     public static final Command[] initCanScan={
