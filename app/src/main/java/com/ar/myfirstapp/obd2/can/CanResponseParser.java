@@ -8,6 +8,7 @@ import com.ar.myfirstapp.obd2.parser.Parser;
  */
 
 public class CanResponseParser extends Parser{
+
     @Override
     public void parse( Command command) {
         byte[] raw = command.getRawResp();

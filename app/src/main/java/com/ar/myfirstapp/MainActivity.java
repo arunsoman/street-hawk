@@ -97,6 +97,10 @@ public class MainActivity extends AppCompatActivity {
                 String message = editTextInput.getText().toString();
                 if (!TextUtils.isEmpty(message)) {
                     try {
+                        if(message.startsWith("m1")){
+                            device1.sendCommand(Mode1.getCommand(message.split(" ")[1]));
+                            return;
+                        }
                         device1.sendCommand(new Command("", message + "\r", "", new Parser() {
                             @Override
                             public void parse(Command command) {
@@ -108,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                                 command.setResult(sb.toString());
                             }
                         }));
-                      //  editTextInput.setText("");
+                      editTextInput.setText(message.split(" ")[0]);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -296,9 +300,16 @@ public class MainActivity extends AppCompatActivity {
     public void readObdDevices() {
         try {
             device1 = new Device(BtManager.getELMAddres(), responseCallback);
-            device1.initSequence();
+            for(Command proto: AtCommands.protoIter) {
+                device1.initSequence();
+                device1.sendCommand(proto);
+                for (Command c: AtCommands.testCommands)
+                    device1.sendCommand(c);
+            }
+
  //           device1.getMode1PIDs();
  //           device1.sendCommand(AtCommands.activitMonitor);
+            /*
             Command command = Mode1.getCommand("00");
             device1.sendCommand(command);
             command = Mode1.getCommand("1C");
@@ -309,7 +320,14 @@ public class MainActivity extends AppCompatActivity {
             device1.sendCommand(command);
             command = Mode1.getCommand("05");
             device1.sendCommand(command);
-            device1.queryCan((byte) 1, (byte) (0x7DF));
+            device1.sendCommand(Mode1.getCommand("00"));
+            device1.sendCommand(Mode1.getCommand("01"));
+            device1.sendCommand(Mode1.getCommand("04"));
+            device1.sendCommand(Mode1.getCommand("0C"));
+            device1.sendCommand(Mode1.getCommand("0D"));
+            device1.initSequence();
+            //device1.queryCan((byte) 1, (byte) (0x7DF));
+            */
 
         } catch (IOException e) {
             e.printStackTrace();

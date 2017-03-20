@@ -1,10 +1,8 @@
     package com.ar.myfirstapp.obd2.saej1979;
 
-import com.ar.myfirstapp.obd2.ASCIIUtils;
 import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.obd2.parser.Parser;
 
-/**
+    /**
  * Created by Arun Soman on 3/12/2017.
  */
 
@@ -17,9 +15,10 @@ public class Mide1Pid12Parser extends SaeJ1979ResponseParser {
 
 };
 
-public Mide1Pid12Parser(){
-    String  str;
-}
+    public Mide1Pid12Parser() {
+        super("41 12 ");
+    }
+
     @Override
     public void setResult(Command command, int argLen) {
         int index = A;//getIndex(getRespValue(str));

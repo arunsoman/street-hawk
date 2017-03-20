@@ -1,12 +1,10 @@
 package com.ar.myfirstapp.async;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.ar.myfirstapp.elm.ELMConnector;
 import com.ar.myfirstapp.obd2.Command;
@@ -14,7 +12,6 @@ import com.ar.myfirstapp.obd2.Command;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -36,7 +33,6 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
     public void submit(Command c){
         synchronized (commands){
             commands.add(c);
-            Log.e("ReadWriteAsyncTask:", c.toString());
         }
     }
 
@@ -55,16 +51,13 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
                 command = commands.remove();
             }
             try {
-                byte[] rawResponse;
                 try {
-                    rawResponse = connector.sendNreceive(command.cmd);
+                    connector.sendNreceive(command);
                 }catch (IOException e){
+                    Log.e("readeWritethread","IOException: "+command.toString(), e);
                     command.setResponseStatus(Command.ResponseStatus.NetworkError);
                     throw e;
                 }
-                command.setRawResp(rawResponse);
-                command.getParser().parse(command);
-                Log.e("RWAT",command.toString());
                 Bundle bundle = new Bundle(2);
                 bundle.putString("cmd", command.toString());
                 Message message = responseCallback.obtainMessage();
@@ -72,9 +65,11 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Void> {
                 message.setData(bundle);
                 responseCallback.sendMessage(message);
             } catch (Throwable tr){
+                Log.e("readeWritethread","Exception: "+command.toString(), tr);
                 if(tr instanceof InterruptedIOException)
                     break;
             }
+            //Log.e("readeWritethread","Command: "+command.toString());
         }
         Log.e("readeWritethread","stopped");
         return null;
