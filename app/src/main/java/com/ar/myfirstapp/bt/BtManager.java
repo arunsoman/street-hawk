@@ -1,32 +1,51 @@
 package com.ar.myfirstapp.bt;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.util.Log;
-
-import com.ar.myfirstapp.Device;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.ar.myfirstapp.MainActivity.BT_INT_REQ;
+
 /**
  * Created by Arun Soman on 2/28/2017.
  */
 
-public class BtManager {
-    public static String getELMAddres(){
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
+public class BtManager  {
+
+    private BluetoothAdapter mBluetoothAdapter;
+
+    public BtManager(Activity activity){
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter != null) {
+            Toast.makeText(activity.getApplicationContext(),"Your device does not support Bluetooth",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (!mBluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                activity.startActivityForResult(enableBtIntent, BT_INT_REQ);
+        }
+    }
+
+    public boolean isBtAdaptorEnabled(){
+        return mBluetoothAdapter.isEnabled();
+    }
+    private String getELM327Addres(String OBDII){
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         String deviceAddress = null;
-        if (pairedDevices.size() > 0)
-        {
-            for (BluetoothDevice device : pairedDevices)
-            {
-                if (device.getName().equals("OBDII")) {
+        if (pairedDevices.size() > 0) {
+            for (BluetoothDevice device : pairedDevices) {
+                if (device.getName().equals(OBDII)) {
                     deviceAddress = device.getAddress();
                     return deviceAddress;
                 }
@@ -35,31 +54,9 @@ public class BtManager {
         return deviceAddress;
     }
 
-    private static String getBTDevieType(BluetoothDevice d){
-        String type = "";
 
-        switch (d.getType()){
-            case BluetoothDevice.DEVICE_TYPE_CLASSIC:
-                type = "DEVICE_TYPE_CLASSIC";
-                break;
-            case BluetoothDevice.DEVICE_TYPE_DUAL:
-                type = "DEVICE_TYPE_DUAL";
-                break;
-            case BluetoothDevice.DEVICE_TYPE_LE:
-                type = "DEVICE_TYPE_LE";
-                break;
-            case BluetoothDevice.DEVICE_TYPE_UNKNOWN:
-                type = "DEVICE_TYPE_UNKNOWN";
-                break;
-            default:
-                type = "unknown...";
-        }
-
-        return type;
-    }
-    public static BluetoothSocket connect(String deviceAddress) throws IOException {
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = btAdapter.getRemoteDevice(deviceAddress);
+    public  BluetoothSocket connect() throws IOException {
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(getELM327Addres("OBDII"));
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
         BluetoothSocket bluetoothSocket = null ,sockFallback = null;
 

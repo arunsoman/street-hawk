@@ -16,7 +16,7 @@ public class Command {
         return cmd;
     }
 
-    public static enum ResponseStatus{Unknown, Ok, UnSupportedReq, BadResponse, NoData, NO_DATA, NetworkError};
+    public static enum ResponseStatus{Unknown, Ok, UnSupportedReq, BadResponse, NoData, NO_DATA, UNABLE_TO_CONNECT, NetworkError};
 
     private String name;
     private String modeID;
@@ -85,9 +85,11 @@ public class Command {
 
     @Override
     public String toString() {
-        return "REQ:{ " + modeID + ", " + id + ", " + name + " bytes: " + Arrays.toString(cmd)+"}\n"+
-                "RAW: "+Arrays.toString(rawResp) + "\n"+
-                "Result: "+ this.result +"\n";
+        String resp = (responseStatus != ResponseStatus.Ok) ?
+                ("RAW: " + Arrays.toString(rawResp) + "\n" +" responseStatus:" + responseStatus.toString()) :
+                ("Result: " + this.result + "\n");
+        return "REQ:{ " + modeID + ", " + id + ", " + name + " bytes: " + Arrays.toString(cmd) + "}\n" + resp;
+
     }
     public void setRawResp(byte[] rawResp){this.rawResp = rawResp;}
     public void setResult(String result){

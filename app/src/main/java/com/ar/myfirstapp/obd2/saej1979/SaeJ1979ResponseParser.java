@@ -20,29 +20,20 @@ public abstract class SaeJ1979ResponseParser extends Parser {
         this.headerDelim = headerDelim;
     }
 
+ @Override
     protected String validate(Command command){
-        String str = ASCIIUtils.toString(command.getRawResp());
-        str = str.replace("SEARCHING...","");
-        str = str.replace("\r\n>...","");
-        str = str.replace("\r>...","");
+     String str = super.validate(command);
+     if(str == null)
+         return null;
 
-        if(str.contains("NO DATA")){
-            command.setResponseStatus(Command.ResponseStatus.NO_DATA);
-            return null;
-        }
-        if(str.contains("?")){
-            if(str.replace( " ", "").replace("?","").trim().length() == 0){
-                command.setResponseStatus(Command.ResponseStatus.UnSupportedReq);
-                return null;
-            }
-        }
-        if(!str.contains(headerDelim)){
-            command.setResponseStatus(Command.ResponseStatus.Unknown);
-            return null;
-        }
-        String str1 = str.substring(str.indexOf(headerDelim)+headerDelim.length(), str.length());
-        return  str1;
+     if(!str.contains(headerDelim)) {
+        command.setResponseStatus(Command.ResponseStatus.Unknown);
+        return null;
     }
+
+    String str1 = str.substring(str.indexOf(headerDelim) + headerDelim.length(), str.length());
+        return str1;
+}
 
     @Override
     public void parse(Command command) {
