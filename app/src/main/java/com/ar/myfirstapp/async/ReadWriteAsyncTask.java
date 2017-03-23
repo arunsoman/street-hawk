@@ -45,6 +45,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected Boolean doInBackground(Void... params) {
         try (Pipe pipe = new Pipe(bluetoothSocket)){
+            Throwable tr = null;
             while (!stop){
                 Command command;
                 synchronized (commands){
@@ -54,14 +55,16 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
                 }
                 try {
                     pipe.sendNreceive(command);
+                    command.parse();
                     Bundle bundle = new Bundle(2);
                     bundle.putString("cmd", command.toString());
                     Message message = responseCallback.obtainMessage();
                     message.what = 1;
                     message.setData(bundle);
                     responseCallback.sendMessage(message);
-                } catch (Throwable tr){
-                    Log.e("readeWritethread","Exception: "+command.toString(), tr);
+                    tr = null;
+                } catch (Throwable t){
+                    tr = t;
                     if(tr instanceof InterruptedIOException) {
                         command.setResponseStatus(Command.ResponseStatus.NetworkError);
                         return true;
@@ -71,7 +74,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
                         return false;
                     }
                 }
-                //Log.e("readeWritethread","Command: "+command.toString());
+                Log.e("readeWritethread",command.toString(), tr);
             }
             Log.e("readeWritethread","stopped");
             return true;

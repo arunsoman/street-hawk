@@ -13,16 +13,16 @@ import static com.ar.myfirstapp.obd2.parser.BasicParserSet.okParser;
  */
 
 public class AtCommands {
-    public static final Command ATSP0= new Command("AT ", "0\r", "Automatic protocol detection", okParser);
-    public static final Command ATSP1= new Command("AT ", "1\r", "SAE J1850 PWM (41.6 kbaud)", okParser);
-    public static final Command ATSP2= new Command("AT ", "2\r", "SAE J1850 VPW (10.4 kbaud)", okParser);
-    public static final Command ATSP3= new Command("AT ", "3\r", "ISO 9141-2 (5 baud init, 10.4 kbaud)", okParser);
-    public static final Command ATSP4= new Command("AT ", "4\r", "ISO 14230-4 KWP (5 baud init, 10.4 kbaud)", okParser);
-    public static final Command ATSP5= new Command("AT ", "5\r", "ISO 14230-4 KWP (fast init, 10.4 kbaud)", okParser);
-    public static final Command ATSP6= new Command("AT ", "6\r", "ISO 15765-4 CAN (11 bit ID, 500 kbaud)", okParser);
-    public static final Command ATSP7= new Command("AT ", "7\r", "ISO 15765-4 CAN (29 bit ID, 500 kbaud)", okParser);
-    public static final Command ATSP8= new Command("AT ", "8\r", "ISO 15765-4 CAN (11 bit ID, 250 kbaud)", okParser);
-    public static final Command ATSP9= new Command("AT ", "9\r", "ISO 15765-4 CAN (29 bit ID, 250 kbaud)", okParser);
+    public static final Command ATSP0= new Command("AT ", "sp 0\r", "Automatic protocol detection", okParser);
+    public static final Command ATSP1= new Command("AT ", "sp 1\r", "SAE J1850 PWM (41.6 kbaud)", okParser);
+    public static final Command ATSP2= new Command("AT ", "sp 2\r", "SAE J1850 VPW (10.4 kbaud)", okParser);
+    public static final Command ATSP3= new Command("AT ", "sp 3\r", "ISO 9141-2 (5 baud init, 10.4 kbaud)", okParser);
+    public static final Command ATSP4= new Command("AT ", "sp 4\r", "ISO 14230-4 KWP (5 baud init, 10.4 kbaud)", okParser);
+    public static final Command ATSP5= new Command("AT ", "sp 5\r", "ISO 14230-4 KWP (fast init, 10.4 kbaud)", okParser);
+    public static final Command ATSP6= new Command("AT ", "sp 6\r", "ISO 15765-4 CAN (11 bit ID, 500 kbaud)", okParser);
+    public static final Command ATSP7= new Command("AT ", "sp 7\r", "ISO 15765-4 CAN (29 bit ID, 500 kbaud)", okParser);
+    public static final Command ATSP8= new Command("AT ", "sp 8\r", "ISO 15765-4 CAN (11 bit ID, 250 kbaud)", okParser);
+    public static final Command ATSP9= new Command("AT ", "sp 9\r", "ISO 15765-4 CAN (29 bit ID, 250 kbaud)", okParser);
 
 
     public static final Command ATHI = new Command("AT", " H1\r", "", okParser);
@@ -63,7 +63,8 @@ public class AtCommands {
     };
 
     public static final Command[] protoIter= {
-            ATSP0, ATSP6
+            //ATSP0,
+            ATSP6
     };
 
     public static final Command[] testCommands= {
