@@ -11,6 +11,7 @@ import java.io.IOException;
 
 public final class ELM327{
 
+    public static long waitTime = 200;
     private ReadWriteAsyncTask readWriteAsyncTask;
 
     private BluetoothSocket bs;
