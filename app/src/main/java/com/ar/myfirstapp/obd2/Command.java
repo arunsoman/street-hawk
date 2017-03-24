@@ -116,4 +116,23 @@ public class Command {
     public void setResult(String result){
         this.result = result;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Command command = (Command) o;
+
+        if (!commandId.equals(command.commandId)) return false;
+        return id.equals(command.id);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = commandId.hashCode();
+        result = 31 * result + id.hashCode();
+        return result;
+    }
 }

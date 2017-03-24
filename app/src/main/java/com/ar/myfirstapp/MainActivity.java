@@ -254,10 +254,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void addData(int index, Command command) {
         try {
-            fragmentData[index].add(command);
+            int loc = fragmentData[index].indexOf(command);
+            if(loc == -1){
+                fragmentData[index].add(Integer.parseInt(command.getPid(), 16), command);
+            }else {
+                fragmentData[index].set(Integer.parseInt(command.getPid(), 16), command);
+
+            }
         } catch (NullPointerException e) {
             fragmentData[index] = new LinkedList<>();
-            fragmentData[index].add(command);
+            fragmentData[index].add(Integer.parseInt(command.getPid(), 16), command);
         }
     }
 
