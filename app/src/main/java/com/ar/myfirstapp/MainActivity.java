@@ -8,6 +8,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.NotificationCompatBase;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -24,38 +29,72 @@ import com.ar.myfirstapp.obd2.parser.Parser;
 import com.ar.myfirstapp.obd2.saej1979.Mode1;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
 import com.ar.myfirstapp.utils.Utils;
+import com.ar.myfirstapp.view.OBDView;
 import com.ar.myfirstapp.view.ResponseHandler;
 import com.ar.myfirstapp.view.ResponseViewer;
+import com.ar.myfirstapp.view.fragments.BaseFragment;
+import com.ar.myfirstapp.view.fragments.FragmentFactory;
+import com.ar.myfirstapp.view.fragments.LogFragment;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     public static ELM327 device1;
     private BtManager btManager;
 
-    private Button buttonScan;
-    private Button buttonSend;
-    private EditText editTextInput;
-    private TextView textViewLog;
-
     public ResponseHandler responseHandler;
+
+    private ViewPager viewPager;
+    private TextView textViewTitle;
+
+    private BaseFragment[] fragments = new BaseFragment[FragmentFactory.getTitle().length];
+
+    private List<Command>[] fragmentData = new List[FragmentFactory.getTitle().length];
 
     private BroadcastReceiver bluetoothStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
                 if (!Utils.isBluetoothEnabled(MainActivity.this)) {
-                    buttonScan.setActivated(false);
+                    //buttonScan.setActivated(false);
                     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, Utils.BT_INT_REQ);
                 } else {
-                    buttonScan.setActivated(true);
+                    //buttonScan.setActivated(true);
                 }
             }
         }
     };
+
+    void startFire() {
+        new Handler().post(new Runnable() {
+            BluetoothSocket bs;
+
+            @Override
+            public void run() {
+                try {
+                    if (btManager == null || !btManager.isConnected()) {
+                        bs = btManager.connect();
+                    }
+                    if (btManager.isConnected()) {
+                        device1 = new ELM327(bs, responseHandler);
+                        fireTasks();
+                    } else {
+                        //TODO
+                        //buttonScan.setActivated(true);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    //TODO
+                }
+            }
+        });
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,41 +107,44 @@ public class MainActivity extends AppCompatActivity{
 
         ResponseViewer tvLog = new ResponseViewer();
         responseHandler.registerDisplay(tvLog, "*");
+
+        startFire();
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (viewPager.getCurrentItem() == 0) {
+            super.onBackPressed();
+        } else {
+            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
+        }
     }
 
     private void initUI() {
-        editTextInput = (EditText) findViewById(R.id.editTextInput);
-        textViewLog = (TextView) findViewById(R.id.textViewLog);
-        buttonScan = (Button) findViewById(R.id.buttonScan);
-        buttonSend = (Button) findViewById(R.id.buttonSend);
-
-        buttonSend.setOnClickListener(new View.OnClickListener() {
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        textViewTitle = (TextView) findViewById(R.id.textViewTitle);
+        ScreenSlidePagerAdapter pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onClick(View v) {
-                String message = editTextInput.getText().toString();
-                if (!TextUtils.isEmpty(message)) {
-                    if (message.startsWith("m1")) {
-                        Command c = Mode1.getCommand(message.split(" ")[1]);
-                        if (c != null)
-                            device1.send(c);
-                        return;
-                    }
-                    device1.send(new Command("", message + "\r", "", new Parser() {
-                        @Override
-                        public void parse(Command command) {
-                            byte[] rawResp = command.getRawResp();
-                            StringBuilder sb = new StringBuilder();
-                            for (byte aByte : rawResp) {
-                                sb.append(aByte).append(' ');
-                            }
-                            command.setResult(sb.toString());
-                        }
-                    }));
-                    editTextInput.setText(message.split(" ")[0]);
-                }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                textViewTitle.setText(FragmentFactory.getTitle()[position]);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
             }
         });
+        viewPager.setCurrentItem(FragmentFactory.getTitle().length);
 
+        /*
         buttonScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,6 +174,7 @@ public class MainActivity extends AppCompatActivity{
 
             }
         });
+        */
     }
 
     @Override
@@ -198,7 +241,52 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
-    public void show(String command) {
-        textViewLog.append(command);
+    public void show(Command command) {
+        try {
+            int index = Integer.parseInt(command.getCommandId(), 16);
+            addData(index, command);
+        } catch (NumberFormatException ignored) {
+        } finally {
+            addData(FragmentFactory.getTitle().length - 1, command);
+            sendBroadcast(new Intent("myfirstapp.refresh"));
+        }
+    }
+
+    private void addData(int index, Command command) {
+        try {
+            fragmentData[index].add(command);
+        } catch (NullPointerException e) {
+            fragmentData[index] = new LinkedList<>();
+            fragmentData[index].add(command);
+        }
+    }
+
+    public List<Command> getCommands(int index) {
+        return fragmentData[index];
+    }
+
+    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
+        public ScreenSlidePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            BaseFragment fragment;
+            if (position == FragmentFactory.getTitle().length - 1) {
+                fragment = new LogFragment();
+            } else {
+                fragment = new OBDFragment();
+            }
+            Bundle bundle = new Bundle();
+            bundle.putInt("position", position);
+            fragment.setArguments(bundle);
+            return fragment;
+        }
+
+        @Override
+        public int getCount() {
+            return 11;
+        }
     }
 }

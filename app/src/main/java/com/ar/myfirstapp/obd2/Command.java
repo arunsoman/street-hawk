@@ -107,6 +107,11 @@ public class Command {
         return "REQ:{ m:" + commandId + ", p:" + id + ", " + name + " bytes: " + Arrays.toString(cmd) + "}\n" + resp;
 
     }
+
+    public String getName() {
+        return name;
+    }
+
     public void setRawResp(byte[] rawResp){this.rawResp = rawResp;}
     public void setResult(String result){
         this.result = result;
