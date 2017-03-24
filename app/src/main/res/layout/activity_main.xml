@@ -7,55 +7,16 @@
     android:padding="16dp"
     tools:context="com.ar.myfirstapp.MainActivity">
 
-    <Button
-        android:id="@+id/buttonScan"
+    <TextView
+        android:id="@+id/textViewTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Scan" />
+        android:textAlignment="center"
+        tools:text="Title" />
 
-    <LinearLayout
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/linearLayoutSend"
-        android:layout_below="@+id/buttonScan"
-        android:layout_marginBottom="10dp"
-        android:orientation="vertical"
-        android:weightSum="1">
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/textViewLog"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </ScrollView>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayoutSend"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:weightSum="10">
-
-        <EditText
-            android:id="@+id/editTextInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="7"
-            android:inputType="textNoSuggestions"
-            android:lines="1" />
-
-        <Button
-            android:id="@+id/buttonSend"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:text="Submit" />
-    </LinearLayout>
+        android:layout_height="match_parent"
+        android:layout_below="@+id/textViewTitle" />
 </RelativeLayout>

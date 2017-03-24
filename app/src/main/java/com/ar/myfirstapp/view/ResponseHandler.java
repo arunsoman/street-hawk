@@ -42,8 +42,8 @@ public class ResponseHandler extends Handler {
                 if (view == null)
                     view = viewMap.get("*");
                 if (view != null) {
-                    String command = view.display(c);
-                    activity.show(command);
+                    view.display(c);
+                    activity.show(c);
                 }
             }
             //    tvLog.display(msg.getData().getString("cmd"));
