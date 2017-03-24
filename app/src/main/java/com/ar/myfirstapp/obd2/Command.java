@@ -5,43 +5,63 @@ import com.ar.myfirstapp.obd2.parser.Parser;
 import java.util.Arrays;
 
 
-/**
- * Created by arunsoman on 04/03/17.
- */
-
 public class Command {
-    private static final byte CR = (byte)'\r';
+    public CommandType getCommandType() {
+        return commandType;
+    }
 
-    public byte[] getCmd() {
+    public String getPid() {
+        return id;
+    }
+
+    public enum ResponseStatus{Unknown, Ok, UnSupportedReq, BadResponse, NoData, NO_DATA, UNABLE_TO_CONNECT, NetworkError};
+    public enum CommandType{Unknown, AT, MODEX, MODEX_DIS};
+
+    public byte[] getRequest() {
         return cmd;
     }
 
-    public String getResult() {
+    public String getResponse() {
         return result;
     }
 
-    public static enum ResponseStatus{Unknown, Ok, UnSupportedReq, BadResponse, NoData, NO_DATA, UNABLE_TO_CONNECT, NetworkError};
     private final byte[] empty = new byte[0];
     private String name;
-    private String modeID;
+
+    public String getCommandId() {
+        return commandId;
+    }
+
+    private String commandId;
     private String id;
     private byte[] cmd = empty;
     private byte[] rawResp = empty;
-    private String result = "empty";
+    private String result = "";
     private ResponseStatus responseStatus = ResponseStatus.Unknown;
     private Parser parser;
+    protected CommandType commandType = CommandType.Unknown;
 
 
-    public Command(String modeID, String id, String name,  Parser parser) {
-        this(populateCmd(modeID,id), parser);
-        this.modeID = modeID;
-        this.id = id;
+    private void populateReq(String mode, String id){
+        commandId = mode.trim();
+        this.id = id.trim();
+        cmd = commandId.concat(" ").concat(this.id).concat("\r").getBytes();
+    }
+    public Command(String modeID, String id, String name,  boolean discovery, Parser parser) {
         this.name = name;
         this.parser = parser;
+        populateReq(modeID, id);
+        if(discovery)
+            commandType = CommandType.MODEX_DIS;
+    }
+    public Command(String modeID, String id, String name,  Parser parser) {
+        this.name = name;
+        this.parser = parser;
+        populateReq(modeID, id);
     }
 
     public Command(byte[] cmd, Parser parser) {
-        this.modeID = null;
+        this.commandId = null;
         this.id = null;
         this.name = null;
         this.parser = parser;
@@ -57,15 +77,7 @@ public class Command {
         parser.parse(this);
     }
 
-    private static byte[] populateCmd(String modeID, String id){
-        StringBuilder sb = new StringBuilder().append(modeID).append(" ");
-        if(id.endsWith("\r"))
-            sb.append(id);
-        else
-            sb.append(id).append("\r");
-        return sb.toString().getBytes();
-    }
-
+    private final static byte CR = (byte)('\r');
     private byte[] populateCmd(byte[] cmd) {
        byte[] res;
         if (cmd[cmd.length-1] != CR) {
@@ -92,7 +104,7 @@ public class Command {
         String resp = (responseStatus== null || responseStatus != ResponseStatus.Ok) ?
                 ("RAW: " + Arrays.toString(rawResp) + "\n" + " responseStatus:" + responseStatus.toString()) :
                 ("Result: " + this.result + "\n");
-        return "REQ:{ m:" + modeID + ", p:" + id + ", " + name + " bytes: " + Arrays.toString(cmd) + "}\n" + resp;
+        return "REQ:{ m:" + commandId + ", p:" + id + ", " + name + " bytes: " + Arrays.toString(cmd) + "}\n" + resp;
 
     }
     public void setRawResp(byte[] rawResp){this.rawResp = rawResp;}

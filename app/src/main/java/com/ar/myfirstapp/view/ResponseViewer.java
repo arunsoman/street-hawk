@@ -13,39 +13,25 @@ import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
  * Created by Arun Soman on 3/22/2017.
  */
 
-public class ResponseViewer {
+public class ResponseViewer implements OBDView{
     private TextView view;
 
     public ResponseViewer(AppCompatActivity activity){
         view= (TextView)activity.findViewById(R.id.log);
     }
 
-    public void display(final String str){
-        if(str.contains(", p:00")||
-                str.contains("m01, p:20")) {
+    public void display(final Command command){
+        if(command.getCommandType()== Command.CommandType.MODEX_DIS) {
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
-                    String mode = null;
-                    if(str.contains("m:01")){
-                        mode = "m1";
-                    }
-                    else if(str.contains("m:09")){
-                        mode = "m9";
-                    }
-                    else return;
-                    String tmp = str.split("Result: ")[1];
-
-                    for(String pid: tmp.split(" ")){
-                        if(pid.contains("00")) continue;
-                        Command c = ModeFactory.getCommand(mode, pid);
-                        if(c != null){
-                            MainActivity.device1.send(c);
-                        }
-                    }
+                    Command[] cmds = ModeFactory.getSupportedPidCommands(command);
+                    for(Command c: cmds)
+                        if(c != null)
+                        MainActivity.device1.send(c);
                 }
             });
         }
-        view.append(str);
+        view.append(command.toString());
     }
 }

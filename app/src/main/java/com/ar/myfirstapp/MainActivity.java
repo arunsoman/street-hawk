@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -15,6 +14,7 @@ import com.ar.myfirstapp.elm.ELM327;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
+import com.ar.myfirstapp.view.ResponseHandler;
 import com.ar.myfirstapp.view.ResponseViewer;
 import com.ar.myfirstapp.view.Terminal;
 
@@ -29,13 +29,8 @@ public class MainActivity extends AppCompatActivity {
     private ResponseViewer tvLog;
     private BtManager btManager;
 
-    public final Handler responseCallback = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            tvLog.display(msg.getData().getString("cmd"));
-            super.handleMessage(msg);
-        }
-    };
+    public ResponseHandler responseHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +39,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init(){
+        responseHandler = new ResponseHandler(this);
         tvLog = new ResponseViewer(this);
+        responseHandler.registerDissplay(tvLog, "*");
         new Terminal(this, device1);
         btnScan = (Button) findViewById(R.id.scan);
         btManager = new BtManager(this);
@@ -63,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                                 bs = btManager.connect();
                             }
                             if (btManager.isConnected()) {
-                                device1 = new ELM327(bs, responseCallback);
+                                device1 = new ELM327(bs, responseHandler);
                                 fireTasks();
                             }else {
                                 //TODO
@@ -104,11 +101,14 @@ public class MainActivity extends AppCompatActivity {
                 for(Command initC: AtCommands.initCommands)
                 device1.send(initC);
                 device1.send(proto);
-   //             device1.send(ModeFactory.getCommand("m1", "20"));
-                for(String str: ModeFactory.getSupportedModes()){
-                    device1.send(ModeFactory.getDiscoveryCommand(str));
-                }
-                //for (Command c: AtCommands.testCommands)
+                device1.send(ModeFactory.getCommand("m9", "00"));
+                device1.send(ModeFactory.getCommand("m1", "00"));
+                device1.send(ModeFactory.getCommand("m1", "20"));
+                device1.send(ModeFactory.getCommand("m1", "40"));
+//                for(String str: ModeFactory.getSupportedModes()){
+//                    device1.send(ModeFactory.getDiscoveryCommand(str));
+//                }
+//                //for (Command c: AtCommands.testCommands)
                 //    device1.send(c);
             }
 //            for(Command c: AtCommands.initCanScan){

@@ -3,12 +3,12 @@ package com.ar.myfirstapp.async;
 import android.bluetooth.BluetoothSocket;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
 import com.ar.myfirstapp.elm.ELM327;
 import com.ar.myfirstapp.obd2.Command;
+import com.ar.myfirstapp.view.ResponseHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,20 +23,20 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 
 public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
-    private final Queue<Command> commands = new ConcurrentLinkedQueue<Command>();
-    private Handler responseCallback;
+    private final Queue<Command> inQ = new ConcurrentLinkedQueue<Command>();
+    private ResponseHandler responseHandler;
     private BluetoothSocket bluetoothSocket;
     private boolean stop;
     private boolean interrupt;
 
-    public ReadWriteAsyncTask(BluetoothSocket bluetoothSocket, Handler responseCallback){
-        this.responseCallback = responseCallback;
+    public ReadWriteAsyncTask(BluetoothSocket bluetoothSocket, ResponseHandler responseHandler){
+        this.responseHandler = responseHandler;
         this.bluetoothSocket = bluetoothSocket;
     }
 
     public void submit(final Command c){
-        synchronized (commands){
-            commands.add(c);
+        synchronized (inQ){
+            inQ.add(c);
         }
     }
 
@@ -45,24 +45,25 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
     }
     @Override
     protected Boolean doInBackground(Void... params) {
+        Bundle bundle = new Bundle(2);
         try (Pipe pipe = new Pipe(bluetoothSocket)){
             Throwable tr = null;
             while (!stop){
                 Command command;
-                synchronized (commands){
-                    if(commands.size() ==  0)
+                synchronized (inQ){
+                    if(inQ.size() ==  0)
                         continue;
-                    command = commands.remove();
+                    command = inQ.remove();
                 }
                 try {
                     pipe.sendNreceive(command);
                     command.parse();
-                    Bundle bundle = new Bundle(2);
-                    bundle.putString("cmd", command.toString());
-                    Message message = responseCallback.obtainMessage();
+                    responseHandler.add(command);
+             //       bundle.putString("cmd", "");
+                    Message message = responseHandler.obtainMessage();
                     message.what = 1;
                     message.setData(bundle);
-                    responseCallback.sendMessage(message);
+                    responseHandler.sendMessage(message);
                     tr = null;
                 } catch (Throwable t){
                     tr = t;
@@ -139,7 +140,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
         }
 
         private Command sendNreceive(Command command) throws IOException {
-            writeOs(command.getCmd());
+            writeOs(command.getRequest());
             int avail = is.available();
             if(avail == 0){
                 synchronized (is){
@@ -157,6 +158,9 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
                     byte[] rawResp = readAll();
                     command.setRawResp(rawResp);
                 }
+            }else{
+                byte[] rawResp = readAll();
+                command.setRawResp(rawResp);
             }
             return command;
         }

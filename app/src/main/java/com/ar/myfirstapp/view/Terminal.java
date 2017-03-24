@@ -12,6 +12,8 @@ import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.parser.Parser;
 import com.ar.myfirstapp.obd2.saej1979.Mode1;
 
+import static com.ar.myfirstapp.MainActivity.device1;
+
 /**
  * Created by Arun Soman on 3/22/2017.
  */
@@ -19,13 +21,11 @@ import com.ar.myfirstapp.obd2.saej1979.Mode1;
 public class Terminal implements View.OnClickListener {
     private Button btnScan, buttonSend;
     private EditText editTextInput;
-    private ELM327 device1;
 
     public Terminal(AppCompatActivity activity, ELM327 device1){
         buttonSend = (Button) activity.findViewById(R.id.buttonSend);
         editTextInput = (EditText) activity.findViewById(R.id.editTextInput);
         buttonSend.setOnClickListener(this);
-        this.device1 = device1;
     }
 
     @Override

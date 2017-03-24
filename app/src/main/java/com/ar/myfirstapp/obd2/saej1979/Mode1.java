@@ -11,12 +11,12 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Mode1 {
+public class Mode1 implements Mode {
 
 
     public static final Map<String, Command> commands = new HashMap<>();
     static {
-    commands.put("00", new Command("01", "00\r", "PIDs supported [01 - 20]",  new SaeJ1979ResponseParser("41 00 "){
+    commands.put("00", new Command("01", "00\r", "PIDs supported [01 - 20]", true,  new SaeJ1979ResponseParser("41 00 "){
 
                 @Override
                 public void parse(Command command) {
@@ -185,17 +185,7 @@ public class Mode1 {
                     String str = validate(command);
                     if(str == null)
                         return;
-                    String str2 = str.replace(" ", "");
-                    BitSet bitSet = BitSet.valueOf(new long[]{Long.valueOf(str2, 16)});
-                    StringBuilder sb = new StringBuilder();
-                    for (int j = 0; j < bitSet.length(); j++) {
-                        if(j <= 9 )
-                            sb.append('0');
-                        if (bitSet.get(j)) {
-                            sb.append(Integer.toHexString(j)).append(' ');
-                        }
-                    }
-                    command.setResult(sb.toString());
+                    command.setResult(str);
                     command.setResponseStatus(Command.ResponseStatus.Ok);
                 }
 
@@ -239,7 +229,7 @@ public class Mode1 {
                     command.setResult(""+ ((A * 256) + B));
                 }
             }));
-            commands.put("20", new Command("01", "20", "PIDs supported 21-40", new SaeJ1979ResponseParser("41 20 ") {
+            commands.put("20", new Command("01", "20", "PIDs supported 21-40", true, new SaeJ1979ResponseParser("41 20 ") {
                 @Override
                 public void parse(Command command) {
                     String str = validate(command);
@@ -252,7 +242,7 @@ public class Mode1 {
                         if(j <= 9 )
                             sb.append('0');
                         if (bitSet.get(j)) {
-                            sb.append(Integer.toHexString(j)).append(' ');
+                            sb.append(Integer.toHexString(0x20+j)).append(' ');
                         }
                     }
                     command.setResponseStatus(Command.ResponseStatus.Ok);
@@ -368,10 +358,26 @@ public class Mode1 {
             commands.put("3D", new Command("01", "3D", "Catalyst TemperatureBank 2, Sensor 1-406513.5°C", new ParserAtimes256plusBby10minus40("41 3D ")));
             commands.put("3E", new Command("01", "3E", "Catalyst TemperatureBank 1, Sensor 2-406513.5°C", new ParserAtimes256plusBby10minus40("41 3E ")));
             commands.put("3F", new Command("01", "3F", "Catalyst TemperatureBank 2, Sensor 2-406513.5°C", new ParserAtimes256plusBby10minus40("41 3F ")));
-            commands.put("40", new Command("01", "40", "PIDs supported 41-60", new SaeJ1979ResponseParser("41 40 ") {
+            commands.put("40", new Command("01", "40", "PIDs supported 41-60", true, new SaeJ1979ResponseParser("41 40 ") {
+
+                @Override
+                public void parse(Command command) {
+                    String str = validate(command);
+                    if(str == null)
+                        return;
+                    String str2 = str.replace(" ", "");
+                    BitSet bitSet = BitSet.valueOf(new long[]{Long.valueOf(str2, 16)});
+                    StringBuilder sb = new StringBuilder();
+                    for (int j = 0; j < bitSet.length(); j++) {
+                        if (bitSet.get(j)) {
+                            sb.append(Integer.toHexString(0x40+j)).append(' ');
+                        }
+                    }
+                    command.setResult(sb.toString());
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                }
                 @Override
                 public void setResult(Command command, int argLen) {
-                    command.setResult("ÿet to implement");//command.setResult(""+ (Bit encoded[A7..D0] == [PID 0x41..PID 0x60]);
                 }
             }));
             commands.put("41", new Command("01", "41", "Monitor status this drive cycle", new SaeJ1979ResponseParser("41 41 ") {
@@ -440,7 +446,6 @@ public class Mode1 {
             commands.put("C3", new Command("01", "C3", "????", null));
             commands.put("C4", new Command("01", "C4", "????", null));
     };
-
 
 
     public static Command getCommand(String index) {
