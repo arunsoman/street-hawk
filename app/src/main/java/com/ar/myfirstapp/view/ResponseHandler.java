@@ -6,6 +6,7 @@ import android.os.Message;
 import com.ar.myfirstapp.MainActivity;
 import com.ar.myfirstapp.obd2.Command;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -17,29 +18,36 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ResponseHandler extends Handler {
     private final Queue<Command> outQ = new ConcurrentLinkedQueue<Command>();
-    private MainActivity mainActivity;
     private Map<String, OBDView> viewMap = new HashMap<>();
 
-    public ResponseHandler(MainActivity mainActivity) {
-        this.mainActivity = mainActivity;
+    private final WeakReference<MainActivity> activityReference;
+
+
+    public ResponseHandler(MainActivity activityReference) {
+        this.activityReference = new WeakReference<>(activityReference);
     }
 
-    public void registerDissplay(OBDView view, String commandId){
+    public void registerDisplay(OBDView view, String commandId) {
         viewMap.put(commandId, view);
     }
+
     @Override
     public void handleMessage(Message msg) {
-        if(!outQ.isEmpty()){
-            Command c = outQ.remove();
-            String cId = c.getCommandId();
-            OBDView view = viewMap.get(cId);
-            if(view == null)
-                view = viewMap.get("*");
-            if(view != null)
-                view.display(c);
+        MainActivity activity = activityReference.get();
+        if (activity != null) {
+            if (!outQ.isEmpty()) {
+                Command c = outQ.remove();
+                String cId = c.getCommandId();
+                OBDView view = viewMap.get(cId);
+                if (view == null)
+                    view = viewMap.get("*");
+                if (view != null) {
+                    String command = view.display(c);
+                    activity.show(command);
+                }
+            }
+            //    tvLog.display(msg.getData().getString("cmd"));
         }
-    //    tvLog.display(msg.getData().getString("cmd"));
-        super.handleMessage(msg);
     }
 
     public void add(Command command) {

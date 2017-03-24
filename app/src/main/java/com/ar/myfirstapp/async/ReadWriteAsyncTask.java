@@ -29,13 +29,13 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
     private boolean stop;
     private boolean interrupt;
 
-    public ReadWriteAsyncTask(BluetoothSocket bluetoothSocket, ResponseHandler responseHandler){
+    public ReadWriteAsyncTask(BluetoothSocket bluetoothSocket, ResponseHandler responseHandler) {
         this.responseHandler = responseHandler;
         this.bluetoothSocket = bluetoothSocket;
     }
 
-    public void submit(final Command c){
-        synchronized (inQ){
+    public void submit(final Command c) {
+        synchronized (inQ) {
             inQ.add(c);
         }
     }
@@ -43,15 +43,16 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
     public void interrupt() throws IOException {
         this.interrupt = true;
     }
+
     @Override
     protected Boolean doInBackground(Void... params) {
         Bundle bundle = new Bundle(2);
-        try (Pipe pipe = new Pipe(bluetoothSocket)){
+        try (Pipe pipe = new Pipe(bluetoothSocket)) {
             Throwable tr = null;
-            while (!stop){
+            while (!stop) {
                 Command command;
-                synchronized (inQ){
-                    if(inQ.size() ==  0)
+                synchronized (inQ) {
+                    if (inQ.size() == 0)
                         continue;
                     command = inQ.remove();
                 }
@@ -59,28 +60,29 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
                     pipe.sendNreceive(command);
                     command.parse();
                     responseHandler.add(command);
-             //       bundle.putString("cmd", "");
+                    //       bundle.putString("cmd", "");
                     Message message = responseHandler.obtainMessage();
                     message.what = 1;
                     message.setData(bundle);
                     responseHandler.sendMessage(message);
                     tr = null;
-                } catch (Throwable t){
+                } catch (Throwable t) {
                     tr = t;
-                    if(tr instanceof InterruptedIOException) {
+                    if (tr instanceof InterruptedIOException) {
                         command.setResponseStatus(Command.ResponseStatus.NetworkError);
                         return true;
                     }
-                    if(tr instanceof IOException) {
+                    if (tr instanceof IOException) {
                         command.setResponseStatus(Command.ResponseStatus.NetworkError);
                         return false;
                     }
                 }
-                Log.e("readeWritethread",command.toString(), tr);
+                Log.e("readeWritethread", command.toString(), tr);
             }
-            Log.e("readeWritethread","stopped");
+            Log.e("readeWritethread", "stopped");
             return true;
         } catch (IOException e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -95,9 +97,9 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
         final OutputStream os;
         private int state;
 
-        void reset(int cnt){
-            this.count = count- cnt;
-            if(this.count <0)
+        void reset(int cnt) {
+            this.count = count - cnt;
+            if (this.count < 0)
                 count = 0;
         }
 
@@ -117,7 +119,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
                 } else {
                     state = 0;
                 }
-                if(interrupt){
+                if (interrupt) {
                     writeOs("!".getBytes());
                     interrupt = false;
                 }
@@ -142,8 +144,8 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
         private Command sendNreceive(Command command) throws IOException {
             writeOs(command.getRequest());
             int avail = is.available();
-            if(avail == 0){
-                synchronized (is){
+            if (avail == 0) {
+                synchronized (is) {
                     try {
                         is.wait(ELM327.waitTime);
                     } catch (InterruptedException e) {
@@ -151,21 +153,21 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
                         return null;
                     }
                 }
-                if(( is.available()) == 0){
+                if ((is.available()) == 0) {
                     command.setRawResp(null);
                     command.setResponseStatus(Command.ResponseStatus.NO_DATA);
-                }else{
+                } else {
                     byte[] rawResp = readAll();
                     command.setRawResp(rawResp);
                 }
-            }else{
+            } else {
                 byte[] rawResp = readAll();
                 command.setRawResp(rawResp);
             }
             return command;
         }
 
-        private void writeOs(byte[]data) throws IOException {
+        private void writeOs(byte[] data) throws IOException {
             synchronized (os) {
                 os.write(data);
                 os.flush();
