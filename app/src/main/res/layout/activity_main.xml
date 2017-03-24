@@ -5,32 +5,30 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:weightSum="16"
     tools:context="com.ar.myfirstapp.MainActivity">
 
     <Button
-        android:id="@+id/scan"
+        android:id="@+id/buttonScan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:text="Scan" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/linearLayoutSend"
-        android:layout_below="@+id/scan"
+        android:layout_below="@+id/buttonScan"
+        android:layout_marginBottom="10dp"
         android:orientation="vertical"
-        android:weightSum="2">
+        android:weightSum="1">
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.8
-">
+            android:layout_weight="1">
 
             <TextView
-                android:id="@+id/log"
+                android:id="@+id/textViewLog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
