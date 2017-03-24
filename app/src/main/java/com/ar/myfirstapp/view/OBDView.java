@@ -7,5 +7,5 @@ import com.ar.myfirstapp.obd2.Command;
  */
 
 public interface OBDView {
-    void display(Command c);
+    String display(Command c);
 }

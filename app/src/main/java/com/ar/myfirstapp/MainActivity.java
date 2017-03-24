@@ -1,55 +1,112 @@
 package com.ar.myfirstapp;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.ar.myfirstapp.bt.BtManager;
 import com.ar.myfirstapp.elm.ELM327;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
+import com.ar.myfirstapp.obd2.parser.Parser;
+import com.ar.myfirstapp.obd2.saej1979.Mode1;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
+import com.ar.myfirstapp.utils.Utils;
 import com.ar.myfirstapp.view.ResponseHandler;
 import com.ar.myfirstapp.view.ResponseViewer;
-import com.ar.myfirstapp.view.Terminal;
 
 import java.io.IOException;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
-    public static final int BT_INT_REQ = 500;
     public static ELM327 device1;
-    private Button btnScan;
-    private ResponseViewer tvLog;
     private BtManager btManager;
 
+    private Button buttonScan;
+    private Button buttonSend;
+    private EditText editTextInput;
+    private TextView textViewLog;
+
     public ResponseHandler responseHandler;
+
+    private BroadcastReceiver bluetoothStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
+                if (!Utils.isBluetoothEnabled(MainActivity.this)) {
+                    buttonScan.setActivated(false);
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, Utils.BT_INT_REQ);
+                } else {
+                    buttonScan.setActivated(true);
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        init();
+        initUI();
+        btManager = new BtManager();
+        responseHandler = new ResponseHandler(this);
+        bluetoothStateReceiver.onReceive(this, new Intent(BluetoothAdapter.ACTION_STATE_CHANGED));
+
+        ResponseViewer tvLog = new ResponseViewer();
+        responseHandler.registerDisplay(tvLog, "*");
     }
 
-    private void init(){
-        responseHandler = new ResponseHandler(this);
-        tvLog = new ResponseViewer(this);
-        responseHandler.registerDissplay(tvLog, "*");
-        new Terminal(this, device1);
-        btnScan = (Button) findViewById(R.id.scan);
-        btManager = new BtManager(this);
-        btnScan.setActivated(false);
-        btnScan.setOnClickListener(new View.OnClickListener() {
+    private void initUI() {
+        editTextInput = (EditText) findViewById(R.id.editTextInput);
+        textViewLog = (TextView) findViewById(R.id.textViewLog);
+        buttonScan = (Button) findViewById(R.id.buttonScan);
+        buttonSend = (Button) findViewById(R.id.buttonSend);
+
+        buttonSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btnScan.setActivated(false);
+                String message = editTextInput.getText().toString();
+                if (!TextUtils.isEmpty(message)) {
+                    if (message.startsWith("m1")) {
+                        Command c = Mode1.getCommand(message.split(" ")[1]);
+                        if (c != null)
+                            device1.send(c);
+                        return;
+                    }
+                    device1.send(new Command("", message + "\r", "", new Parser() {
+                        @Override
+                        public void parse(Command command) {
+                            byte[] rawResp = command.getRawResp();
+                            StringBuilder sb = new StringBuilder();
+                            for (byte aByte : rawResp) {
+                                sb.append(aByte).append(' ');
+                            }
+                            command.setResult(sb.toString());
+                        }
+                    }));
+                    editTextInput.setText(message.split(" ")[0]);
+                }
+            }
+        });
+
+        buttonScan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                buttonScan.setActivated(false);
                 new Handler().post(new Runnable() {
                     BluetoothSocket bs;
 
@@ -62,9 +119,9 @@ public class MainActivity extends AppCompatActivity {
                             if (btManager.isConnected()) {
                                 device1 = new ELM327(bs, responseHandler);
                                 fireTasks();
-                            }else {
+                            } else {
                                 //TODO
-                                btnScan.setActivated(true);
+                                buttonScan.setActivated(true);
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -80,42 +137,41 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        init();
+        registerReceiver(bluetoothStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(bluetoothStateReceiver);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == BT_INT_REQ) {
-            if(btManager.isBtAdaptorEnabled()){
-                btnScan.setActivated(true);
-            }
-            return;
+        if (requestCode == Utils.BT_INT_REQ) {
+            bluetoothStateReceiver.onReceive(this, new Intent(BluetoothAdapter.ACTION_STATE_CHANGED));
         }
-
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     public void fireTasks() {
         try {
-            for(Command proto: AtCommands.protoIter) {
-                for(Command initC: AtCommands.initCommands)
-                device1.send(initC);
+            for (Command proto : AtCommands.protoIter) {
+                for (Command initC : AtCommands.initCommands)
+                    device1.send(initC);
                 device1.send(proto);
-                device1.send(ModeFactory.getCommand("m9", "00"));
-                device1.send(ModeFactory.getCommand("m1", "00"));
-                device1.send(ModeFactory.getCommand("m1", "20"));
-                device1.send(ModeFactory.getCommand("m1", "40"));
-//                for(String str: ModeFactory.getSupportedModes()){
-//                    device1.send(ModeFactory.getDiscoveryCommand(str));
-//                }
-//                //for (Command c: AtCommands.testCommands)
+                //             device1.send(ModeFactory.getCommand("m1", "20"));
+                for (String str : ModeFactory.getSupportedModes()) {
+                    device1.send(ModeFactory.getDiscoveryCommand(str));
+                }
+                //for (Command c: AtCommands.testCommands)
                 //    device1.send(c);
             }
 //            for(Command c: AtCommands.initCanScan){
 //                    device1.send(c);
 //            }
 // //           device1.getMode1PIDs();
- //           device1.sendCommand(AtCommands.activitMonitor);
+            //           device1.sendCommand(AtCommands.activitMonitor);
             /*
             Command command = Mode1.getCommand("00");
             device1.sendCommand(command);
@@ -136,10 +192,13 @@ public class MainActivity extends AppCompatActivity {
             //device1.queryCan((byte) 1, (byte) (0x7DF));
             */
 
-        }  catch (Exception e) {
-            Log.e("MActivity","NPE",e);
+        } catch (Exception e) {
+            Log.e("MActivity", "NPE", e);
         }
     }
 
 
+    public void show(String command) {
+        textViewLog.append(command);
+    }
 }
