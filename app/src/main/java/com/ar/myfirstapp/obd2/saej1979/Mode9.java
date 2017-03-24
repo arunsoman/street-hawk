@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class Mode9 {
+public class Mode9 implements Mode {
     public static final Map < String, Command > commands = new HashMap < > ();
     static {
-        commands.put("00", new Command("09 ", "00", "List of PIDs supported (range 01h to 20h)", new SaeJ1979Mode9ResponseParser("91 00 ") {
+        commands.put("00", new Command("09 ", "00", "List of PIDs supported (range 01h to 20h)", true, new SaeJ1979Mode9ResponseParser("91 00 ") {
             @Override public void parse(Command command) {
 //                String str = validate(command);
                 String str = ASCIIUtils.toString(command.getRawResp());
@@ -110,9 +110,9 @@ public class Mode9 {
             @Override public void parse(Command command) {
                 String str = validate(command);
                 if(str == null) {
-                    argLen = str.split(" ").length;
                     return;
                 }
+                    argLen = str.split(" ").length;
                 if (argLen != 4) {
                     command.setResponseStatus(Command.ResponseStatus.Unknown);
                     return;

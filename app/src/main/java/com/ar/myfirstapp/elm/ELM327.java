@@ -5,6 +5,7 @@ import android.os.Handler;
 
 import com.ar.myfirstapp.async.ReadWriteAsyncTask;
 import com.ar.myfirstapp.obd2.Command;
+import com.ar.myfirstapp.view.ResponseHandler;
 
 import java.io.IOException;
 
@@ -15,9 +16,9 @@ public final class ELM327{
     private ReadWriteAsyncTask readWriteAsyncTask;
 
     private BluetoothSocket bs;
-    private Handler  responseCallback;
+    private ResponseHandler responseCallback;
 
-    public ELM327(BluetoothSocket bs, Handler responseCallback) {
+    public ELM327(BluetoothSocket bs, ResponseHandler responseCallback) {
         readWriteAsyncTask = new ReadWriteAsyncTask(bs,responseCallback);
         readWriteAsyncTask.execute();
         this.responseCallback = responseCallback;
@@ -32,7 +33,7 @@ public final class ELM327{
     }
 
 
-    public void resume(BluetoothSocket bs, Handler responseCallback) {
+    public void resume(BluetoothSocket bs, ResponseHandler responseCallback) {
         this.responseCallback = responseCallback;
         this.bs = bs;
     }
