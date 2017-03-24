@@ -23,6 +23,7 @@ import static com.ar.myfirstapp.MainActivity.BT_INT_REQ;
 public class BtManager  {
 
     private BluetoothAdapter mBluetoothAdapter;
+    private boolean connected;
 
     public BtManager(Activity activity){
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -40,6 +41,10 @@ public class BtManager  {
     public boolean isBtAdaptorEnabled(){
         return mBluetoothAdapter.isEnabled();
     }
+
+    public boolean isConnected(){
+        return connected;
+    }
     private String getELM327Addres(String OBDII){
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         String deviceAddress = null;
@@ -54,7 +59,6 @@ public class BtManager  {
         return deviceAddress;
     }
 
-
     public  BluetoothSocket connect() throws IOException {
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(getELM327Addres("OBDII"));
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -63,6 +67,7 @@ public class BtManager  {
         try {
             bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid);
             bluetoothSocket.connect();
+            connected = bluetoothSocket.isConnected();
             return bluetoothSocket;
         } catch (IOException e) {
             String TAG = BluetoothManager.class.getName();
@@ -74,10 +79,13 @@ public class BtManager  {
                 sockFallback = (BluetoothSocket) m.invoke(bluetoothSocket.getRemoteDevice(), params);
                 sockFallback.connect();
                 bluetoothSocket = sockFallback;
+                connected = bluetoothSocket.isConnected();
                 return bluetoothSocket;
             } catch (Exception e2) {
+                connected = false;
                 Log.e(TAG, "Couldn't fallback while establishing Bluetooth connection.", e2);
                 throw new IOException(e2.getMessage());
+                //TODO
             }
         }
     }

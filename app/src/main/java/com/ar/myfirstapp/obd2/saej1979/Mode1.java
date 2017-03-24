@@ -11,7 +11,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Mode1 extends Mode {
+public class Mode1 {
 
 
     public static final Map<String, Command> commands = new HashMap<>();
@@ -27,10 +27,12 @@ public class Mode1 extends Mode {
                     BitSet bitSet = BitSet.valueOf(new long[]{Long.valueOf(str2, 16)});
                     StringBuilder sb = new StringBuilder();
                     for (int j = 0; j < bitSet.length(); j++) {
-                        if (bitSet.get(j))
+                        if (bitSet.get(j)) {
                             sb.append(Integer.toHexString(j)).append(' ');
+                        }
                     }
                     command.setResult(sb.toString());
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
                 }
 
         @Override
@@ -42,13 +44,13 @@ public class Mode1 extends Mode {
                     "Monitor status since DTCs cleared. (Includes malfunction indicator lamp (MIL) status and number of DTCs.)",
                     new Mode1Pid01Parser()));
 
-            commands.put("02", new Command("01", "02", "Freeze DTC", new SaeJ1979ResponseParser("41 02 ") {
+            commands.put("2", new Command("01", "02", "Freeze DTC", new SaeJ1979ResponseParser("41 02 ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//";
+                    command.setResult("yet to implement");//";
                 }
             }));
-            commands.put("03", new Command("01", "03", "Fuel system status", new SaeJ1979ResponseParser("41 03 ") {
+            commands.put("3", new Command("01", "03", "Fuel system status", new SaeJ1979ResponseParser("41 03 ") {
 
                 @Override
                 public void setResult(Command command, int argLen) {
@@ -82,50 +84,57 @@ public class Mode1 extends Mode {
                     command.setResult(str);
                 }
             }));
-            commands.put("04", new Command("01", "04", "Calculated engine load value0100%", new Aby2point55Parser("41 04 ")));
-            commands.put("05", new Command("01", "05", "Engine coolant temperature-40215°C", new SaeJ1979ResponseParser("41 05 ") {
+            commands.put("4", new Command("01", "04", "Calculated engine load value0100%", new Aby2point55Parser("41 04 ")));
+            commands.put("5", new Command("01", "05", "Engine coolant temperature-40215°C", new SaeJ1979ResponseParser("41 05 ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + (A - 40);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+(A - 40));
                 }
             }));
-            commands.put("06", new Command("01", "06", "Short term fuel % trim—Bank 1-100 (Rich)99.22 (Lean)%", new SaeJ1979ResponseParser("41 06 ") {
+            commands.put("6", new Command("01", "06", "Short term fuel % trim—Bank 1-100 (Rich)99.22 (Lean)%", new SaeJ1979ResponseParser("41 06 ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + ((A - 128) * 100 / 128);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ ((A - 128) * 100 / 128));
                 }
             }));
-            commands.put("07", new Command("01", "07", "Long term fuel % trim—Bank 1-100 (Rich)99.22 (Lean)%", new SaeJ1979ResponseParser("41 07 ") {
+            commands.put("7", new Command("01", "07", "Long term fuel % trim—Bank 1-100 (Rich)99.22 (Lean)%", new SaeJ1979ResponseParser("41 07 ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + ((A - 128) * 100 / 128);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ ((A - 128) * 100 / 128));
                 }
             }));
-            commands.put("08", new Command("01", "08", "Short term fuel % trim—Bank 2-100 (Rich)99.22 (Lean)%", new SaeJ1979ResponseParser("41 08") {
+            commands.put("8", new Command("01", "08", "Short term fuel % trim—Bank 2-100 (Rich)99.22 (Lean)%", new SaeJ1979ResponseParser("41 08") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + ((A - 128) * 100 / 128);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ ((A - 128) * 100 / 128));
                 }
             }));
-            commands.put("09", new Command("01", "09", "Long term fuel % trim—Bank 2-100 (Rich)99.22 (Lean)%", new SaeJ1979ResponseParser("41 09 ") {
+            commands.put("9", new Command("01", "09", "Long term fuel % trim—Bank 2-100 (Rich)99.22 (Lean)%", new SaeJ1979ResponseParser("41 09 ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + ((A - 128) * 100 / 128);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ ((A - 128) * 100 / 128));
                 }
             }));
-            commands.put("0A", new Command("01", "0A", "Fuel pressure0765kPa (gauge)", new SaeJ1979ResponseParser("41 0A ") {
+            commands.put("A", new Command("01", "0A", "Fuel pressure0765kPa (gauge)", new SaeJ1979ResponseParser("41 0A ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + (A * 3);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ (A * 3));
                 }
             }));
-            commands.put("0B", new Command("01", "0B", "Intake manifold absolute pressure0255kPa (absolute)", new SaeJ1979ResponseParser("41 0B ") {
+            commands.put("B", new Command("01", "0B", "Intake manifold absolute pressure0255kPa (absolute)", new SaeJ1979ResponseParser("41 0B ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + (A);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ (A));
                 }
             }));
-            commands.put("0C", new Command("01", "0C\r", "Engine RPM016383.75rpm", new SaeJ1979ResponseParser("41 0C ") {
+            commands.put("C", new Command("01", "0C\r", "Engine RPM016383.75rpm", new SaeJ1979ResponseParser("41 0C ") {
                 @Override
                 public void setResult(Command command, int argLen) {
                     if (argLen != 2) {
@@ -136,7 +145,7 @@ public class Mode1 extends Mode {
                     command.setResponseStatus(Command.ResponseStatus.Ok);
                 }
             }));
-            commands.put("0D", new Command("01", "0D\r", "Vehicle speed0255km/h", new SaeJ1979ResponseParser("41 0D ") {
+            commands.put("D", new Command("01", "0D\r", "Vehicle speed0255km/h", new SaeJ1979ResponseParser("41 0D ") {
                 @Override
                 public void setResult(Command command, int argLen) {
                     if (argLen != 1) {
@@ -147,30 +156,52 @@ public class Mode1 extends Mode {
                     command.setResponseStatus(Command.ResponseStatus.Ok);
                 }
             }));
-            commands.put("0E", new Command("01", "0E", "Timing advance-6463.5° relative to #1 cylinder", new SaeJ1979ResponseParser("41 0E ") {
+            commands.put("E", new Command("01", "0E", "Timing advance-6463.5° relative to #1 cylinder", new SaeJ1979ResponseParser("41 0E ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + ((A / 2) -64);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ ((A / 2) -64));
                 }
             }));
-            commands.put("0F", new Command("01", "0F", "Intake air temperature-40215°C", new SaeJ1979ResponseParser("41 0F ") {
+            commands.put("F", new Command("01", "0F", "Intake air temperature-40215°C", new SaeJ1979ResponseParser("41 0F ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + (A - 40);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ (A - 40));
                 }
             }));
             commands.put("10", new Command("01", "10", "MAF air flow rate0655.35g/s", new SaeJ1979ResponseParser("41 10 ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + (((A * 256) + B) / 100);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ (((A * 256) + B) / 100));
                 }
             }));
-            commands.put("11", new Command("01", "11", "Throttle position0100%", new Aby2point55Parser("01 11 ")));
+            commands.put("11", new Command("01", "11", "Throttle position0100%", new Aby2point55Parser("41 11 ")));
             commands.put("12", new Command("01", "12", "Commanded secondary air status", new Mide1Pid12Parser()));
             commands.put("13", new Command("01", "13", "Oxygen sensors present", new SaeJ1979ResponseParser("41 13 ") {
                 @Override
+                public void parse(Command command) {
+                    String str = validate(command);
+                    if(str == null)
+                        return;
+                    String str2 = str.replace(" ", "");
+                    BitSet bitSet = BitSet.valueOf(new long[]{Long.valueOf(str2, 16)});
+                    StringBuilder sb = new StringBuilder();
+                    for (int j = 0; j < bitSet.length(); j++) {
+                        if(j <= 9 )
+                            sb.append('0');
+                        if (bitSet.get(j)) {
+                            sb.append(Integer.toHexString(j)).append(' ');
+                        }
+                    }
+                    command.setResult(sb.toString());
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                }
+
+                @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//throw new RuntimeException("yet to implement");//" + ([A0..A3] ==Bank 1, Sensors 1 - 4.[A4..A7] ==Bank 2…);
+//                    command.setResult("yet to implement");//command.setResult(""+ ([A0..A3] ==Bank 1, Sensors 1 - 4.[A4..A7] ==Bank 2…);
                 }
             }));
             commands.put("14", new Command("01", "14", "Bank 1, Sensor 1:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new O2SensorParser("41 14 ")));
@@ -184,39 +215,67 @@ public class Mode1 extends Mode {
             commands.put("1C", new Command("01", "1C", "OBD standards this vehicle conforms to", new Mide1Pid1CParser()));
             commands.put("1D", new Command("01", "1D", "Oxygen sensors present", new SaeJ1979ResponseParser("41 1D ") {
                 @Override
+                public void parse(Command command) {
+                    String str = validate(command);
+
+                }
+                
+                @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");// throw new RuntimeException("yet to implement");//" + (Similar to PID 13, but[A0..A7] == [
+                //    command.setResult("yet to implement");// command.setResult(""+ (Similar to PID 13, but[A0..A7] == [
                     //B1S1, B1S2, B2S1, B2S2, B3S1, B3S2, B4S1, B4S2]);
                 }
             }));
             commands.put("1E", new Command("01", "1E", "Auxiliary input status", new SaeJ1979ResponseParser("41 1E ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//throw new RuntimeException("yet to implement");//" + (A0 == Power Take Off (PTO) status(1 == active)[A1..A7]not used);
+                    command.setResult("yet to implement");//command.setResult(""+ (A0 == Power Take Off (PTO) status(1 == active)[A1..A7]not used);
                 }
             }));
             commands.put("1F", new Command("01", "1F", "Run time since engine start065535seconds", new SaeJ1979ResponseParser("41 1F ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + ((A * 256) + B);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ ((A * 256) + B));
                 }
             }));
             commands.put("20", new Command("01", "20", "PIDs supported 21-40", new SaeJ1979ResponseParser("41 20 ") {
                 @Override
+                public void parse(Command command) {
+                    String str = validate(command);
+                    if(str == null)
+                        return;
+                    String str2 = str.replace(" ", "");
+                    BitSet bitSet = BitSet.valueOf(new long[]{Long.valueOf(str2, 16)});
+                    StringBuilder sb = new StringBuilder();
+                    for (int j = 0; j < bitSet.length(); j++) {
+                        if(j <= 9 )
+                            sb.append('0');
+                        if (bitSet.get(j)) {
+                            sb.append(Integer.toHexString(j)).append(' ');
+                        }
+                    }
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(sb.toString());
+                }
+                
+                @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//throw new RuntimeException("yet to implement");//" + (Bit encoded[A7..D0] == [PID 0x21..PID 0x40]);
+                //    command.setResult("yet to implement");//command.setResult(""+ (Bit encoded[A7..D0] == [PID 0x21..PID 0x40]);
                 }
             }));
             commands.put("21", new Command("01", "21", "Distance traveled with malfunction indicator lamp (MIL) on065535km", new SaeJ1979ResponseParser("41 21 ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + ((A * 256) + B);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ ((A * 256) + B));
                 }
             }));
             commands.put("22", new Command("01", "22", "Fuel Rail Pressure (relative to manifold vacuum)05177.265kPa", new SaeJ1979ResponseParser("41 22 ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("yet to implement");//" + ((((A * 256) + B) * 10) / 128);
+                    command.setResponseStatus(Command.ResponseStatus.Ok);
+                    command.setResult(""+ ((((A * 256) + B) * 10) / 128));
                 }
             }));
             commands.put("23", new Command("01", "23", "Fuel Rail Pressure (diesel)0655350kPa (gauge)", new SaeJ1979ResponseParser("41 23 ") {
@@ -312,13 +371,13 @@ public class Mode1 extends Mode {
             commands.put("40", new Command("01", "40", "PIDs supported 41-60", new SaeJ1979ResponseParser("41 40 ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("ÿet to implement");//throw new RuntimeException("yet to implement");//" + (Bit encoded[A7..D0] == [PID 0x41..PID 0x60]);
+                    command.setResult("ÿet to implement");//command.setResult(""+ (Bit encoded[A7..D0] == [PID 0x41..PID 0x60]);
                 }
             }));
             commands.put("41", new Command("01", "41", "Monitor status this drive cycle", new SaeJ1979ResponseParser("41 41 ") {
                 @Override
                 public void setResult(Command command, int argLen) {
-                    throw new RuntimeException("ÿet to implement");//throw new RuntimeException("yet to implement");//" + (Bit encoded. See below.);
+                    command.setResult("ÿet to implement");//command.setResult(""+ (Bit encoded. See below.);
                 }
             }));
             commands.put("42", new Command("01", "42", "Control module voltage065.535V", new SaeJ1979ResponseParser("41 42 ") {
@@ -352,7 +411,7 @@ public class Mode1 extends Mode {
                     }
                     command.setResponseStatus(Command.ResponseStatus.Ok);
                     command.setResult("" + (((A * 256) + B) / 32768));
-                    //throw new RuntimeException("yet to implement");//" + ;
+                    //command.setResult(""+ ;
                 }
             }));
             commands.put("45", new Command("01", "45", "Relative throttle position0100%", new Aby2point55Parser("41 45 ")));
@@ -364,7 +423,7 @@ public class Mode1 extends Mode {
                         return;
                     }
                     command.setResponseStatus(Command.ResponseStatus.Ok);
-                    command.setResult("" + (A -40));//throw new RuntimeException("yet to implement");//" + (A - 40);
+                    command.setResult("" + (A -40));//command.setResult(""+ (A - 40);
                 }
             }));
             commands.put("47", new Command("01", "47", "Absolute throttle position B0100%", new Aby2point55Parser("41 47 ")));
@@ -382,9 +441,6 @@ public class Mode1 extends Mode {
             commands.put("C4", new Command("01", "C4", "????", null));
     };
 
-    public Mode1(String modeId) {
-        super(modeId);
-    }
 
 
     public static Command getCommand(String index) {

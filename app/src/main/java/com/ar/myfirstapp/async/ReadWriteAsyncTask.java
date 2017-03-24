@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.ar.myfirstapp.elm.ELM327;
 import com.ar.myfirstapp.obd2.Command;
 
 import java.io.ByteArrayOutputStream;
@@ -45,6 +46,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected Boolean doInBackground(Void... params) {
         try (Pipe pipe = new Pipe(bluetoothSocket)){
+            Throwable tr = null;
             while (!stop){
                 Command command;
                 synchronized (commands){
@@ -54,14 +56,16 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
                 }
                 try {
                     pipe.sendNreceive(command);
+                    command.parse();
                     Bundle bundle = new Bundle(2);
                     bundle.putString("cmd", command.toString());
                     Message message = responseCallback.obtainMessage();
                     message.what = 1;
                     message.setData(bundle);
                     responseCallback.sendMessage(message);
-                } catch (Throwable tr){
-                    Log.e("readeWritethread","Exception: "+command.toString(), tr);
+                    tr = null;
+                } catch (Throwable t){
+                    tr = t;
                     if(tr instanceof InterruptedIOException) {
                         command.setResponseStatus(Command.ResponseStatus.NetworkError);
                         return true;
@@ -71,7 +75,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
                         return false;
                     }
                 }
-                //Log.e("readeWritethread","Command: "+command.toString());
+                Log.e("readeWritethread",command.toString(), tr);
             }
             Log.e("readeWritethread","stopped");
             return true;
@@ -140,7 +144,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
             if(avail == 0){
                 synchronized (is){
                     try {
-                        is.wait(2000);
+                        is.wait(ELM327.waitTime);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                         return null;

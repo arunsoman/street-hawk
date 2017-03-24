@@ -1,7 +1,5 @@
 package com.ar.myfirstapp.obd2;
 
-import com.ar.myfirstapp.obd2.saej1979.Mode;
-import com.ar.myfirstapp.obd2.saej1979.Mode1;
 /*
 import com.ar.myfirstapp.obd2.saej1979.Mode10;
 import com.ar.myfirstapp.obd2.saej1979.Mode2;

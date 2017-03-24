@@ -16,15 +16,19 @@ public class Command {
         return cmd;
     }
 
-    public static enum ResponseStatus{Unknown, Ok, UnSupportedReq, BadResponse, NoData, NO_DATA, UNABLE_TO_CONNECT, NetworkError};
+    public String getResult() {
+        return result;
+    }
 
+    public static enum ResponseStatus{Unknown, Ok, UnSupportedReq, BadResponse, NoData, NO_DATA, UNABLE_TO_CONNECT, NetworkError};
+    private final byte[] empty = new byte[0];
     private String name;
     private String modeID;
     private String id;
-    private byte[] cmd;
-    private byte[] rawResp;
-    private String result;
-    private ResponseStatus responseStatus;
+    private byte[] cmd = empty;
+    private byte[] rawResp = empty;
+    private String result = "empty";
+    private ResponseStatus responseStatus = ResponseStatus.Unknown;
     private Parser parser;
 
 
@@ -85,10 +89,10 @@ public class Command {
 
     @Override
     public String toString() {
-        String resp = (responseStatus != ResponseStatus.Ok) ?
-                ("RAW: " + Arrays.toString(rawResp) + "\n" +" responseStatus:" + responseStatus.toString()) :
+        String resp = (responseStatus== null || responseStatus != ResponseStatus.Ok) ?
+                ("RAW: " + Arrays.toString(rawResp) + "\n" + " responseStatus:" + responseStatus.toString()) :
                 ("Result: " + this.result + "\n");
-        return "REQ:{ " + modeID + ", " + id + ", " + name + " bytes: " + Arrays.toString(cmd) + "}\n" + resp;
+        return "REQ:{ m:" + modeID + ", p:" + id + ", " + name + " bytes: " + Arrays.toString(cmd) + "}\n" + resp;
 
     }
     public void setRawResp(byte[] rawResp){this.rawResp = rawResp;}

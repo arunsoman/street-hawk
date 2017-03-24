@@ -18,12 +18,14 @@ public abstract class Parser {
             command.setResponseStatus(Command.ResponseStatus.UNABLE_TO_CONNECT);
             return null;
         }
-        if(str.contains("?")){
-            if(str.replace( " ", "").replace("?","").trim().length() == 0){
-                command.setResponseStatus(Command.ResponseStatus.UnSupportedReq);
-                return null;
-            }
-        }
+//TODO fix ?
+//
+//        if(str.contains("?")){
+//            if(str.replace( " ", "").replace("?","").trim().length() == 0){
+//                command.setResponseStatus(Command.ResponseStatus.UnSupportedReq);
+//                return null;
+//            }
+//        }
         return str;
     }
 
