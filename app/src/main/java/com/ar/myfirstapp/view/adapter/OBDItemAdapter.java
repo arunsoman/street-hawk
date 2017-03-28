@@ -1,6 +1,5 @@
 package com.ar.myfirstapp.view.adapter;
 
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,9 +7,9 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.ar.myfirstapp.MainActivity;
 import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.obd2.Command;
+import com.ar.myfirstapp.view.DeviceService;
 
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
         holder.linearLayoutItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.device1.send(command);
+                DeviceService.getInstance().send(command);
             }
         });
     }

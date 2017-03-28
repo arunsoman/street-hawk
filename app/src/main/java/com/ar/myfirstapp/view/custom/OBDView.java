@@ -1,4 +1,4 @@
-package com.ar.myfirstapp.view;
+package com.ar.myfirstapp.view.custom;
 
 import com.ar.myfirstapp.obd2.Command;
 

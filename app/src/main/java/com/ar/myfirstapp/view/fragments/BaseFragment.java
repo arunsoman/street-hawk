@@ -1,20 +1,11 @@
 package com.ar.myfirstapp.view.fragments;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.view.View;
 import android.support.v4.app.Fragment;
-
-import com.ar.myfirstapp.MainActivity;
-import com.ar.myfirstapp.elm.ELM327;
-import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.utils.Utils;
-import com.ar.myfirstapp.view.OBDView;
-
-import java.util.List;
+import android.view.View;
 
 
 /**
@@ -23,12 +14,7 @@ import java.util.List;
 
 public abstract class BaseFragment extends Fragment {
     protected View rootView;
-    protected ELM327 device;
     public String title;
-
-    public void setDevice(ELM327 device) {
-        this.device = device;
-    }
 
     public BaseFragment() {
 

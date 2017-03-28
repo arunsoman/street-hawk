@@ -5,6 +5,7 @@ import android.os.Message;
 
 import com.ar.myfirstapp.MainActivity;
 import com.ar.myfirstapp.obd2.Command;
+import com.ar.myfirstapp.view.custom.OBDView;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;

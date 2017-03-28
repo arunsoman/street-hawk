@@ -17,23 +17,28 @@ import java.util.UUID;
 
 public class BtManager {
     private static final String TAG = "BtManager";
-    private BluetoothAdapter mBluetoothAdapter;
+    private static BluetoothAdapter bluetoothAdapter;
     private boolean connected;
 
+    public static BluetoothAdapter getAdapter() {
+        if (bluetoothAdapter != null)
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        return bluetoothAdapter;
+    }
+
     public BtManager() {
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
     public boolean isBtAdaptorEnabled() {
-        return mBluetoothAdapter.isEnabled();
+        return getAdapter().isEnabled();
     }
 
     public boolean isConnected() {
         return connected;
     }
 
-    private String getELM327Address(String OBDII) {
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+    public static String getELM327Address(String OBDII) {
+        Set<BluetoothDevice> pairedDevices = getAdapter().getBondedDevices();
         String deviceAddress = null;
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
@@ -50,10 +55,10 @@ public class BtManager {
         BluetoothSocket bluetoothSocket = null, sockFallback = null;
         String ELM327Address = getELM327Address("OBDII");
         if (!TextUtils.isEmpty(ELM327Address)) {
-            BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(ELM327Address);
+            BluetoothDevice device = getAdapter().getRemoteDevice(ELM327Address);
 
-            UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-            //UUID uuid = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
+            //UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+            UUID uuid = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
             try {
                 bluetoothSocket = device.createRfcommSocketToServiceRecord(uuid);
                 bluetoothSocket.connect();

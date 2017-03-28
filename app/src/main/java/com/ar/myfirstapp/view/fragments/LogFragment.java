@@ -12,11 +12,10 @@ import android.widget.TextView;
 
 import com.ar.myfirstapp.MainActivity;
 import com.ar.myfirstapp.R;
-import com.ar.myfirstapp.elm.ELM327;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.parser.Parser;
 import com.ar.myfirstapp.obd2.saej1979.Mode1;
-import com.ar.myfirstapp.view.adapter.OBDItemAdapter;
+import com.ar.myfirstapp.view.DeviceService;
 
 import java.util.List;
 
@@ -67,10 +66,10 @@ public class LogFragment extends BaseFragment {
                     if (message.startsWith("m1")) {
                         Command c = Mode1.getCommand(message.split(" ")[1]);
                         if (c != null)
-                            device.send(c);
+                            DeviceService.getInstance().send(c);
                         return;
                     }
-                    device.send(new Command("", message + "\r", "", new Parser() {
+                    DeviceService.getInstance().send(new Command("", message + "\r", "", new Parser() {
                         @Override
                         public void parse(Command command) {
                             byte[] rawResp = command.getRawResp();

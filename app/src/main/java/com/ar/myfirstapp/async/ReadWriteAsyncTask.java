@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.os.Message;
 import android.util.Log;
 
-import com.ar.myfirstapp.elm.ELM327;
 import com.ar.myfirstapp.obd2.Command;
+import com.ar.myfirstapp.utils.Constants;
 import com.ar.myfirstapp.view.ResponseHandler;
 
 import java.io.ByteArrayOutputStream;
@@ -147,7 +147,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
             if (avail == 0) {
                 synchronized (is) {
                     try {
-                        is.wait(ELM327.waitTime);
+                        is.wait(Constants.ELMWaitTime);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                         return null;
