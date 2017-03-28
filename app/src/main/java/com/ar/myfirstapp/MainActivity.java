@@ -62,58 +62,12 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    /**
-     * The Handler that gets information back from the BluetoothChatService
-     */
-    private final Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case DeviceService.MESSAGE_TYPE.STATE_CHANGE:
-                    switch (msg.arg1) {
-                        case DeviceService.BLUETOOTH_STATE.CONNECTED:
-                            //setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
-                            //mConversationArrayAdapter.clear();
-                            break;
-                        case DeviceService.BLUETOOTH_STATE.CONNECTING:
-                            //setStatus(R.string.title_connecting);
-                            break;
-                        case DeviceService.BLUETOOTH_STATE.NONE:
-                            //setStatus(R.string.title_not_connected);
-                            break;
-                    }
-                    break;
-                case DeviceService.MESSAGE_TYPE.WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    String writeMessage = new String(writeBuf);
-                    //mConversationArrayAdapter.add("Me:  " + writeMessage);
-                    break;
-                case DeviceService.MESSAGE_TYPE.READ:
-                    byte[] readBuf = (byte[]) msg.obj;
-                    // construct a string from the valid bytes in the buffer
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-                    //mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
-                    break;
-                case DeviceService.MESSAGE_TYPE.DEVICE_NAME:
-                    // save the connected device's name
-                    //mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
-                    //Toast.makeText(this, "Connected to " + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
-                    break;
-                case DeviceService.MESSAGE_TYPE.TOAST:
-                    Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TAG_TOAST), Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        }
-    };
-
-
     void initiateConnection() {
         if (deviceService == null) {
             BluetoothDevice device = BtManager.getAdapter().getRemoteDevice(BtManager.getELM327Address("OBDII"));
             deviceService = DeviceService.getInstance();
             deviceService.init();
-            deviceService.setHandler(handler);
+            deviceService.setHandler(responseHandler);
             deviceService.connect(device);
             fireTasks();
         }
