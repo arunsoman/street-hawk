@@ -27,12 +27,12 @@ import com.ar.myfirstapp.view.fragments.FragmentFactory;
 import com.ar.myfirstapp.view.fragments.LogFragment;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
 
     private DeviceManager deviceManager;
     public ResponseHandler responseHandler;

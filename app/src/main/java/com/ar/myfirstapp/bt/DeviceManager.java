@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.ar.myfirstapp.MainActivity;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.utils.Constants;
 import com.ar.myfirstapp.utils.Logger;
@@ -175,7 +176,7 @@ public class DeviceManager {
 
             // Get a BluetoothSocket for a connection with the given BluetoothDevice
             try {
-                tmp = device.createRfcommSocketToServiceRecord(UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66"));
+                tmp = device.createRfcommSocketToServiceRecord(UUID.fromString(MainActivity.UUID));
             } catch (IOException e) {
                 Logger.e(TAG, "ConnectThread#ConnectThread() createRfcommSocketToServiceRecord Excpetion", e);
             }
