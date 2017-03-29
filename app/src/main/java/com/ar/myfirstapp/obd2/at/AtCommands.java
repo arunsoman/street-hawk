@@ -16,9 +16,9 @@ public class AtCommands {
     public static final Command ATSP0= new Command("AT ", "sp 0", "Automatic protocol detection", okParser);
     public static final Command ATSP1= new Command("AT ", "sp 1", "SAE J1850 PWM (41.6 kbaud)", okParser);
     public static final Command ATSP2= new Command("AT ", "sp 2", "SAE J1850 VPW (10.4 kbaud)", okParser);
-    public static final Command ATSP3= new Command("AT ", "sp 3", "ISO 9141-2 (5 baud init, 10.4 kbaud)", okParser);
-    public static final Command ATSP4= new Command("AT ", "sp 4", "ISO 14230-4 KWP (5 baud init, 10.4 kbaud)", okParser);
-    public static final Command ATSP5= new Command("AT ", "sp 5", "ISO 14230-4 KWP (fast init, 10.4 kbaud)", okParser);
+    public static final Command ATSP3= new Command("AT ", "sp 3", "ISO 9141-2 (5 baud initialize, 10.4 kbaud)", okParser);
+    public static final Command ATSP4= new Command("AT ", "sp 4", "ISO 14230-4 KWP (5 baud initialize, 10.4 kbaud)", okParser);
+    public static final Command ATSP5= new Command("AT ", "sp 5", "ISO 14230-4 KWP (fast initialize, 10.4 kbaud)", okParser);
     public static final Command ATSP6= new Command("AT ", "sp 6", "ISO 15765-4 CAN (11 bit ID, 500 kbaud)", okParser);
     public static final Command ATSP7= new Command("AT ", "sp 7", "ISO 15765-4 CAN (29 bit ID, 500 kbaud)", okParser);
     public static final Command ATSP8= new Command("AT ", "sp 8", "ISO 15765-4 CAN (11 bit ID, 250 kbaud)", okParser);

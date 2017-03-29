@@ -2,6 +2,7 @@ package com.ar.myfirstapp.view;
 
 import android.os.Handler;
 
+import com.ar.myfirstapp.bt.DeviceManager;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
 import com.ar.myfirstapp.view.custom.OBDView;
@@ -11,7 +12,7 @@ import com.ar.myfirstapp.view.custom.OBDView;
  */
 
 public class ResponseViewer implements OBDView {
-    public String display(final Command command) {
+    public void display(final Command command) {
         if (command.getCommandType() == Command.CommandType.MODEX_DIS) {
             new Handler().post(new Runnable() {
                 @Override
@@ -19,10 +20,9 @@ public class ResponseViewer implements OBDView {
                     Command[] cmds = ModeFactory.getSupportedPidCommands(command);
                     for (Command c : cmds)
                         if (c != null)
-                            DeviceService.getInstance().send(c);
+                            DeviceManager.getInstance().send(c);
                 }
             });
         }
-        return (command.toString());
     }
 }

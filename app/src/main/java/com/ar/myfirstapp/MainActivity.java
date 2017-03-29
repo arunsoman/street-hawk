@@ -7,45 +7,40 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.ar.myfirstapp.bt.BtManager;
+import com.ar.myfirstapp.bt.DeviceManager;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
 import com.ar.myfirstapp.utils.Utils;
-import com.ar.myfirstapp.utils.Constants;
-import com.ar.myfirstapp.view.DeviceService;
 import com.ar.myfirstapp.view.ResponseHandler;
-import com.ar.myfirstapp.view.ResponseViewer;
 import com.ar.myfirstapp.view.fragments.BaseFragment;
 import com.ar.myfirstapp.view.fragments.FragmentFactory;
 import com.ar.myfirstapp.view.fragments.LogFragment;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private BtManager btManager;
-    private DeviceService deviceService;
-
+    private DeviceManager deviceManager;
     public ResponseHandler responseHandler;
 
     private ViewPager viewPager;
     private TextView textViewTitle;
 
-    private List<Command>[] fragmentData = new List[FragmentFactory.getLength()];
+    private Map<Integer, Command>[] fragmentData = new HashMap[FragmentFactory.getLength()];
 
     private BroadcastReceiver bluetoothStateReceiver = new BroadcastReceiver() {
         @Override
@@ -62,19 +57,23 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
     void initiateConnection() {
-        if (deviceService == null) {
-            BluetoothDevice device = BtManager.getAdapter().getRemoteDevice(BtManager.getELM327Address("OBDII"));
-            deviceService = DeviceService.getInstance();
-            deviceService.init();
-            deviceService.setHandler(responseHandler);
-            deviceService.connect(device);
-            fireTasks();
+        if (deviceManager == null) {
+            deviceManager = DeviceManager.getInstance();
+            deviceManager.setHandler(responseHandler);
+            deviceManager.initialize();
+            String deviceAddress = deviceManager.getELM327Address("OBDII");
+            if (!TextUtils.isEmpty(deviceAddress)) {
+                BluetoothDevice device = deviceManager.getBluetoothAdapter().getRemoteDevice(deviceAddress);
+                deviceManager.connect(device);
+                fireTasks();
+            }
         }
     }
 
     void terminateConnection() {
-        deviceService.stop();
+        deviceManager.stop();
     }
 
     @Override
@@ -88,15 +87,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initUI();
-        btManager = new BtManager();
+
         responseHandler = new ResponseHandler(this);
         bluetoothStateReceiver.onReceive(this, new Intent(BluetoothAdapter.ACTION_STATE_CHANGED));
 
-        ResponseViewer tvLog = new ResponseViewer();
-        responseHandler.registerDisplay(tvLog, "*");
-
         initiateConnection();
-
     }
 
     @Override
@@ -188,38 +183,38 @@ public class MainActivity extends AppCompatActivity {
         try {
             for (Command proto : AtCommands.protoIter) {
                 for (Command initC : AtCommands.initCommands)
-                    deviceService.send(initC);
-                deviceService.send(proto);
-                //             deviceService.send(ModeFactory.getCommand("m1", "20"));
+                    deviceManager.send(initC);
+                deviceManager.send(proto);
+                //             deviceManager.send(ModeFactory.getCommand("m1", "20"));
                 for (String str : ModeFactory.getSupportedModes()) {
-                    deviceService.send(ModeFactory.getDiscoveryCommand(str));
+                    deviceManager.send(ModeFactory.getDiscoveryCommand(str));
                 }
                 //for (Command c: AtCommands.testCommands)
-                //    deviceService.send(c);
+                //    deviceManager.send(c);
             }
 //            for(Command c: AtCommands.initCanScan){
-//                    deviceService.send(c);
+//                    deviceManager.send(c);
 //            }
-// //           deviceService.getMode1PIDs();
-            //           deviceService.sendCommand(AtCommands.activitMonitor);
+// //           deviceManager.getMode1PIDs();
+            //           deviceManager.sendCommand(AtCommands.activitMonitor);
             /*
             Command command = Mode1.getCommand("00");
-            deviceService.sendCommand(command);
+            deviceManager.sendCommand(command);
             command = Mode1.getCommand("1C");
-            deviceService.sendCommand(command);
+            deviceManager.sendCommand(command);
             command = Mode1.getCommand("12");
-            deviceService.sendCommand(command);
+            deviceManager.sendCommand(command);
             command = Mode1.getCommand("51");
-            deviceService.sendCommand(command);
+            deviceManager.sendCommand(command);
             command = Mode1.getCommand("05");
-            deviceService.sendCommand(command);
-            deviceService.sendCommand(Mode1.getCommand("00"));
-            deviceService.sendCommand(Mode1.getCommand("01"));
-            deviceService.sendCommand(Mode1.getCommand("04"));
-            deviceService.sendCommand(Mode1.getCommand("0C"));
-            deviceService.sendCommand(Mode1.getCommand("0D"));
-            deviceService.initSequence();
-            //deviceService.queryCan((byte) 1, (byte) (0x7DF));
+            deviceManager.sendCommand(command);
+            deviceManager.sendCommand(Mode1.getCommand("00"));
+            deviceManager.sendCommand(Mode1.getCommand("01"));
+            deviceManager.sendCommand(Mode1.getCommand("04"));
+            deviceManager.sendCommand(Mode1.getCommand("0C"));
+            deviceManager.sendCommand(Mode1.getCommand("0D"));
+            deviceManager.initSequence();
+            //deviceManager.queryCan((byte) 1, (byte) (0x7DF));
             */
 
         } catch (Exception e) {
@@ -241,20 +236,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void addData(int index, Command command) {
         try {
-            int loc = fragmentData[index].indexOf(command);
-            if (loc == -1) {
-                fragmentData[index].add(Integer.parseInt(command.getPid(), 16), command);
-            } else {
-                fragmentData[index].set(Integer.parseInt(command.getPid(), 16), command);
-
-            }
+            fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
         } catch (NullPointerException e) {
-            fragmentData[index] = new LinkedList<>();
-            fragmentData[index].add(Integer.parseInt(command.getPid(), 16), command);
+            fragmentData[index] = new HashMap<>();
+            try {
+                fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
+            } catch (Exception ignored) {
+            }
+        } catch (IndexOutOfBoundsException ignored) {
+        } catch (NumberFormatException ignored) {
+
         }
     }
 
-    public List<Command> getCommands(int index) {
+    public Map<Integer, Command> getCommands(int index) {
         return fragmentData[index];
     }
 

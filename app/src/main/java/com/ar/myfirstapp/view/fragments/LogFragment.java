@@ -15,9 +15,10 @@ import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.parser.Parser;
 import com.ar.myfirstapp.obd2.saej1979.Mode1;
-import com.ar.myfirstapp.view.DeviceService;
+import com.ar.myfirstapp.bt.DeviceManager;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by amal.george on 24-03-2017
@@ -45,9 +46,9 @@ public class LogFragment extends BaseFragment {
     @Override
     protected void updateData() {
         Bundle bundle = getArguments();
-        List<Command> commands = ((MainActivity) getActivity()).getCommands(bundle.getInt("position"));
+        Map<Integer, Command> commands = ((MainActivity) getActivity()).getCommands(bundle.getInt("position"));
         if (commands != null) {
-            for (Command command : commands) {
+            for (Command command : commands.values()) {
                 textViewLog.append(command.toString());
             }
         }
@@ -66,10 +67,10 @@ public class LogFragment extends BaseFragment {
                     if (message.startsWith("m1")) {
                         Command c = Mode1.getCommand(message.split(" ")[1]);
                         if (c != null)
-                            DeviceService.getInstance().send(c);
+                            DeviceManager.getInstance().send(c);
                         return;
                     }
-                    DeviceService.getInstance().send(new Command("", message + "\r", "", new Parser() {
+                    DeviceManager.getInstance().send(new Command("", message + "\r", "", new Parser() {
                         @Override
                         public void parse(Command command) {
                             byte[] rawResp = command.getRawResp();

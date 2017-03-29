@@ -1,10 +1,8 @@
 package com.ar.myfirstapp.elm;
 
 import android.bluetooth.BluetoothSocket;
-import android.os.Handler;
 
 import com.ar.myfirstapp.async.ReadWriteAsyncTask;
-import com.ar.myfirstapp.bt.BtManager;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.view.ResponseHandler;
 

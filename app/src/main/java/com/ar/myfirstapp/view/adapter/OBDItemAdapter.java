@@ -9,18 +9,19 @@ import android.widget.TextView;
 
 import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.view.DeviceService;
+import com.ar.myfirstapp.bt.DeviceManager;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by amal.george on 24-03-2017
  */
 
 public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHolder> {
-    private List<Command> commands;
+    private Map<Integer,Command> commands;
 
-    public OBDItemAdapter(List<Command> commands) {
+    public OBDItemAdapter(Map<Integer,Command> commands) {
         this.commands = commands;
     }
 
@@ -37,7 +38,7 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
         holder.linearLayoutItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DeviceService.getInstance().send(command);
+                DeviceManager.getInstance().send(command);
             }
         });
     }
