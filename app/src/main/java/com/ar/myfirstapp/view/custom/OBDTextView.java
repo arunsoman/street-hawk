@@ -18,6 +18,6 @@ public class OBDTextView extends AppCompatTextView implements OBDView {
 
     @Override
     public void display(Command c) {
-        setText(c.toString());
+        setText(c.getName());
     }
 }

@@ -1,16 +1,13 @@
 package com.ar.myfirstapp.view;
 
-import android.app.Activity;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
-import com.ar.myfirstapp.MainActivity;
 import com.ar.myfirstapp.bt.DeviceManager;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
 import com.ar.myfirstapp.utils.Constants;
-import com.ar.myfirstapp.utils.Logger;
 import com.ar.myfirstapp.view.custom.OBDView;
 
 import java.lang.ref.WeakReference;
@@ -88,10 +85,12 @@ public class ResponseHandler extends Handler {
                     new Handler().post(new Runnable() {
                         @Override
                         public void run() {
-                            Command[] cmds = ModeFactory.getSupportedPidCommands(command);
-                            for (Command c : cmds)
-                                if (c != null)
-                                    DeviceManager.getInstance().send(c);
+                            Command[] commands = ModeFactory.getSupportedPidCommands(command);
+                            if (commands != null) {
+                                for (Command c : commands)
+                                    if (c != null)
+                                        DeviceManager.getInstance().send(c);
+                            }
                         }
                     });
                 }

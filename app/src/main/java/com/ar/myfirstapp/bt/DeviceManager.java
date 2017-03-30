@@ -8,7 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.ar.myfirstapp.MainActivity;
+import com.ar.myfirstapp.view.MainActivity;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.utils.Constants;
 import com.ar.myfirstapp.utils.Logger;
@@ -52,7 +52,7 @@ public class DeviceManager {
     }
 
     /**
-     * Constructor. Prepares a new BluetoothChat session.
+     * Constructor. Prepares a new DeviceManager instance
      */
     private DeviceManager() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();

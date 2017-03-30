@@ -10,14 +10,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.ar.myfirstapp.MainActivity;
+import com.ar.myfirstapp.view.MainActivity;
 import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.parser.Parser;
 import com.ar.myfirstapp.obd2.saej1979.Mode1;
 import com.ar.myfirstapp.bt.DeviceManager;
 
-import java.util.List;
 import java.util.Map;
 
 /**

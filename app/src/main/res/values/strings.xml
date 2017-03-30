@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">myFirstApp</string>
+
+    <string name="error_bluetooth">Bluetooth not enabled</string>
 </resources>

@@ -1,5 +1,6 @@
-package com.ar.myfirstapp;
+package com.ar.myfirstapp.view;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -15,16 +16,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.bt.DeviceManager;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
 import com.ar.myfirstapp.utils.Utils;
-import com.ar.myfirstapp.view.ResponseHandler;
 import com.ar.myfirstapp.view.fragments.BaseFragment;
 import com.ar.myfirstapp.view.fragments.FragmentFactory;
 import com.ar.myfirstapp.view.fragments.LogFragment;
+import com.ar.myfirstapp.view.fragments.OBDFragment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +36,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
+    //public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
 
     private DeviceManager deviceManager;
     public ResponseHandler responseHandler;
@@ -173,8 +177,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Utils.BT_INT_REQ) {
-            bluetoothStateReceiver.onReceive(this, new Intent(BluetoothAdapter.ACTION_STATE_CHANGED));
+        switch (requestCode) {
+            case Utils.BT_INT_REQ:
+                if (resultCode == Activity.RESULT_OK)
+                    bluetoothStateReceiver.onReceive(this, new Intent(BluetoothAdapter.ACTION_STATE_CHANGED));
+                else {
+                    Toast.makeText(MainActivity.this, R.string.error_bluetooth, Toast.LENGTH_SHORT).show();
+                }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
