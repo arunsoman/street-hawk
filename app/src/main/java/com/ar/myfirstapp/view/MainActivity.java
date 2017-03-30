@@ -39,8 +39,8 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements ResponseHandler.ResponseListener {
 
-    public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
-    //public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
+    //public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
+    public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
 
     private DeviceManager deviceManager;
     public ResponseHandler responseHandler = new ResponseHandler();
@@ -237,9 +237,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
                 fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
             } catch (Exception ignored) {
             }
-        } catch (IndexOutOfBoundsException ignored) {
-        } catch (NumberFormatException ignored) {
-
+        } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
         }
     }
 
@@ -309,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
         @Override
         public int getCount() {
-            return 11;
+            return FragmentFactory.getLength();
         }
     }
 }
