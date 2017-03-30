@@ -229,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
     }
 
     private void addData(int index, Command command) {
+        if (command == null) return;
         try {
             fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
         } catch (NullPointerException e) {
@@ -309,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
         @Override
         public int getCount() {
-            return 11;
+            return FragmentFactory.getLength();
         }
     }
 }

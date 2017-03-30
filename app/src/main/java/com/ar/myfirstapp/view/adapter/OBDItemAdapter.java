@@ -33,14 +33,14 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
     @Override
     public void onBindViewHolder(OBDItemAdapter.ViewHolder holder, int position) {
         final Command command = commands.get(position);
-        holder.textViewOBDKey.display(command);
-        holder.textViewOBDValue.setText(command.toString());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DeviceManager.getInstance().send(command);
-            }
-        });
+            holder.textViewOBDKey.display(command);
+            holder.textViewOBDValue.setText(command.toString());
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    DeviceManager.getInstance().send(command);
+                }
+            });
     }
 
     @Override
