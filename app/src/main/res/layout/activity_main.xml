@@ -18,5 +18,14 @@
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/buttonConnect"
         android:layout_below="@+id/textViewTitle" />
+
+    <Button
+        android:id="@+id/buttonConnect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Connect"
+        android:visibility="gone" />
 </RelativeLayout>

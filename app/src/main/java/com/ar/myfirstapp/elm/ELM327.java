@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothSocket;
 
 import com.ar.myfirstapp.async.ReadWriteAsyncTask;
 import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.view.ResponseHandler;
+import com.ar.myfirstapp.bt.ResponseHandler;
 
 import java.io.IOException;
 

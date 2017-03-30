@@ -34,7 +34,7 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
     public void onBindViewHolder(OBDItemAdapter.ViewHolder holder, int position) {
         final Command command = commands.get(position);
         holder.textViewOBDKey.display(command);
-        holder.textViewOBDKey.setText(command.toString());
+        holder.textViewOBDValue.setText(command.toString());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

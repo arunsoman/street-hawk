@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -15,11 +16,14 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.bt.DeviceManager;
+import com.ar.myfirstapp.bt.ResponseHandler;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
@@ -33,15 +37,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ResponseHandler.ResponseListener {
 
-    //public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
-    public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
+    public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
+    //public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
 
     private DeviceManager deviceManager;
-    public ResponseHandler responseHandler;
+    public ResponseHandler responseHandler = new ResponseHandler();
 
     private ViewPager viewPager;
+    private Button buttonConnect;
     private TextView textViewTitle;
 
     private Map<Integer, Command>[] fragmentData = new HashMap[FragmentFactory.getLength()];
@@ -62,17 +67,12 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    void initiateConnection() {
-        if (deviceManager == null) {
-            deviceManager = DeviceManager.getInstance();
-            deviceManager.setHandler(responseHandler);
-            deviceManager.initialize();
-            String deviceAddress = deviceManager.getELM327Address("OBDII");
-            if (!TextUtils.isEmpty(deviceAddress)) {
-                BluetoothDevice device = deviceManager.getBluetoothAdapter().getRemoteDevice(deviceAddress);
-                deviceManager.connect(device);
-                fireTasks();
-            }
+    void startConnection() {
+        String deviceAddress = deviceManager.getELM327Address("OBDII");
+        if (!TextUtils.isEmpty(deviceAddress)) {
+            BluetoothDevice device = deviceManager.getBluetoothAdapter().getRemoteDevice(deviceAddress);
+            deviceManager.connect(device);
+            fireTasks();
         }
     }
 
@@ -92,10 +92,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initUI();
 
-        responseHandler = new ResponseHandler(this);
         bluetoothStateReceiver.onReceive(this, new Intent(BluetoothAdapter.ACTION_STATE_CHANGED));
 
-        initiateConnection();
+        if (deviceManager == null) {
+            deviceManager = DeviceManager.getInstance();
+            responseHandler.setOnStateChangedListener(this);
+            deviceManager.setHandler(responseHandler);
+            deviceManager.initialize();
+            startConnection();
+        }
     }
 
     @Override
@@ -113,6 +118,8 @@ public class MainActivity extends AppCompatActivity {
     private void initUI() {
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         textViewTitle = (TextView) findViewById(R.id.textViewTitle);
+        buttonConnect = (Button) findViewById(R.id.buttonConnect);
+
         ScreenSlidePagerAdapter pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -133,37 +140,12 @@ public class MainActivity extends AppCompatActivity {
         });
         viewPager.setCurrentItem(FragmentFactory.getTitle().length);
 
-        /*
-        buttonScan.setOnClickListener(new View.OnClickListener() {
+        buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                buttonScan.setActivated(false);
-                new Handler().post(new Runnable() {
-                    BluetoothSocket bs;
-
-                    @Override
-                    public void run() {
-                        try {
-                            if (btManager == null || !btManager.isConnected()) {
-                                bs = btManager.connect();
-                            }
-                            if (btManager.isConnected()) {
-                                device1 = new ELM327(bs, responseHandler);
-                                fireTasks();
-                            } else {
-                                //TODO
-                                buttonScan.setActivated(true);
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            //TODO
-                        }
-                    }
-                });
-
+                startConnection();
             }
         });
-        */
     }
 
     @Override
@@ -263,6 +245,47 @@ public class MainActivity extends AppCompatActivity {
 
     public Map<Integer, Command> getCommands(int index) {
         return fragmentData[index];
+    }
+
+    @Override
+    public void onStateChanged(int state) {
+        buttonConnect.setVisibility(state == DeviceManager.BLUETOOTH_STATE.NONE ? View.VISIBLE : View.GONE);
+        if (state == DeviceManager.BLUETOOTH_STATE.CONNECTING) {
+            Toast.makeText(this, "Connecting", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onConnected(String connectedDeviceName) {
+        Toast.makeText(this, "Connected to " + connectedDeviceName, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onWriteCommand(Command command) {
+
+    }
+
+    @Override
+    public void onReadCommand(final Command command) {
+        if (command.getCommandType() == Command.CommandType.MODEX_DIS) {
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    Command[] commands = ModeFactory.getSupportedPidCommands(command);
+                    if (commands != null) {
+                        for (Command c : commands)
+                            if (c != null)
+                                DeviceManager.getInstance().send(c);
+                    }
+                }
+            });
+        }
+        show(command);
+    }
+
+    @Override
+    public void onNotification(String notificationText) {
+
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
