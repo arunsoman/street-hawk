@@ -1,4 +1,4 @@
-package com.ar.myfirstapp.view;
+package com.ar.myfirstapp.view.custom;
 
 import com.ar.myfirstapp.obd2.Command;
 
@@ -7,5 +7,5 @@ import com.ar.myfirstapp.obd2.Command;
  */
 
 public interface OBDView {
-    String display(Command c);
+    void display(Command c);
 }

@@ -1,7 +1,8 @@
-package com.ar.myfirstapp;
+package com.ar.myfirstapp.view;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothSocket;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,50 +12,44 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.NotificationCompatBase;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.ar.myfirstapp.bt.BtManager;
-import com.ar.myfirstapp.elm.ELM327;
+import com.ar.myfirstapp.R;
+import com.ar.myfirstapp.bt.DeviceManager;
+import com.ar.myfirstapp.bt.ResponseHandler;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
-import com.ar.myfirstapp.obd2.parser.Parser;
-import com.ar.myfirstapp.obd2.saej1979.Mode1;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
 import com.ar.myfirstapp.utils.Utils;
-import com.ar.myfirstapp.view.OBDView;
-import com.ar.myfirstapp.view.ResponseHandler;
-import com.ar.myfirstapp.view.ResponseViewer;
 import com.ar.myfirstapp.view.fragments.BaseFragment;
 import com.ar.myfirstapp.view.fragments.FragmentFactory;
 import com.ar.myfirstapp.view.fragments.LogFragment;
+import com.ar.myfirstapp.view.fragments.OBDFragment;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ResponseHandler.ResponseListener {
 
-    public static ELM327 device1;
-    private BtManager btManager;
+    public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
+    //public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
 
-    public ResponseHandler responseHandler;
+    private DeviceManager deviceManager;
+    public ResponseHandler responseHandler = new ResponseHandler();
 
     private ViewPager viewPager;
+    private Button buttonConnect;
     private TextView textViewTitle;
 
-    private BaseFragment[] fragments = new BaseFragment[FragmentFactory.getTitle().length];
-
-    private List<Command>[] fragmentData = new List[FragmentFactory.getTitle().length];
+    private Map<Integer, Command>[] fragmentData = new HashMap[FragmentFactory.getLength()];
 
     private BroadcastReceiver bluetoothStateReceiver = new BroadcastReceiver() {
         @Override
@@ -71,29 +66,24 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    void startFire() {
-        new Handler().post(new Runnable() {
-            BluetoothSocket bs;
 
-            @Override
-            public void run() {
-                try {
-                    if (btManager == null || !btManager.isConnected()) {
-                        bs = btManager.connect();
-                    }
-                    if (btManager.isConnected()) {
-                        device1 = new ELM327(bs, responseHandler);
-                        fireTasks();
-                    } else {
-                        //TODO
-                        //buttonScan.setActivated(true);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    //TODO
-                }
-            }
-        });
+    void startConnection() {
+        String deviceAddress = deviceManager.getELM327Address("OBDII");
+        if (!TextUtils.isEmpty(deviceAddress)) {
+            BluetoothDevice device = deviceManager.getBluetoothAdapter().getRemoteDevice(deviceAddress);
+            deviceManager.connect(device);
+            fireTasks();
+        }
+    }
+
+    void terminateConnection() {
+        deviceManager.stop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        terminateConnection();
     }
 
     @Override
@@ -101,29 +91,35 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initUI();
-        btManager = new BtManager();
-        responseHandler = new ResponseHandler(this);
+
         bluetoothStateReceiver.onReceive(this, new Intent(BluetoothAdapter.ACTION_STATE_CHANGED));
 
-        ResponseViewer tvLog = new ResponseViewer();
-        responseHandler.registerDisplay(tvLog, "*");
-
-        startFire();
+        if (deviceManager == null) {
+            deviceManager = DeviceManager.getInstance();
+            responseHandler.setOnStateChangedListener(this);
+            deviceManager.setHandler(responseHandler);
+            deviceManager.initialize();
+            startConnection();
+        }
     }
-
 
     @Override
     public void onBackPressed() {
+        /*
         if (viewPager.getCurrentItem() == 0) {
             super.onBackPressed();
         } else {
             viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
         }
+        */
+        super.onBackPressed();
     }
 
     private void initUI() {
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         textViewTitle = (TextView) findViewById(R.id.textViewTitle);
+        buttonConnect = (Button) findViewById(R.id.buttonConnect);
+
         ScreenSlidePagerAdapter pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -144,37 +140,12 @@ public class MainActivity extends AppCompatActivity {
         });
         viewPager.setCurrentItem(FragmentFactory.getTitle().length);
 
-        /*
-        buttonScan.setOnClickListener(new View.OnClickListener() {
+        buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                buttonScan.setActivated(false);
-                new Handler().post(new Runnable() {
-                    BluetoothSocket bs;
-
-                    @Override
-                    public void run() {
-                        try {
-                            if (btManager == null || !btManager.isConnected()) {
-                                bs = btManager.connect();
-                            }
-                            if (btManager.isConnected()) {
-                                device1 = new ELM327(bs, responseHandler);
-                                fireTasks();
-                            } else {
-                                //TODO
-                                buttonScan.setActivated(true);
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            //TODO
-                        }
-                    }
-                });
-
+                startConnection();
             }
         });
-        */
     }
 
     @Override
@@ -191,8 +162,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Utils.BT_INT_REQ) {
-            bluetoothStateReceiver.onReceive(this, new Intent(BluetoothAdapter.ACTION_STATE_CHANGED));
+        switch (requestCode) {
+            case Utils.BT_INT_REQ:
+                if (resultCode == Activity.RESULT_OK)
+                    bluetoothStateReceiver.onReceive(this, new Intent(BluetoothAdapter.ACTION_STATE_CHANGED));
+                else {
+                    Toast.makeText(MainActivity.this, R.string.error_bluetooth, Toast.LENGTH_SHORT).show();
+                }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -201,38 +177,38 @@ public class MainActivity extends AppCompatActivity {
         try {
             for (Command proto : AtCommands.protoIter) {
                 for (Command initC : AtCommands.initCommands)
-                    device1.send(initC);
-                device1.send(proto);
-                //             device1.send(ModeFactory.getCommand("m1", "20"));
+                    deviceManager.send(initC);
+                deviceManager.send(proto);
+                //             deviceManager.send(ModeFactory.getCommand("m1", "20"));
                 for (String str : ModeFactory.getSupportedModes()) {
-                    device1.send(ModeFactory.getDiscoveryCommand(str));
+                    deviceManager.send(ModeFactory.getDiscoveryCommand(str));
                 }
                 //for (Command c: AtCommands.testCommands)
-                //    device1.send(c);
+                //    deviceManager.send(c);
             }
 //            for(Command c: AtCommands.initCanScan){
-//                    device1.send(c);
+//                    deviceManager.send(c);
 //            }
-// //           device1.getMode1PIDs();
-            //           device1.sendCommand(AtCommands.activitMonitor);
+// //           deviceManager.getMode1PIDs();
+            //           deviceManager.sendCommand(AtCommands.activitMonitor);
             /*
             Command command = Mode1.getCommand("00");
-            device1.sendCommand(command);
+            deviceManager.sendCommand(command);
             command = Mode1.getCommand("1C");
-            device1.sendCommand(command);
+            deviceManager.sendCommand(command);
             command = Mode1.getCommand("12");
-            device1.sendCommand(command);
+            deviceManager.sendCommand(command);
             command = Mode1.getCommand("51");
-            device1.sendCommand(command);
+            deviceManager.sendCommand(command);
             command = Mode1.getCommand("05");
-            device1.sendCommand(command);
-            device1.sendCommand(Mode1.getCommand("00"));
-            device1.sendCommand(Mode1.getCommand("01"));
-            device1.sendCommand(Mode1.getCommand("04"));
-            device1.sendCommand(Mode1.getCommand("0C"));
-            device1.sendCommand(Mode1.getCommand("0D"));
-            device1.initSequence();
-            //device1.queryCan((byte) 1, (byte) (0x7DF));
+            deviceManager.sendCommand(command);
+            deviceManager.sendCommand(Mode1.getCommand("00"));
+            deviceManager.sendCommand(Mode1.getCommand("01"));
+            deviceManager.sendCommand(Mode1.getCommand("04"));
+            deviceManager.sendCommand(Mode1.getCommand("0C"));
+            deviceManager.sendCommand(Mode1.getCommand("0D"));
+            deviceManager.initSequence();
+            //deviceManager.queryCan((byte) 1, (byte) (0x7DF));
             */
 
         } catch (Exception e) {
@@ -254,21 +230,62 @@ public class MainActivity extends AppCompatActivity {
 
     private void addData(int index, Command command) {
         try {
-            int loc = fragmentData[index].indexOf(command);
-            if(loc == -1){
-                fragmentData[index].add(Integer.parseInt(command.getPid(), 16), command);
-            }else {
-                fragmentData[index].set(Integer.parseInt(command.getPid(), 16), command);
-
-            }
+            fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
         } catch (NullPointerException e) {
-            fragmentData[index] = new LinkedList<>();
-            fragmentData[index].add(Integer.parseInt(command.getPid(), 16), command);
+            fragmentData[index] = new HashMap<>();
+            try {
+                fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
+            } catch (Exception ignored) {
+            }
+        } catch (IndexOutOfBoundsException ignored) {
+        } catch (NumberFormatException ignored) {
+
         }
     }
 
-    public List<Command> getCommands(int index) {
+    public Map<Integer, Command> getCommands(int index) {
         return fragmentData[index];
+    }
+
+    @Override
+    public void onStateChanged(int state) {
+        buttonConnect.setVisibility(state == DeviceManager.BLUETOOTH_STATE.NONE ? View.VISIBLE : View.GONE);
+        if (state == DeviceManager.BLUETOOTH_STATE.CONNECTING) {
+            Toast.makeText(this, "Connecting", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onConnected(String connectedDeviceName) {
+        Toast.makeText(this, "Connected to " + connectedDeviceName, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onWriteCommand(Command command) {
+
+    }
+
+    @Override
+    public void onReadCommand(final Command command) {
+        if (command.getCommandType() == Command.CommandType.MODEX_DIS) {
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    Command[] commands = ModeFactory.getSupportedPidCommands(command);
+                    if (commands != null) {
+                        for (Command c : commands)
+                            if (c != null)
+                                DeviceManager.getInstance().send(c);
+                    }
+                }
+            });
+        }
+        show(command);
+    }
+
+    @Override
+    public void onNotification(String notificationText) {
+
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {

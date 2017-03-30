@@ -2,18 +2,14 @@ package com.ar.myfirstapp.async;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Message;
-import android.util.Log;
 
-import com.ar.myfirstapp.elm.ELM327;
 import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.view.ResponseHandler;
+import com.ar.myfirstapp.utils.Constants;
+import com.ar.myfirstapp.bt.ResponseHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -46,6 +42,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected Boolean doInBackground(Void... params) {
+        /*
         Bundle bundle = new Bundle(2);
         try (Pipe pipe = new Pipe(bluetoothSocket)) {
             Throwable tr = null;
@@ -85,6 +82,8 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
             e.printStackTrace();
             return false;
         }
+        */
+        return false;
     }
 
 
@@ -147,7 +146,7 @@ public class ReadWriteAsyncTask extends AsyncTask<Void, Void, Boolean> {
             if (avail == 0) {
                 synchronized (is) {
                     try {
-                        is.wait(ELM327.waitTime);
+                        is.wait(Constants.ELMWaitTime);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                         return null;

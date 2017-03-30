@@ -10,15 +10,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.ar.myfirstapp.MainActivity;
+import com.ar.myfirstapp.view.MainActivity;
 import com.ar.myfirstapp.R;
-import com.ar.myfirstapp.elm.ELM327;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.parser.Parser;
 import com.ar.myfirstapp.obd2.saej1979.Mode1;
-import com.ar.myfirstapp.view.adapter.OBDItemAdapter;
+import com.ar.myfirstapp.bt.DeviceManager;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by amal.george on 24-03-2017
@@ -46,9 +45,9 @@ public class LogFragment extends BaseFragment {
     @Override
     protected void updateData() {
         Bundle bundle = getArguments();
-        List<Command> commands = ((MainActivity) getActivity()).getCommands(bundle.getInt("position"));
+        Map<Integer, Command> commands = ((MainActivity) getActivity()).getCommands(bundle.getInt("position"));
         if (commands != null) {
-            for (Command command : commands) {
+            for (Command command : commands.values()) {
                 textViewLog.append(command.toString());
             }
         }
@@ -67,16 +66,18 @@ public class LogFragment extends BaseFragment {
                     if (message.startsWith("m1")) {
                         Command c = Mode1.getCommand(message.split(" ")[1]);
                         if (c != null)
-                            device.send(c);
+                            DeviceManager.getInstance().send(c);
                         return;
                     }
-                    device.send(new Command("", message + "\r", "", new Parser() {
+                    DeviceManager.getInstance().send(new Command("", message + "\r", "", new Parser() {
                         @Override
                         public void parse(Command command) {
                             byte[] rawResp = command.getRawResp();
                             StringBuilder sb = new StringBuilder();
-                            for (byte aByte : rawResp) {
-                                sb.append(aByte).append(' ');
+                            if (rawResp != null) {
+                                for (byte aByte : rawResp) {
+                                    sb.append(aByte).append(' ');
+                                }
                             }
                             command.setResult(sb.toString());
                         }

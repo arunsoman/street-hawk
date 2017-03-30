@@ -20,4 +20,8 @@ public class FragmentFactory {
                 "Log"
         };
     }
+
+    public static int getLength() {
+        return getTitle().length;
+    }
 }

@@ -1,4 +1,4 @@
-package com.ar.myfirstapp;
+package com.ar.myfirstapp.view.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,11 +8,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.ar.myfirstapp.view.MainActivity;
+import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.view.adapter.OBDItemAdapter;
-import com.ar.myfirstapp.view.fragments.BaseFragment;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by amal.george on 24-03-2017
@@ -32,7 +33,7 @@ public class OBDFragment extends BaseFragment {
     @Override
     protected void updateData() {
         Bundle bundle = getArguments();
-        List<Command> commands = ((MainActivity) getActivity()).getCommands(bundle.getInt("position"));
+        Map<Integer,Command> commands = ((MainActivity) getActivity()).getCommands(bundle.getInt("position"));
         if (commands != null) {
             OBDItemAdapter obdItemAdapter = new OBDItemAdapter(commands);
             recyclerView.setAdapter(obdItemAdapter);

@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    tools:context="com.ar.myfirstapp.MainActivity">
+    android:padding="4dp"
+    tools:context="com.ar.myfirstapp.view.MainActivity">
 
     <TextView
         android:id="@+id/textViewTitle"
@@ -18,5 +18,14 @@
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/buttonConnect"
         android:layout_below="@+id/textViewTitle" />
+
+    <Button
+        android:id="@+id/buttonConnect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Connect"
+        android:visibility="gone" />
 </RelativeLayout>

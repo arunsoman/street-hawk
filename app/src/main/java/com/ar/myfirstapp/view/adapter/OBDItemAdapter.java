@@ -1,27 +1,26 @@
 package com.ar.myfirstapp.view.adapter;
 
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.ar.myfirstapp.MainActivity;
 import com.ar.myfirstapp.R;
+import com.ar.myfirstapp.bt.DeviceManager;
 import com.ar.myfirstapp.obd2.Command;
+import com.ar.myfirstapp.view.custom.OBDTextView;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by amal.george on 24-03-2017
  */
 
 public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHolder> {
-    private List<Command> commands;
+    private Map<Integer, Command> commands;
 
-    public OBDItemAdapter(List<Command> commands) {
+    public OBDItemAdapter(Map<Integer, Command> commands) {
         this.commands = commands;
     }
 
@@ -34,11 +33,12 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
     @Override
     public void onBindViewHolder(OBDItemAdapter.ViewHolder holder, int position) {
         final Command command = commands.get(position);
-        holder.textViewOBDKey.setText(command.getName());
-        holder.linearLayoutItem.setOnClickListener(new View.OnClickListener() {
+        holder.textViewOBDKey.display(command);
+        holder.textViewOBDValue.setText(command.toString());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.device1.send(command);
+                DeviceManager.getInstance().send(command);
             }
         });
     }
@@ -48,14 +48,13 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
         return commands.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewOBDKey, textViewOBDValue;
-        LinearLayout linearLayoutItem;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        OBDTextView textViewOBDKey;
+        TextView textViewOBDValue;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
-            linearLayoutItem = (LinearLayout) itemView.findViewById(R.id.linearLayoutItem);
-            textViewOBDKey = (TextView) itemView.findViewById(R.id.textViewOBDKey);
+            textViewOBDKey = (OBDTextView) itemView.findViewById(R.id.textViewOBDKey);
             textViewOBDValue = (TextView) itemView.findViewById(R.id.textViewOBDValue);
         }
     }
