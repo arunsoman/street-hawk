@@ -35,8 +35,8 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
-    //public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
+    //public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
+    public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
 
     private DeviceManager deviceManager;
     public ResponseHandler responseHandler;
@@ -100,11 +100,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        /*
         if (viewPager.getCurrentItem() == 0) {
             super.onBackPressed();
         } else {
             viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
         }
+        */
+        super.onBackPressed();
     }
 
     private void initUI() {

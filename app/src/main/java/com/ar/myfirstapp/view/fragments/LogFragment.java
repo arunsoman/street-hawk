@@ -74,8 +74,10 @@ public class LogFragment extends BaseFragment {
                         public void parse(Command command) {
                             byte[] rawResp = command.getRawResp();
                             StringBuilder sb = new StringBuilder();
-                            for (byte aByte : rawResp) {
-                                sb.append(aByte).append(' ');
+                            if (rawResp != null) {
+                                for (byte aByte : rawResp) {
+                                    sb.append(aByte).append(' ');
+                                }
                             }
                             command.setResult(sb.toString());
                         }
