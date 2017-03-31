@@ -27,6 +27,7 @@ import com.ar.myfirstapp.bt.ResponseHandler;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
+import com.ar.myfirstapp.utils.Constants;
 import com.ar.myfirstapp.utils.Logger;
 import com.ar.myfirstapp.utils.Utils;
 import com.ar.myfirstapp.view.fragments.BaseFragment;
@@ -35,6 +36,8 @@ import com.ar.myfirstapp.view.fragments.LogFragment;
 import com.ar.myfirstapp.view.fragments.OBDFragment;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -53,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
     private TextView textViewTitle;
 
     private Map<Integer, Command>[] fragmentData = new HashMap[FragmentFactory.getLength()];
+    private List<Command> commandLog = new LinkedList<>();
 
     private BroadcastReceiver bluetoothStateReceiver = new BroadcastReceiver() {
         @Override
@@ -226,8 +230,8 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
             addData(index, command);
         } catch (NumberFormatException ignored) {
         } finally {
-            addData(FragmentFactory.getTitle().length, command);
-            sendBroadcast(new Intent("myfirstapp.refresh"));
+            commandLog.add(command);
+            sendBroadcast(new Intent(Constants.TAG_NOTIFICATION_REFRESH));
         }
     }
 
@@ -247,6 +251,10 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
     public Map<Integer, Command> getCommands(int index) {
         return fragmentData[index];
+    }
+
+    public List<Command> getCommandLog() {
+        return commandLog;
     }
 
     @Override
@@ -302,10 +310,10 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
                 fragment = new LogFragment();
             } else {
                 fragment = new OBDFragment();
+                Bundle bundle = new Bundle();
+                bundle.putInt("position", position);
+                fragment.setArguments(bundle);
             }
-            Bundle bundle = new Bundle();
-            bundle.putInt("position", position);
-            fragment.setArguments(bundle);
             return fragment;
         }
 

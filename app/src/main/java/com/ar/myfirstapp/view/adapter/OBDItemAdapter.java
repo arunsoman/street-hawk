@@ -9,7 +9,6 @@ import android.widget.TextView;
 import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.bt.DeviceManager;
 import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.view.custom.OBDTextView;
 
 import java.util.Map;
 
@@ -33,7 +32,7 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
     @Override
     public void onBindViewHolder(OBDItemAdapter.ViewHolder holder, int position) {
         final Command command = commands.get(position);
-        holder.textViewOBDKey.display(command);
+        holder.textViewOBDKey.setText(command.getName());
         holder.textViewOBDValue.setText(command.toString());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,12 +48,12 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        OBDTextView textViewOBDKey;
+        TextView textViewOBDKey;
         TextView textViewOBDValue;
 
         ViewHolder(View itemView) {
             super(itemView);
-            textViewOBDKey = (OBDTextView) itemView.findViewById(R.id.textViewOBDKey);
+            textViewOBDKey = (TextView) itemView.findViewById(R.id.textViewOBDKey);
             textViewOBDValue = (TextView) itemView.findViewById(R.id.textViewOBDValue);
         }
     }

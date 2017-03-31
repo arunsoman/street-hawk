@@ -3,6 +3,11 @@ package com.ar.myfirstapp.obd2;
 import com.ar.myfirstapp.obd2.parser.Parser;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+
+import javax.sql.CommonDataSource;
 
 
 public class Command {
@@ -14,8 +19,13 @@ public class Command {
         return id;
     }
 
-    public enum ResponseStatus{Unknown, Ok, UnSupportedReq, BadResponse, NoData, NO_DATA, UNABLE_TO_CONNECT, NetworkError};
-    public enum CommandType{Unknown, AT, MODEX, MODEX_DIS};
+    public enum ResponseStatus {Unknown, Ok, UnSupportedReq, BadResponse, NoData, NO_DATA, UNABLE_TO_CONNECT, NetworkError}
+
+    ;
+
+    public enum CommandType {Unknown, AT, MODEX, MODEX_DIS}
+
+    ;
 
     public byte[] getRequest() {
         return cmd;
@@ -42,19 +52,21 @@ public class Command {
     protected CommandType commandType = CommandType.Unknown;
 
 
-    private void populateReq(String mode, String id){
+    private void populateReq(String mode, String id) {
         commandId = mode.trim();
         this.id = id.trim();
         cmd = commandId.concat(" ").concat(this.id).concat("\r").getBytes();
     }
-    public Command(String modeID, String id, String name,  boolean discovery, Parser parser) {
+
+    public Command(String modeID, String id, String name, boolean discovery, Parser parser) {
         this.name = name;
         this.parser = parser;
         populateReq(modeID, id);
-        if(discovery)
+        if (discovery)
             commandType = CommandType.MODEX_DIS;
     }
-    public Command(String modeID, String id, String name,  Parser parser) {
+
+    public Command(String modeID, String id, String name, Parser parser) {
         this.name = name;
         this.parser = parser;
         populateReq(modeID, id);
@@ -73,14 +85,15 @@ public class Command {
     }
 
 
-    public void parse(){
+    public void parse() {
         parser.parse(this);
     }
 
-    private final static byte CR = (byte)('\r');
+    private final static byte CR = (byte) ('\r');
+
     private byte[] populateCmd(byte[] cmd) {
-       byte[] res;
-        if (cmd[cmd.length-1] != CR) {
+        byte[] res;
+        if (cmd[cmd.length - 1] != CR) {
             byte[] tmp = new byte[cmd.length + 1];
             System.arraycopy(cmd, 9, tmp, 0, cmd.length);
             tmp[tmp.length] = CR;
@@ -101,7 +114,7 @@ public class Command {
 
     @Override
     public String toString() {
-        String resp = (responseStatus== null || responseStatus != ResponseStatus.Ok) ?
+        String resp = (responseStatus == null || responseStatus != ResponseStatus.Ok) ?
                 ("RAW: " + Arrays.toString(rawResp) + "\n" + " responseStatus:" + responseStatus.toString()) :
                 ("Result: " + this.result + "\n");
         return "REQ:{ m:" + commandId + ", p:" + id + ", " + name + " bytes: " + Arrays.toString(cmd) + "}\n" + resp;
@@ -112,8 +125,11 @@ public class Command {
         return name;
     }
 
-    public void setRawResp(byte[] rawResp){this.rawResp = rawResp;}
-    public void setResult(String result){
+    public void setRawResp(byte[] rawResp) {
+        this.rawResp = rawResp;
+    }
+
+    public void setResult(String result) {
         this.result = result;
     }
 

@@ -17,6 +17,7 @@ import com.ar.myfirstapp.obd2.parser.Parser;
 import com.ar.myfirstapp.obd2.saej1979.Mode1;
 import com.ar.myfirstapp.bt.DeviceManager;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,10 +45,10 @@ public class LogFragment extends BaseFragment {
 
     @Override
     protected void updateData() {
-        Bundle bundle = getArguments();
-        Map<Integer, Command> commands = ((MainActivity) getActivity()).getCommands(bundle.getInt("position"));
+        textViewLog.setText("");
+        List<Command> commands = ((MainActivity) getActivity()).getCommandLog();
         if (commands != null) {
-            for (Command command : commands.values()) {
+            for (Command command : commands) {
                 textViewLog.append(command.toString());
             }
         }
