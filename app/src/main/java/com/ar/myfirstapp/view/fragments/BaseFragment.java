@@ -17,10 +17,6 @@ import com.ar.myfirstapp.utils.Constants;
 public abstract class BaseFragment extends Fragment {
     protected View rootView;
 
-    public BaseFragment() {
-
-    }
-
     @Override
     public void onResume() {
         super.onResume();

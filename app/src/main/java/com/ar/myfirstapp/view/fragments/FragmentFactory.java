@@ -6,8 +6,8 @@ package com.ar.myfirstapp.view.fragments;
 
 public class FragmentFactory {
     public static String[] getTitle() {
-        return new String[
-                ]{"Show current data",
+        return new String[]{
+                "Show current data",
                 "Show freeze frame data",
                 "Show stored Diagnostic Trouble Codes",
                 "Clear Diagnostic Trouble Codes and stored values",

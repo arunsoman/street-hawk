@@ -37,6 +37,9 @@ public class DeviceManager {
     private ConnectedThread connectedThread;
     private int currentState, newState;
 
+    public static final String SPP_UUID = "00001101-0000-1000-8000-00805F9B34FB";
+
+
     public static final class BLUETOOTH_STATE {
         public static final int NONE = 0;       // Initialization state.
         public static final int CONNECTING = 1; // Attempting an outgoing connection
@@ -176,7 +179,7 @@ public class DeviceManager {
 
             // Get a BluetoothSocket for a connection with the given BluetoothDevice
             try {
-                tmp = device.createRfcommSocketToServiceRecord(UUID.fromString(MainActivity.UUID));
+                tmp = device.createRfcommSocketToServiceRecord(UUID.fromString(SPP_UUID));
             } catch (IOException e) {
                 Logger.e(TAG, "ConnectThread#ConnectThread() createRfcommSocketToServiceRecord Excpetion", e);
             }

@@ -45,9 +45,6 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
     private static final String TAG = "MainActivity";
 
-    //public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
-    public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
-
     private DeviceManager deviceManager;
     public ResponseHandler responseHandler = new ResponseHandler();
 
@@ -223,21 +220,6 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
         }
     }
 
-
-    private void addData(int index, Command command) {
-        try {
-            fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
-        } catch (NullPointerException e) {
-            fragmentData[index] = new HashMap<>();
-            try {
-                fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
-            } catch (Exception exception) {
-                Logger.e(TAG, exception.toString());
-            }
-        } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
-        }
-    }
-
     public Map<Integer, Command> getCommands(int index) {
         return fragmentData[index];
     }
@@ -286,6 +268,20 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
         } finally {
             commandLog.add(command);
             sendBroadcast(new Intent(Constants.TAG_NOTIFICATION_REFRESH));
+        }
+    }
+
+    private void addData(int index, Command command) {
+        try {
+            fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
+        } catch (NullPointerException e) {
+            fragmentData[index] = new HashMap<>();
+            try {
+                fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
+            } catch (Exception exception) {
+                Logger.e(TAG, exception.toString());
+            }
+        } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
         }
     }
 
