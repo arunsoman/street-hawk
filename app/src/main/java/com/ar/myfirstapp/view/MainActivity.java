@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
     private Button buttonConnect;
     private TextView textViewTitle;
 
-    private Map<Integer, Command>[] fragmentData = new HashMap[FragmentFactory.getLength()];
+    private Map<Integer, Command>[] fragmentData = new HashMap[FragmentFactory.getLastIndex()];
     private List<Command> commandLog = new LinkedList<>();
 
     private BroadcastReceiver bluetoothStateReceiver = new BroadcastReceiver() {
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
             }
         });
-        viewPager.setCurrentItem(FragmentFactory.getTitle().length);
+        viewPager.setCurrentItem(FragmentFactory.getLastIndex());
 
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -224,17 +224,6 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
     }
 
 
-    public void show(Command command) {
-        try {
-            int index = Integer.parseInt(command.getCommandId(), 16);
-            addData(index, command);
-        } catch (NumberFormatException ignored) {
-        } finally {
-            commandLog.add(command);
-            sendBroadcast(new Intent(Constants.TAG_NOTIFICATION_REFRESH));
-        }
-    }
-
     private void addData(int index, Command command) {
         try {
             fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
@@ -290,23 +279,30 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
                 }
             });
         }
-        show(command);
+        try {
+            int index = Integer.parseInt(command.getCommandId(), 16);
+            addData(index, command);
+        } catch (NumberFormatException ignored) {
+        } finally {
+            commandLog.add(command);
+            sendBroadcast(new Intent(Constants.TAG_NOTIFICATION_REFRESH));
+        }
     }
 
     @Override
     public void onNotification(String notificationText) {
-
+        Toast.makeText(this, notificationText, Toast.LENGTH_SHORT).show();
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
-        public ScreenSlidePagerAdapter(FragmentManager fm) {
+        ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
             BaseFragment fragment;
-            if (position == FragmentFactory.getTitle().length - 1) {
+            if (position == FragmentFactory.getLastIndex()) {
                 fragment = new LogFragment();
             } else {
                 fragment = new OBDFragment();

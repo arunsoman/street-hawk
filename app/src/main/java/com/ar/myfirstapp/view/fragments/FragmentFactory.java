@@ -24,4 +24,8 @@ public class FragmentFactory {
     public static int getLength() {
         return getTitle().length;
     }
+
+    public static int getLastIndex() {
+        return getTitle().length - 1;
+    }
 }
