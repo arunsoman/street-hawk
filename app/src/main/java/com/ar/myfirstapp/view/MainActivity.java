@@ -27,6 +27,7 @@ import com.ar.myfirstapp.bt.ResponseHandler;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
+import com.ar.myfirstapp.utils.Logger;
 import com.ar.myfirstapp.utils.Utils;
 import com.ar.myfirstapp.view.fragments.BaseFragment;
 import com.ar.myfirstapp.view.fragments.FragmentFactory;
@@ -38,6 +39,8 @@ import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity implements ResponseHandler.ResponseListener {
+
+    private static final String TAG = "MainActivity";
 
     //public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
     public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
@@ -223,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
             addData(index, command);
         } catch (NumberFormatException ignored) {
         } finally {
-            addData(FragmentFactory.getTitle().length - 1, command);
+            addData(FragmentFactory.getTitle().length, command);
             sendBroadcast(new Intent("myfirstapp.refresh"));
         }
     }
@@ -235,7 +238,8 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
             fragmentData[index] = new HashMap<>();
             try {
                 fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
-            } catch (Exception ignored) {
+            } catch (Exception exception) {
+                Logger.e(TAG, exception.toString());
             }
         } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
         }
