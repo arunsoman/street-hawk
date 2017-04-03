@@ -424,7 +424,7 @@ public class DeviceManager {
             private Command sendRequestForResponse(Command command) throws IOException {
                 writeOs(command.getRequest());
                 handler.obtainMessage(MESSAGE_TYPE.WRITE, -1, -1, command).sendToTarget();
-                Logger.e(TAG, "Request Sent :" + command.toString());
+                Logger.d(TAG, "Request Sent :" + command.toString());
 
                 int avail = is.available();
                 if (avail == 0) {
@@ -497,7 +497,7 @@ public class DeviceManager {
                         command.setResponseStatus(Command.ResponseStatus.NetworkError);
                         connectionLost();
                     }
-                    Log.e(TAG, "Response Received : " + command.toString());
+                    Log.d(TAG, "Response Received : " + command.toString());
 
                 }
             } catch (IOException e) {

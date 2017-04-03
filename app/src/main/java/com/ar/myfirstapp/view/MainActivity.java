@@ -30,6 +30,8 @@ import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
 import com.ar.myfirstapp.utils.Constants;
 import com.ar.myfirstapp.utils.Logger;
 import com.ar.myfirstapp.utils.Utils;
+import com.ar.myfirstapp.view.custom.infinteviewpager.CircleIndicator;
+import com.ar.myfirstapp.view.custom.infinteviewpager.InfiniteViewPager;
 import com.ar.myfirstapp.view.fragments.BaseFragment;
 import com.ar.myfirstapp.view.fragments.FragmentFactory;
 import com.ar.myfirstapp.view.fragments.LogFragment;
@@ -48,9 +50,10 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
     private DeviceManager deviceManager;
     public ResponseHandler responseHandler = new ResponseHandler();
 
-    private ViewPager viewPager;
+    private InfiniteViewPager viewPager;
     private Button buttonConnect;
     private TextView textViewTitle;
+    private CircleIndicator circleIndicator;
 
     private Map<Integer, Command>[] fragmentData = new HashMap[FragmentFactory.getLastIndex()];
     private List<Command> commandLog = new LinkedList<>();
@@ -113,12 +116,15 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
     }
 
     private void initUI() {
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        viewPager = (InfiniteViewPager) findViewById(R.id.viewPager);
         textViewTitle = (TextView) findViewById(R.id.textViewTitle);
         buttonConnect = (Button) findViewById(R.id.buttonConnect);
+        circleIndicator = (CircleIndicator) findViewById(R.id.circleIndicator);
 
         ScreenSlidePagerAdapter pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
+        circleIndicator.setViewPager(viewPager);
+
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -127,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
             @Override
             public void onPageSelected(int position) {
-                textViewTitle.setText(FragmentFactory.getTitle()[position]);
+                textViewTitle.setText(FragmentFactory.getTitle()[position % FragmentFactory.getLength()]);
             }
 
             @Override
@@ -177,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
                     deviceManager.send(initC);
                 deviceManager.send(proto);
                 for (String str : ModeFactory.getSupportedModes()) {
-                    for (Command c: ModeFactory.getDiscoveryCommand(str))
+                    for (Command c : ModeFactory.getDiscoveryCommand(str))
                         deviceManager.send(c);
                 }
             }
@@ -230,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
         }
         try {
             int index = Integer.parseInt(command.getCommandId(), 16);
-            addData(index-1, command);
+            addData(index - 1, command);
         } catch (NumberFormatException ignored) {
         } finally {
             commandLog.add(command);
@@ -265,12 +271,12 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
         @Override
         public Fragment getItem(int position) {
             BaseFragment fragment;
-            if (position == FragmentFactory.getLastIndex()) {
+            if (position % FragmentFactory.getLength() == 0) {
                 fragment = new LogFragment();
             } else {
                 fragment = new OBDFragment();
                 Bundle bundle = new Bundle();
-                bundle.putInt("position", position);
+                bundle.putInt("position", position % FragmentFactory.getLastIndex());
                 fragment.setArguments(bundle);
             }
             return fragment;
