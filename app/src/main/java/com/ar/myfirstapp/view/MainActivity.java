@@ -109,13 +109,6 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
     @Override
     public void onBackPressed() {
-        /*
-        if (viewPager.getCurrentItem() == 0) {
-            super.onBackPressed();
-        } else {
-            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
-        }
-        */
         super.onBackPressed();
     }
 
@@ -183,37 +176,11 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
                 for (Command initC : AtCommands.initCommands)
                     deviceManager.send(initC);
                 deviceManager.send(proto);
-                //             deviceManager.send(ModeFactory.getCommand("m1", "20"));
                 for (String str : ModeFactory.getSupportedModes()) {
-                    deviceManager.send(ModeFactory.getDiscoveryCommand(str));
+                    for (Command c: ModeFactory.getDiscoveryCommand(str))
+                        deviceManager.send(c);
                 }
-                //for (Command c: AtCommands.testCommands)
-                //    deviceManager.send(c);
             }
-//            for(Command c: AtCommands.initCanScan){
-//                    deviceManager.send(c);
-//            }
-// //           deviceManager.getMode1PIDs();
-            //           deviceManager.sendCommand(AtCommands.activitMonitor);
-            /*
-            Command command = Mode1.getCommand("00");
-            deviceManager.sendCommand(command);
-            command = Mode1.getCommand("1C");
-            deviceManager.sendCommand(command);
-            command = Mode1.getCommand("12");
-            deviceManager.sendCommand(command);
-            command = Mode1.getCommand("51");
-            deviceManager.sendCommand(command);
-            command = Mode1.getCommand("05");
-            deviceManager.sendCommand(command);
-            deviceManager.sendCommand(Mode1.getCommand("00"));
-            deviceManager.sendCommand(Mode1.getCommand("01"));
-            deviceManager.sendCommand(Mode1.getCommand("04"));
-            deviceManager.sendCommand(Mode1.getCommand("0C"));
-            deviceManager.sendCommand(Mode1.getCommand("0D"));
-            deviceManager.initSequence();
-            //deviceManager.queryCan((byte) 1, (byte) (0x7DF));
-            */
 
         } catch (Exception e) {
             Log.e("MActivity", "NPE", e);
@@ -263,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
         }
         try {
             int index = Integer.parseInt(command.getCommandId(), 16);
-            addData(index, command);
+            addData(index-1, command);
         } catch (NumberFormatException ignored) {
         } finally {
             commandLog.add(command);

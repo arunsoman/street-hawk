@@ -1,6 +1,7 @@
 package com.ar.myfirstapp.view.adapter;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,8 @@ import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.bt.DeviceManager;
 import com.ar.myfirstapp.obd2.Command;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,10 +20,11 @@ import java.util.Map;
  */
 
 public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHolder> {
-    private Map<Integer, Command> commands;
+    private List<Command> commands;
 
     public OBDItemAdapter(Map<Integer, Command> commands) {
-        this.commands = commands;
+        this.commands = new LinkedList<>();
+        this.commands.addAll(commands.values());
     }
 
     @Override

@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
 import com.ar.myfirstapp.view.MainActivity;
 import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.obd2.Command;
@@ -64,8 +65,11 @@ public class LogFragment extends BaseFragment {
             public void onClick(View v) {
                 String message = editTextInput.getText().toString();
                 if (!TextUtils.isEmpty(message)) {
-                    if (message.startsWith("m1")) {
-                        Command c = Mode1.getCommand(message.split(" ")[1]);
+                    if (message.startsWith("m")) {
+                        String args[] = message.split(" ");
+                        Command c = ModeFactory.getCommand(
+                                args[0].replace("m", ""),
+                                args[1]);
                         if (c != null)
                             DeviceManager.getInstance().send(c);
                         return;

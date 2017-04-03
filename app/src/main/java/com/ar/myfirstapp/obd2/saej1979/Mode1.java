@@ -448,8 +448,17 @@ public class Mode1 implements Mode {
     };
 
 
-    public static Command getCommand(String index) {
+    public Command getCommand(String index) {
         return commands.get(index);
+    }
+
+    @Override
+    public Command[] getDiscoveryCommands() {
+        return new Command[]{commands.get("00"),
+                commands.get("20"),
+                commands.get("40"),
+                commands.get("60"),
+                commands.get("80")};
     }
 
     private static class Aby2point55Parser extends SaeJ1979ResponseParser{
