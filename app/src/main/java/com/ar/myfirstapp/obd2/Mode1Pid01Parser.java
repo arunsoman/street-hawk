@@ -108,7 +108,7 @@ public class Mode1Pid01Parser extends Parser {
         return -1;
     }
 /*
-    public static final ResponseHandler m1Pid1ResponseHandler = new AbstractResponseHandler() {
+    public static final DeviceResponseHandler m1Pid1ResponseHandler = new AbstractResponseHandler() {
 
         @Override
         public void parse()  {

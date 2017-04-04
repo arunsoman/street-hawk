@@ -21,11 +21,7 @@ public class Command {
 
     public enum ResponseStatus {Unknown, Ok, UnSupportedReq, BadResponse, NoData, NO_DATA, UNABLE_TO_CONNECT, NetworkError}
 
-    ;
-
     public enum CommandType {Unknown, AT, MODEX, MODEX_DIS}
-
-    ;
 
     public byte[] getRequest() {
         return cmd;
