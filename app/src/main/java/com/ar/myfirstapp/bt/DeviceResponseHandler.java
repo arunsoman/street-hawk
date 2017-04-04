@@ -10,9 +10,9 @@ import com.ar.myfirstapp.utils.Constants;
  * Created by Arun Soman on 3/24/2017.
  */
 
-public class ResponseHandler extends Handler {
+public class DeviceResponseHandler extends Handler {
 
-    public interface ResponseListener {
+    public interface DeviceResponseListener {
         void onStateChanged(int state);
 
         void onConnected(String connectedDeviceName);
@@ -24,35 +24,39 @@ public class ResponseHandler extends Handler {
         void onNotification(String notificationText);
     }
 
-    private ResponseListener responseListener;
+    private DeviceResponseListener deviceResponseListener;
 
-    public void setOnStateChangedListener(ResponseListener responseListener) {
-        this.responseListener = responseListener;
+    public void setDeviceResponseListener(DeviceResponseListener deviceResponseListener) {
+        this.deviceResponseListener = deviceResponseListener;
     }
 
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
             case DeviceManager.MESSAGE_TYPE.STATE_CHANGE:
-                if (responseListener != null)
-                    responseListener.onStateChanged(msg.arg1);
+                if (deviceResponseListener != null)
+                    deviceResponseListener.onStateChanged(msg.arg1);
                 break;
             case DeviceManager.MESSAGE_TYPE.WRITE:
-                if (responseListener != null)
-                    responseListener.onWriteCommand((Command) msg.obj);
+                if (deviceResponseListener != null)
+                    deviceResponseListener.onWriteCommand((Command) msg.obj);
                 break;
             case DeviceManager.MESSAGE_TYPE.READ:
-                if (responseListener != null)
-                    responseListener.onReadCommand((Command) msg.obj);
+                if (deviceResponseListener != null) {
+                    DeviceManager.CommandParcel parcel = (DeviceManager.CommandParcel) msg.obj;
+                    deviceResponseListener.onReadCommand(parcel.getCommand());
+                    if (parcel.getRequestResponseListener() != null)
+                        parcel.getRequestResponseListener().onResponseReceived(parcel.getCommand());
+                }
                 break;
             case DeviceManager.MESSAGE_TYPE.DEVICE_NAME:
                 String deviceName = msg.getData().getString(Constants.TAG_DEVICE_NAME);
-                if (responseListener != null)
-                    responseListener.onConnected(deviceName);
+                if (deviceResponseListener != null)
+                    deviceResponseListener.onConnected(deviceName);
                 break;
             case DeviceManager.MESSAGE_TYPE.NOTIFICATION:
-                if (responseListener != null)
-                    responseListener.onNotification(msg.getData().getString(Constants.TAG_TOAST));
+                if (deviceResponseListener != null)
+                    deviceResponseListener.onNotification(msg.getData().getString(Constants.TAG_TOAST));
                 break;
         }
 
