@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.bt.DeviceManager;
-import com.ar.myfirstapp.bt.ResponseHandler;
+import com.ar.myfirstapp.bt.DeviceResponseHandler;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
@@ -38,24 +38,25 @@ import com.ar.myfirstapp.view.fragments.LogFragment;
 import com.ar.myfirstapp.view.fragments.OBDFragment;
 
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity implements ResponseHandler.ResponseListener {
+public class MainActivity extends AppCompatActivity implements DeviceResponseHandler.DeviceResponseListener {
 
     private static final String TAG = "MainActivity";
 
     private DeviceManager deviceManager;
-    public ResponseHandler responseHandler = new ResponseHandler();
+    public DeviceResponseHandler deviceResponseHandler = new DeviceResponseHandler();
 
     private InfiniteViewPager viewPager;
     private Button buttonConnect;
     private TextView textViewTitle;
     private CircleIndicator circleIndicator;
 
-    private Map<Integer, Command>[] fragmentData = new HashMap[FragmentFactory.getLastIndex()];
+    private Map<Integer, Command>[] fragmentData = new TreeMap[FragmentFactory.getLastIndex()];
     private List<Command> commandLog = new LinkedList<>();
 
     private BroadcastReceiver bluetoothStateReceiver = new BroadcastReceiver() {
@@ -73,24 +74,18 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
         }
     };
 
-
     void startConnection() {
         String deviceAddress = deviceManager.getELM327Address("OBDII");
         if (!TextUtils.isEmpty(deviceAddress)) {
             BluetoothDevice device = deviceManager.getBluetoothAdapter().getRemoteDevice(deviceAddress);
             deviceManager.connect(device);
-            fireTasks();
         }
-    }
-
-    void terminateConnection() {
-        deviceManager.stop();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        terminateConnection();
+        deviceManager.terminateConnection();
     }
 
     @Override
@@ -103,16 +98,11 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
         if (deviceManager == null) {
             deviceManager = DeviceManager.getInstance();
-            responseHandler.setOnStateChangedListener(this);
-            deviceManager.setHandler(responseHandler);
+            deviceResponseHandler.setDeviceResponseListener(this);
+            deviceManager.setHandler(deviceResponseHandler);
             deviceManager.initialize();
             startConnection();
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
     }
 
     private void initUI() {
@@ -183,8 +173,10 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
                     deviceManager.send(initC);
                 deviceManager.send(proto);
                 for (String str : ModeFactory.getSupportedModes()) {
-                    for (Command c : ModeFactory.getDiscoveryCommand(str))
+                    for (Command c : ModeFactory.getDiscoveryCommand(str)) {
+                        if (c == null) continue;
                         deviceManager.send(c);
+                    }
                 }
             }
 
@@ -212,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
     @Override
     public void onConnected(String connectedDeviceName) {
         Toast.makeText(this, "Connected to " + connectedDeviceName, Toast.LENGTH_SHORT).show();
+        fireTasks();
     }
 
     @Override
@@ -225,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
+                    //TODO Take this later out of this runnable
                     Command[] commands = ModeFactory.getSupportedPidCommands(command);
                     if (commands != null) {
                         for (Command c : commands)
@@ -235,27 +229,32 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
             });
         }
         try {
-            int index = Integer.parseInt(command.getCommandId(), 16);
-            addData(index - 1, command);
+            int index = (Integer.parseInt(command.getCommandId(), 16)) - 1;
+            if (fragmentData[index] == null) fragmentData[index] = new TreeMap<>();
+            try {
+                int pId = Integer.parseInt(command.getPid(), 16);
+                fragmentData[index].put(pId, command);
+                sendNotification(index, pId);
+            } catch (Exception e) {
+                Logger.e(TAG, e.toString());
+            }
         } catch (NumberFormatException ignored) {
         } finally {
             commandLog.add(command);
-            sendBroadcast(new Intent(Constants.TAG_NOTIFICATION_REFRESH));
         }
     }
 
-    private void addData(int index, Command command) {
-        try {
-            fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
-        } catch (NullPointerException e) {
-            fragmentData[index] = new HashMap<>();
-            try {
-                fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
-            } catch (Exception exception) {
-                Logger.e(TAG, exception.toString());
-            }
-        } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
-        }
+    /**
+     * Sends notification to all fragments that a new command request has received
+     *
+     * @param index Command mode
+     * @param pId   pid of command
+     */
+    private void sendNotification(int index, int pId) {
+        Intent intent = new Intent(Constants.TAG_NOTIFICATION_REFRESH);
+        intent.putExtra(Constants.TAG_NOTIFICATION_COMMAND_INDEX, index);
+        intent.putExtra(Constants.TAG_NOTIFICATION_COMMAND_PID, pId);
+        sendBroadcast(intent);
     }
 
     @Override
