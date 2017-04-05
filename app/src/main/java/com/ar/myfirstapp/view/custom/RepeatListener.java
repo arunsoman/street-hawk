@@ -16,8 +16,8 @@ public class RepeatListener implements View.OnTouchListener {
     private Runnable handlerRunnable = new Runnable() {
         @Override
         public void run() {
-            handler.postDelayed(this, normalInterval);
             clickListener.onClick(itemView);
+            handler.postDelayed(handlerRunnable, normalInterval);
         }
     };
     private View itemView;

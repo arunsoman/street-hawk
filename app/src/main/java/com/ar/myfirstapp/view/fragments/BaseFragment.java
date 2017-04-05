@@ -29,13 +29,18 @@ public abstract class BaseFragment extends Fragment {
         getActivity().unregisterReceiver(dataUpdateReceiver);
     }
 
-    protected abstract void updateData();
+    protected abstract void loadData();
+
+    protected abstract void updateData(int index, int pId);
 
     protected BroadcastReceiver dataUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Constants.TAG_NOTIFICATION_REFRESH)) {
-                updateData();
+                int index = intent.getIntExtra(Constants.TAG_NOTIFICATION_COMMAND_INDEX, -1);
+                int pId = intent.getIntExtra(Constants.TAG_NOTIFICATION_COMMAND_PID, -1);
+                if (index != -1 && pId != -1)
+                    updateData(index, pId);
             }
         }
     };

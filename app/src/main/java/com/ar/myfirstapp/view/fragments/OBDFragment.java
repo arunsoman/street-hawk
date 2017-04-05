@@ -8,9 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ar.myfirstapp.view.MainActivity;
 import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.obd2.Command;
+import com.ar.myfirstapp.view.MainActivity;
 import com.ar.myfirstapp.view.adapter.OBDItemAdapter;
 
 import java.util.Map;
@@ -21,6 +21,8 @@ import java.util.Map;
 
 public class OBDFragment extends BaseFragment {
     RecyclerView recyclerView;
+    int position;
+    OBDItemAdapter obdItemAdapter;
 
     @Nullable
     @Override
@@ -31,22 +33,26 @@ public class OBDFragment extends BaseFragment {
     }
 
     @Override
-    protected void updateData() {
-        Bundle bundle = getArguments();
-        Map<Integer,Command> commands = ((MainActivity) getActivity()).getCommands(bundle.getInt("position"));
-        if (commands != null) {
-            OBDItemAdapter obdItemAdapter = new OBDItemAdapter(commands);
-            recyclerView.setAdapter(obdItemAdapter);
-        }
+    protected void updateData(int index, int pId) {
+        if (index != position) return;
+        obdItemAdapter.add(((MainActivity) getActivity()).getCommands(position).get(pId));
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        updateData();
+        loadData();
+    }
+
+    @Override
+    protected void loadData() {
+        Map<Integer, Command> commands = ((MainActivity) getActivity()).getCommands(position);
+        obdItemAdapter = new OBDItemAdapter(commands);
+        recyclerView.setAdapter(obdItemAdapter);
     }
 
     private void initUI() {
+        position = getArguments().getInt("position");
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);

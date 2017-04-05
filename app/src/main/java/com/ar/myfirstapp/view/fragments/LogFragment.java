@@ -41,18 +41,22 @@ public class LogFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        updateData();
+        loadData();
     }
 
     @Override
-    protected void updateData() {
+    protected void loadData() {
         textViewLog.setText("");
         List<Command> commands = ((MainActivity) getActivity()).getCommandLog();
-        if (commands != null) {
-            for (Command command : commands) {
-                textViewLog.append(command.toString());
-            }
+        for (Command command : commands) {
+            textViewLog.append(command.toString());
         }
+    }
+
+    @Override
+    protected void updateData(int mode, int pId) {
+        List<Command> commands = ((MainActivity) getActivity()).getCommandLog();
+        textViewLog.append(commands.get(commands.size()-1).toString());
     }
 
     private void initUI() {
