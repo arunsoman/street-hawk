@@ -45,6 +45,7 @@ public class RepeatListener implements View.OnTouchListener {
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 handler.removeCallbacks(handlerRunnable);
+                handler.removeCallbacksAndMessages(null);
                 itemView = view;
                 handler.postDelayed(handlerRunnable, initialInterval);
                 clickListener.onClick(view);
@@ -52,6 +53,7 @@ public class RepeatListener implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 handler.removeCallbacks(handlerRunnable);
+                handler.removeCallbacksAndMessages(null);
                 itemView = null;
                 return true;
         }
