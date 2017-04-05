@@ -187,8 +187,13 @@ public class Mode9 implements Mode {
 
     }
 
-    public static Command getCommand(String index) {
+    public Command getCommand(String index) {
         Command c = commands.get(index);
         return c;
+    }
+
+    @Override
+    public Command[] getDiscoveryCommands() {
+        return new Command[]{commands.get("00")};
     }
 }

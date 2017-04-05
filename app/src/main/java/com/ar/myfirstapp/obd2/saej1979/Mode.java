@@ -7,4 +7,7 @@ import com.ar.myfirstapp.obd2.Command;
  */
 
 public interface Mode {
+
+    Command[] getDiscoveryCommands();
+    Command getCommand(String pid);
 }

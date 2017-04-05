@@ -16,18 +16,20 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
-        <com.ar.myfirstapp.view.custom.OBDTextView
+        <TextView
             android:id="@+id/textViewOBDKey"
-            tools:text="Key"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            tools:text="Key" />
 
         <TextView
             android:id="@+id/textViewOBDValue"
-            tools:text="Value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            tools:text="Value" />
     </LinearLayout>
 </android.support.v7.widget.CardView>

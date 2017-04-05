@@ -1,6 +1,7 @@
 package com.ar.myfirstapp.view.adapter;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,9 +9,14 @@ import android.widget.TextView;
 
 import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.bt.DeviceManager;
+import com.ar.myfirstapp.bt.RequestResponseListener;
 import com.ar.myfirstapp.obd2.Command;
-import com.ar.myfirstapp.view.custom.OBDTextView;
+import com.ar.myfirstapp.utils.Constants;
+import com.ar.myfirstapp.view.custom.RepeatListener;
 
+import java.util.ArrayList;
+import java.util.TreeMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,9 +25,28 @@ import java.util.Map;
 
 public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHolder> {
     private Map<Integer, Command> commands;
+    private List<Integer> keyList;
 
     public OBDItemAdapter(Map<Integer, Command> commands) {
-        this.commands = commands;
+        if (commands != null) {
+            this.commands = commands;
+            this.keyList = new ArrayList<>(commands.keySet());
+        } else {
+            this.commands = new TreeMap<>();
+            this.keyList = new ArrayList<>();
+        }
+    }
+
+
+    public void add(Command command) {
+        int key = Integer.parseInt(command.getPid(), 16);
+        commands.put(key, command);
+        if (keyList.contains(key)) {
+            //notifyItemChanged(keyList.indexOf(key));
+        } else {
+            keyList = new ArrayList<>(commands.keySet());
+            notifyItemInserted(keyList.indexOf(key));
+        }
     }
 
     @Override
@@ -31,16 +56,24 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(OBDItemAdapter.ViewHolder holder, int position) {
-        final Command command = commands.get(position);
-        holder.textViewOBDKey.display(command);
+    public void onBindViewHolder(final OBDItemAdapter.ViewHolder holder, int position) {
+        final Command command = commands.get(keyList.get(position));
+        holder.textViewOBDKey.setText(command.getName());
         holder.textViewOBDValue.setText(command.toString());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnTouchListener(new RepeatListener(0, Constants.ELMTimeDelay, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DeviceManager.getInstance().send(command);
+                //  notifyItemChanged(holder.getAdapterPosition());
+                DeviceManager.getInstance().send(command, new RequestResponseListener() {
+                    @Override
+                    public void onResponseReceived(Command command) {
+                        holder.textViewOBDKey.setText(command.getName());
+                        holder.textViewOBDValue.setText(command.toString());
+                    }
+                });
+
             }
-        });
+        }));
     }
 
     @Override
@@ -49,13 +82,15 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        OBDTextView textViewOBDKey;
+        TextView textViewOBDKey;
         TextView textViewOBDValue;
 
         ViewHolder(View itemView) {
             super(itemView);
-            textViewOBDKey = (OBDTextView) itemView.findViewById(R.id.textViewOBDKey);
+            textViewOBDKey = (TextView) itemView.findViewById(R.id.textViewOBDKey);
             textViewOBDValue = (TextView) itemView.findViewById(R.id.textViewOBDValue);
         }
     }
+
+
 }

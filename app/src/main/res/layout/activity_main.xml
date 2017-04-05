@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#efefef"
     android:padding="4dp"
     tools:context="com.ar.myfirstapp.view.MainActivity">
 
@@ -14,12 +16,26 @@
         android:textAlignment="center"
         tools:text="Title" />
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/viewPager"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/buttonConnect"
-        android:layout_below="@+id/textViewTitle" />
+        android:layout_below="@+id/textViewTitle">
+
+        <com.ar.myfirstapp.view.custom.infinteviewpager.InfiniteViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/circleIndicator" />
+
+        <com.ar.myfirstapp.view.custom.infinteviewpager.CircleIndicator
+            android:id="@+id/circleIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true"
+            app:icon_selected="@drawable/indicator_circle_white"
+            app:icon_unselected="@drawable/indicator_circle_black" />
+    </RelativeLayout>
 
     <Button
         android:id="@+id/buttonConnect"
@@ -27,5 +43,5 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:text="Connect"
-        android:visibility="gone" />
+        android:visibility="visible" />
 </RelativeLayout>

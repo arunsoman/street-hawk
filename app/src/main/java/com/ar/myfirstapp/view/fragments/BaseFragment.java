@@ -7,6 +7,8 @@ import android.content.IntentFilter;
 import android.support.v4.app.Fragment;
 import android.view.View;
 
+import com.ar.myfirstapp.utils.Constants;
+
 
 /**
  * Created by amal.george on 24-03-2017
@@ -15,14 +17,10 @@ import android.view.View;
 public abstract class BaseFragment extends Fragment {
     protected View rootView;
 
-    public BaseFragment() {
-
-    }
-
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().registerReceiver(dataUpdateReceiver, new IntentFilter("myfirstapp.refresh"));
+        getActivity().registerReceiver(dataUpdateReceiver, new IntentFilter(Constants.TAG_NOTIFICATION_REFRESH));
     }
 
     @Override
@@ -31,13 +29,18 @@ public abstract class BaseFragment extends Fragment {
         getActivity().unregisterReceiver(dataUpdateReceiver);
     }
 
-    protected abstract void updateData();
+    protected abstract void loadData();
+
+    protected abstract void updateData(int index, int pId);
 
     protected BroadcastReceiver dataUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals("myfirstapp.refresh")) {
-                updateData();
+            if (intent.getAction().equals(Constants.TAG_NOTIFICATION_REFRESH)) {
+                int index = intent.getIntExtra(Constants.TAG_NOTIFICATION_COMMAND_INDEX, -1);
+                int pId = intent.getIntExtra(Constants.TAG_NOTIFICATION_COMMAND_PID, -1);
+                if (index != -1 && pId != -1)
+                    updateData(index, pId);
             }
         }
     };

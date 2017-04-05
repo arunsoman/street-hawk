@@ -23,33 +23,41 @@ import android.widget.Toast;
 
 import com.ar.myfirstapp.R;
 import com.ar.myfirstapp.bt.DeviceManager;
-import com.ar.myfirstapp.bt.ResponseHandler;
+import com.ar.myfirstapp.bt.DeviceResponseHandler;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.obd2.at.AtCommands;
 import com.ar.myfirstapp.obd2.saej1979.ModeFactory;
+import com.ar.myfirstapp.utils.Constants;
+import com.ar.myfirstapp.utils.Logger;
 import com.ar.myfirstapp.utils.Utils;
+import com.ar.myfirstapp.view.custom.infinteviewpager.CircleIndicator;
+import com.ar.myfirstapp.view.custom.infinteviewpager.InfiniteViewPager;
 import com.ar.myfirstapp.view.fragments.BaseFragment;
 import com.ar.myfirstapp.view.fragments.FragmentFactory;
 import com.ar.myfirstapp.view.fragments.LogFragment;
 import com.ar.myfirstapp.view.fragments.OBDFragment;
 
 import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity implements ResponseHandler.ResponseListener {
+public class MainActivity extends AppCompatActivity implements DeviceResponseHandler.DeviceResponseListener {
 
-    public static final String UUID = "00001101-0000-1000-8000-00805F9B34FB";
-    //public static final String UUID = "fa87c0d0-afac-11de-8a39-0800200c9a66";
+    private static final String TAG = "MainActivity";
 
     private DeviceManager deviceManager;
-    public ResponseHandler responseHandler = new ResponseHandler();
+    public DeviceResponseHandler deviceResponseHandler = new DeviceResponseHandler();
 
-    private ViewPager viewPager;
+    private InfiniteViewPager viewPager;
     private Button buttonConnect;
     private TextView textViewTitle;
+    private CircleIndicator circleIndicator;
 
-    private Map<Integer, Command>[] fragmentData = new HashMap[FragmentFactory.getLength()];
+    private Map<Integer, Command>[] fragmentData = new TreeMap[FragmentFactory.getLastIndex()];
+    private List<Command> commandLog = new LinkedList<>();
 
     private BroadcastReceiver bluetoothStateReceiver = new BroadcastReceiver() {
         @Override
@@ -66,24 +74,18 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
         }
     };
 
-
     void startConnection() {
         String deviceAddress = deviceManager.getELM327Address("OBDII");
         if (!TextUtils.isEmpty(deviceAddress)) {
             BluetoothDevice device = deviceManager.getBluetoothAdapter().getRemoteDevice(deviceAddress);
             deviceManager.connect(device);
-            fireTasks();
         }
-    }
-
-    void terminateConnection() {
-        deviceManager.stop();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        terminateConnection();
+        deviceManager.terminateConnection();
     }
 
     @Override
@@ -96,32 +98,23 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
         if (deviceManager == null) {
             deviceManager = DeviceManager.getInstance();
-            responseHandler.setOnStateChangedListener(this);
-            deviceManager.setHandler(responseHandler);
+            deviceResponseHandler.setDeviceResponseListener(this);
+            deviceManager.setHandler(deviceResponseHandler);
             deviceManager.initialize();
             startConnection();
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        /*
-        if (viewPager.getCurrentItem() == 0) {
-            super.onBackPressed();
-        } else {
-            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
-        }
-        */
-        super.onBackPressed();
-    }
-
     private void initUI() {
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        viewPager = (InfiniteViewPager) findViewById(R.id.viewPager);
         textViewTitle = (TextView) findViewById(R.id.textViewTitle);
         buttonConnect = (Button) findViewById(R.id.buttonConnect);
+        circleIndicator = (CircleIndicator) findViewById(R.id.circleIndicator);
 
         ScreenSlidePagerAdapter pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
+        circleIndicator.setViewPager(viewPager);
+
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -130,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
             @Override
             public void onPageSelected(int position) {
-                textViewTitle.setText(FragmentFactory.getTitle()[position]);
+                textViewTitle.setText(FragmentFactory.getTitle()[position % FragmentFactory.getLength()]);
             }
 
             @Override
@@ -138,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
 
             }
         });
-        viewPager.setCurrentItem(FragmentFactory.getTitle().length);
+        viewPager.setCurrentItem(FragmentFactory.getLastIndex());
 
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,72 +172,25 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
                 for (Command initC : AtCommands.initCommands)
                     deviceManager.send(initC);
                 deviceManager.send(proto);
-                //             deviceManager.send(ModeFactory.getCommand("m1", "20"));
                 for (String str : ModeFactory.getSupportedModes()) {
-                    deviceManager.send(ModeFactory.getDiscoveryCommand(str));
+                    for (Command c : ModeFactory.getDiscoveryCommand(str)) {
+                        if (c == null) continue;
+                        deviceManager.send(c);
+                    }
                 }
-                //for (Command c: AtCommands.testCommands)
-                //    deviceManager.send(c);
             }
-//            for(Command c: AtCommands.initCanScan){
-//                    deviceManager.send(c);
-//            }
-// //           deviceManager.getMode1PIDs();
-            //           deviceManager.sendCommand(AtCommands.activitMonitor);
-            /*
-            Command command = Mode1.getCommand("00");
-            deviceManager.sendCommand(command);
-            command = Mode1.getCommand("1C");
-            deviceManager.sendCommand(command);
-            command = Mode1.getCommand("12");
-            deviceManager.sendCommand(command);
-            command = Mode1.getCommand("51");
-            deviceManager.sendCommand(command);
-            command = Mode1.getCommand("05");
-            deviceManager.sendCommand(command);
-            deviceManager.sendCommand(Mode1.getCommand("00"));
-            deviceManager.sendCommand(Mode1.getCommand("01"));
-            deviceManager.sendCommand(Mode1.getCommand("04"));
-            deviceManager.sendCommand(Mode1.getCommand("0C"));
-            deviceManager.sendCommand(Mode1.getCommand("0D"));
-            deviceManager.initSequence();
-            //deviceManager.queryCan((byte) 1, (byte) (0x7DF));
-            */
 
         } catch (Exception e) {
             Log.e("MActivity", "NPE", e);
         }
     }
 
-
-    public void show(Command command) {
-        try {
-            int index = Integer.parseInt(command.getCommandId(), 16);
-            addData(index, command);
-        } catch (NumberFormatException ignored) {
-        } finally {
-            addData(FragmentFactory.getTitle().length - 1, command);
-            sendBroadcast(new Intent("myfirstapp.refresh"));
-        }
-    }
-
-    private void addData(int index, Command command) {
-        try {
-            fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
-        } catch (NullPointerException e) {
-            fragmentData[index] = new HashMap<>();
-            try {
-                fragmentData[index].put(Integer.parseInt(command.getPid(), 16), command);
-            } catch (Exception ignored) {
-            }
-        } catch (IndexOutOfBoundsException ignored) {
-        } catch (NumberFormatException ignored) {
-
-        }
-    }
-
     public Map<Integer, Command> getCommands(int index) {
         return fragmentData[index];
+    }
+
+    public List<Command> getCommandLog() {
+        return commandLog;
     }
 
     @Override
@@ -258,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
     @Override
     public void onConnected(String connectedDeviceName) {
         Toast.makeText(this, "Connected to " + connectedDeviceName, Toast.LENGTH_SHORT).show();
+        fireTasks();
     }
 
     @Override
@@ -268,48 +215,69 @@ public class MainActivity extends AppCompatActivity implements ResponseHandler.R
     @Override
     public void onReadCommand(final Command command) {
         if (command.getCommandType() == Command.CommandType.MODEX_DIS) {
-            new Handler().post(new Runnable() {
-                @Override
-                public void run() {
-                    Command[] commands = ModeFactory.getSupportedPidCommands(command);
-                    if (commands != null) {
-                        for (Command c : commands)
-                            if (c != null)
-                                DeviceManager.getInstance().send(c);
-                    }
-                }
-            });
+            Command[] commands = ModeFactory.getSupportedPidCommands(command);
+            if (commands != null) {
+                for (Command c : commands)
+                    if (c != null)
+                        DeviceManager.getInstance().send(c);
+            }
         }
-        show(command);
+        try {
+            int index = (Integer.parseInt(command.getCommandId(), 16)) - 1;
+            if (fragmentData[index] == null) fragmentData[index] = new TreeMap<>();
+            try {
+                int pId = Integer.parseInt(command.getPid(), 16);
+                fragmentData[index].put(pId, command);
+                sendNotification(index, pId);
+            } catch (Exception e) {
+                Logger.e(TAG, e.toString());
+            }
+        } catch (NumberFormatException ignored) {
+        } finally {
+            commandLog.add(command);
+        }
+    }
+
+    /**
+     * Sends notification to all fragments that a new command request has received
+     *
+     * @param index Command mode
+     * @param pId   pid of command
+     */
+    private void sendNotification(int index, int pId) {
+        Intent intent = new Intent(Constants.TAG_NOTIFICATION_REFRESH);
+        intent.putExtra(Constants.TAG_NOTIFICATION_COMMAND_INDEX, index);
+        intent.putExtra(Constants.TAG_NOTIFICATION_COMMAND_PID, pId);
+        sendBroadcast(intent);
     }
 
     @Override
     public void onNotification(String notificationText) {
-
+        Toast.makeText(this, notificationText, Toast.LENGTH_SHORT).show();
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
-        public ScreenSlidePagerAdapter(FragmentManager fm) {
+        ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
             BaseFragment fragment;
-            if (position == FragmentFactory.getTitle().length - 1) {
+            if (position % FragmentFactory.getLength() == 0) {
                 fragment = new LogFragment();
             } else {
                 fragment = new OBDFragment();
+                Bundle bundle = new Bundle();
+                bundle.putInt("position", position % FragmentFactory.getLastIndex());
+                fragment.setArguments(bundle);
             }
-            Bundle bundle = new Bundle();
-            bundle.putInt("position", position);
-            fragment.setArguments(bundle);
             return fragment;
         }
 
         @Override
         public int getCount() {
-            return 11;
+            return FragmentFactory.getLength();
         }
     }
 }

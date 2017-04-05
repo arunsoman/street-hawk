@@ -13,16 +13,16 @@ import static com.ar.myfirstapp.obd2.parser.BasicParserSet.okParser;
  */
 
 public class AtCommands {
-    public static final Command ATSP0= new Command("AT ", "sp 0", "Automatic protocol detection", okParser);
-    public static final Command ATSP1= new Command("AT ", "sp 1", "SAE J1850 PWM (41.6 kbaud)", okParser);
-    public static final Command ATSP2= new Command("AT ", "sp 2", "SAE J1850 VPW (10.4 kbaud)", okParser);
-    public static final Command ATSP3= new Command("AT ", "sp 3", "ISO 9141-2 (5 baud init, 10.4 kbaud)", okParser);
-    public static final Command ATSP4= new Command("AT ", "sp 4", "ISO 14230-4 KWP (5 baud init, 10.4 kbaud)", okParser);
-    public static final Command ATSP5= new Command("AT ", "sp 5", "ISO 14230-4 KWP (fast init, 10.4 kbaud)", okParser);
-    public static final Command ATSP6= new Command("AT ", "sp 6", "ISO 15765-4 CAN (11 bit ID, 500 kbaud)", okParser);
-    public static final Command ATSP7= new Command("AT ", "sp 7", "ISO 15765-4 CAN (29 bit ID, 500 kbaud)", okParser);
-    public static final Command ATSP8= new Command("AT ", "sp 8", "ISO 15765-4 CAN (11 bit ID, 250 kbaud)", okParser);
-    public static final Command ATSP9= new Command("AT ", "sp 9", "ISO 15765-4 CAN (29 bit ID, 250 kbaud)", okParser);
+    public static final Command ATSP0 = new Command("AT ", "sp 0", "Automatic protocol detection", okParser);
+    public static final Command ATSP1 = new Command("AT ", "sp 1", "SAE J1850 PWM (41.6 kbaud)", okParser);
+    public static final Command ATSP2 = new Command("AT ", "sp 2", "SAE J1850 VPW (10.4 kbaud)", okParser);
+    public static final Command ATSP3 = new Command("AT ", "sp 3", "ISO 9141-2 (5 baud init, 10.4 kbaud)", okParser);
+    public static final Command ATSP4 = new Command("AT ", "sp 4", "ISO 14230-4 KWP (5 baud init, 10.4 kbaud)", okParser);
+    public static final Command ATSP5 = new Command("AT ", "sp 5", "ISO 14230-4 KWP (fast init, 10.4 kbaud)", okParser);
+    public static final Command ATSP6 = new Command("AT ", "sp 6", "ISO 15765-4 CAN (11 bit ID, 500 kbaud)", okParser);
+    public static final Command ATSP7 = new Command("AT ", "sp 7", "ISO 15765-4 CAN (29 bit ID, 500 kbaud)", okParser);
+    public static final Command ATSP8 = new Command("AT ", "sp 8", "ISO 15765-4 CAN (11 bit ID, 250 kbaud)", okParser);
+    public static final Command ATSP9 = new Command("AT ", "sp 9", "ISO 15765-4 CAN (29 bit ID, 250 kbaud)", okParser);
 
 
     public static final Command ATHI = new Command("AT", " H1", "", okParser);
@@ -39,13 +39,13 @@ public class AtCommands {
     public static final Command activitMonitor = new Command("AT", " AMC", "", new Parser() {
         @Override
         public void parse(Command command) {
-            byte[]rawBytes = command.getRawResp();
-           if(rawBytes.length == 1 && rawBytes[0] == 63){
-               command.setResponseStatus(Command.ResponseStatus.UnSupportedReq);
-               return;
-           }
-            int tmp = Integer.parseInt(new String(rawBytes), 16) +1;
-            double d = tmp*(.65536);
+            byte[] rawBytes = command.getRawResp();
+            if (rawBytes.length == 1 && rawBytes[0] == 63) {
+                command.setResponseStatus(Command.ResponseStatus.UnSupportedReq);
+                return;
+            }
+            int tmp = Integer.parseInt(new String(rawBytes), 16) + 1;
+            double d = tmp * (.65536);
             command.setResult(Double.toString(d));
         }
     });
@@ -62,18 +62,21 @@ public class AtCommands {
             new Command("AT", "ST 250", "", okParser),
     };
 
-    public static final Command[] protoIter= {
+    public static final Command[] protoIter = {
             //ATSP0,
             ATSP6
     };
 
-    public static final Command[] testCommands= {
+    public static final Command[] testCommands = {
+            /*
+            Commented due to NonStatic method referenced from static context on test statement
             Mode1.getCommand("00"),
             Mode1.getCommand("0C"),
             Mode1.getCommand("0D"),
+            */
     };
 
-    public static final Command[] initCanScan={
+    public static final Command[] initCanScan = {
             new Command("AT", " CA", "", okParser),
             new Command("AT", " L1", "", okParser),
             new Command("AT", " H1", "", okParser),

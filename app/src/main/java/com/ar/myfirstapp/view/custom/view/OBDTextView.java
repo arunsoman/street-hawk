@@ -1,4 +1,4 @@
-package com.ar.myfirstapp.view.custom;
+package com.ar.myfirstapp.view.custom.view;
 
 import android.content.Context;
 import android.support.annotation.Nullable;

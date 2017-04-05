@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.ar.myfirstapp.view.MainActivity;
 import com.ar.myfirstapp.obd2.Command;
 import com.ar.myfirstapp.utils.Constants;
 import com.ar.myfirstapp.utils.Logger;
@@ -36,6 +35,9 @@ public class DeviceManager {
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
     private int currentState, newState;
+
+    public static final String SPP_UUID = "00001101-0000-1000-8000-00805F9B34FB";
+
 
     public static final class BLUETOOTH_STATE {
         public static final int NONE = 0;       // Initialization state.
@@ -176,7 +178,7 @@ public class DeviceManager {
 
             // Get a BluetoothSocket for a connection with the given BluetoothDevice
             try {
-                tmp = device.createRfcommSocketToServiceRecord(UUID.fromString(MainActivity.UUID));
+                tmp = device.createRfcommSocketToServiceRecord(UUID.fromString(SPP_UUID));
             } catch (IOException e) {
                 Logger.e(TAG, "ConnectThread#ConnectThread() createRfcommSocketToServiceRecord Excpetion", e);
             }
@@ -278,26 +280,64 @@ public class DeviceManager {
     }
 
     /**
+     * Helper class to bundle command object and the requestResponseListener
+     */
+    class CommandParcel {
+        private Command command;
+        private RequestResponseListener requestResponseListener;
+
+        CommandParcel(Command command, RequestResponseListener requestResponseListener) {
+            this.command = command;
+            this.requestResponseListener = requestResponseListener;
+        }
+
+        CommandParcel(Command command) {
+            this.command = command;
+        }
+
+        public Command getCommand() {
+            return command;
+        }
+
+        public void setCommand(Command command) {
+            this.command = command;
+        }
+
+        RequestResponseListener getRequestResponseListener() {
+            return requestResponseListener;
+        }
+    }
+
+
+    /**
      * Write to the ConnectedThread in an unsynchronized manner
      *
      * @param command The command to write
-     * @see ConnectedThread#send(Command)
      */
+
+    public void send(Command command, RequestResponseListener requestResponseListener) {
+        synchronized (inQ) {
+            inQ.add(new CommandParcel(command, requestResponseListener));
+        }
+    }
+
+    /**
+     * Write to the ConnectedThread in an unsynchronized manner
+     *
+     * @param command The command to write
+     */
+
     public void send(Command command) {
-        // Create temporary object
-        ConnectedThread r;
-        // Synchronize a copy of the ConnectedThread
-        synchronized (this) {
-            //if (currentState != BLUETOOTH_STATE.CONNECTED) return;
-            sendToQueue(command);
+        synchronized (inQ) {
+            inQ.add(new CommandParcel(command));
         }
     }
 
     /**
      * Stop all threads
      */
-    public synchronized void stop() {
-        Log.d(TAG, "stop");
+    public synchronized void terminateConnection() {
+        Log.d(TAG, "terminateConnection");
 
         if (connectThread != null) {
             connectThread.cancel();
@@ -353,13 +393,7 @@ public class DeviceManager {
         DeviceManager.this.initialize();
     }
 
-    private final Queue<Command> inQ = new ConcurrentLinkedQueue<>();
-
-    void sendToQueue(final Command c) {
-        synchronized (inQ) {
-            inQ.add(c);
-        }
-    }
+    private final Queue<CommandParcel> inQ = new ConcurrentLinkedQueue<>();
 
     /**
      * This thread runs during a connection with a remote device.
@@ -421,7 +455,7 @@ public class DeviceManager {
             private Command sendRequestForResponse(Command command) throws IOException {
                 writeOs(command.getRequest());
                 handler.obtainMessage(MESSAGE_TYPE.WRITE, -1, -1, command).sendToTarget();
-                Logger.e(TAG, "Request Sent :" + command.toString());
+                Logger.d(TAG, "Request Sent :" + command.toString());
 
                 int avail = is.available();
                 if (avail == 0) {
@@ -444,7 +478,6 @@ public class DeviceManager {
                     byte[] rawResp = readAll();
                     command.setRawResp(rawResp);
                 }
-                handler.obtainMessage(MESSAGE_TYPE.READ, -1, -1, command).sendToTarget();
                 return command;
             }
 
@@ -481,20 +514,24 @@ public class DeviceManager {
         public void run() {
             try (Pipe pipe = new Pipe(mmInStream, mmOutStream)) {
                 while (currentState == BLUETOOTH_STATE.CONNECTED) {
-                    Command command;
+                    CommandParcel commandParcel;
                     synchronized (inQ) {
                         if (inQ.size() == 0)
                             continue;
-                        command = inQ.remove();
+                        commandParcel = inQ.remove();
                     }
+                    Command command = commandParcel.getCommand();
                     try {
                         pipe.sendRequestForResponse(command);
                         command.parse();
                     } catch (IOException exception) {
                         command.setResponseStatus(Command.ResponseStatus.NetworkError);
                         connectionLost();
+                    } finally {
+                        commandParcel.setCommand(command);
+                        handler.obtainMessage(MESSAGE_TYPE.READ, -1, -1, commandParcel).sendToTarget();
                     }
-                    Log.e(TAG, "Response Received : " + command.toString());
+                    Log.d(TAG, "Response Received : " + command.toString());
 
                 }
             } catch (IOException e) {
