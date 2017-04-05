@@ -215,18 +215,12 @@ public class MainActivity extends AppCompatActivity implements DeviceResponseHan
     @Override
     public void onReadCommand(final Command command) {
         if (command.getCommandType() == Command.CommandType.MODEX_DIS) {
-            new Handler().post(new Runnable() {
-                @Override
-                public void run() {
-                    //TODO Take this later out of this runnable
-                    Command[] commands = ModeFactory.getSupportedPidCommands(command);
-                    if (commands != null) {
-                        for (Command c : commands)
-                            if (c != null)
-                                DeviceManager.getInstance().send(c);
-                    }
-                }
-            });
+            Command[] commands = ModeFactory.getSupportedPidCommands(command);
+            if (commands != null) {
+                for (Command c : commands)
+                    if (c != null)
+                        DeviceManager.getInstance().send(c);
+            }
         }
         try {
             int index = (Integer.parseInt(command.getCommandId(), 16)) - 1;

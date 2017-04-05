@@ -61,37 +61,4 @@ public class DeviceResponseHandler extends Handler {
         }
 
     }
-
-    //private static final String TAG = "RESPONSE HANDLER";
-
-    // private final Queue<Command> outQ = new ConcurrentLinkedQueue<Command>();
-    //private Map<String, OBDView> viewMap = new HashMap<>();
-
-    /*
-    public void registerDisplay(OBDView view, String commandId) {
-        viewMap.put(commandId, view);
-    }
-
-    @Override
-    public void handleMessage(Message msg) {
-        MainActivity activity = activityReference.get();
-        if (activity != null) {
-            if (!outQ.isEmpty()) {
-                Command c = outQ.remove();
-                String cId = c.getCommandId();
-                OBDView view = viewMap.get(cId);
-                if (view == null)
-                    view = viewMap.get("*");
-                if (view != null) {
-                    view.display(c);
-                    activity.show(c);
-                }
-            }
-            //    tvLog.display(msg.getData().getString("cmd"));
-        }
-    }
-    public void add(Command command) {
-        outQ.add(command);
-    }
-    */
 }

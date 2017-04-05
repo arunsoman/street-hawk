@@ -15,10 +15,9 @@ import com.ar.myfirstapp.utils.Constants;
 import com.ar.myfirstapp.view.custom.RepeatListener;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by amal.george on 24-03-2017
@@ -33,7 +32,7 @@ public class OBDItemAdapter extends RecyclerView.Adapter<OBDItemAdapter.ViewHold
             this.commands = commands;
             this.keyList = new ArrayList<>(commands.keySet());
         } else {
-            this.commands = new LinkedHashMap<>();
+            this.commands = new TreeMap<>();
             this.keyList = new ArrayList<>();
         }
     }
