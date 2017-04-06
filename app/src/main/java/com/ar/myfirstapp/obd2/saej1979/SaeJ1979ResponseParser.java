@@ -42,7 +42,7 @@ public abstract class SaeJ1979ResponseParser extends Parser {
             return;
         String splits[] = str1.split(" ");
         int len = splits.length;
-        if(len >0) {
+        if(len > 0) {
             A = (int) Long.parseLong(splits[0], 16);
             if(len> 1){
                 B = (int) Long.parseLong(splits[1], 16);

@@ -6,7 +6,7 @@ import com.ar.myfirstapp.obd2.Command;
  * Created by Arun Soman on 3/12/2017.
  */
 
-public class Mide1Pid12Parser extends SaeJ1979ResponseParser {
+public class Mode1Pid12Parser extends SaeJ1979ResponseParser {
     private final static String[] values ={
             "Upstream",
             "Downstream of catalytic converter",
@@ -15,7 +15,7 @@ public class Mide1Pid12Parser extends SaeJ1979ResponseParser {
 
 };
 
-    public Mide1Pid12Parser() {
+    public Mode1Pid12Parser() {
         super("41 12 ");
     }
 

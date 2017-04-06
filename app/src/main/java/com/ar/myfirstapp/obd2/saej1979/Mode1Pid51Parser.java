@@ -6,7 +6,7 @@ import com.ar.myfirstapp.obd2.Command;
  * Created by Arun Soman on 3/12/2017.
  */
 
-public class Mide1Pid51Parser extends SaeJ1979ResponseParser {
+public class Mode1Pid51Parser extends SaeJ1979ResponseParser {
     private final static String[] values ={
             "Not available",
             "Gasoline",
@@ -35,7 +35,7 @@ public class Mide1Pid51Parser extends SaeJ1979ResponseParser {
 
     };
 
-    public Mide1Pid51Parser(String delim) {
+    public Mode1Pid51Parser(String delim) {
         super("41 51 ");
     }
 

@@ -6,7 +6,7 @@ import com.ar.myfirstapp.obd2.Command;
  * Created by Arun Soman on 3/12/2017.
  */
 
-public class Mide1Pid1CParser extends SaeJ1979ResponseParser {
+public class Mode1Pid1CParser extends SaeJ1979ResponseParser {
     private final static String[] values ={
             "OBD-II as defined by the CARB",
             "OBD as defined by the EPA",
@@ -43,7 +43,7 @@ public class Mide1Pid1CParser extends SaeJ1979ResponseParser {
             "Heavy Duty Euro OBD Stage VI (HD EOBD-IV)",
 };
 
-    public Mide1Pid1CParser() {
+    public Mode1Pid1CParser() {
         super("41 1C ");
     }
 

@@ -40,7 +40,7 @@ public class Mode1 implements Mode {
 
         }
     }));
-            commands.put("01", new Command("01", "01",
+            commands.put("1", new Command("01", "01",
                     "Monitor status since DTCs cleared. (Includes malfunction indicator lamp (MIL) status and number of DTCs.)",
                     new Mode1Pid01Parser()));
 
@@ -178,7 +178,7 @@ public class Mode1 implements Mode {
                 }
             }));
             commands.put("11", new Command("01", "11", "Throttle position0100%", new Aby2point55Parser("41 11 ")));
-            commands.put("12", new Command("01", "12", "Commanded secondary air status", new Mide1Pid12Parser()));
+            commands.put("12", new Command("01", "12", "Commanded secondary air status", new Mode1Pid12Parser()));
             commands.put("13", new Command("01", "13", "Oxygen sensors present", new SaeJ1979ResponseParser("41 13 ") {
                 @Override
                 public void parse(Command command) {
@@ -202,7 +202,7 @@ public class Mode1 implements Mode {
             commands.put("19", new Command("01", "19", "Bank 2, Sensor 2:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new O2SensorParser("41 19 ")));
             commands.put("1A", new Command("01", "1A", "Bank 2, Sensor 3:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new O2SensorParser("41 1A ")));
             commands.put("1B", new Command("01", "1B", "Bank 2, Sensor 4:Oxygen sensor voltage,0-100(lean)1.27599.2(rich)Volts%", new O2SensorParser("41 1B ")));
-            commands.put("1C", new Command("01", "1C", "OBD standards this vehicle conforms to", new Mide1Pid1CParser()));
+            commands.put("1C", new Command("01", "1C", "OBD standards this vehicle conforms to", new Mode1Pid1CParser()));
             commands.put("1D", new Command("01", "1D", "Oxygen sensors present", new SaeJ1979ResponseParser("41 1D ") {
                 @Override
                 public void parse(Command command) {
@@ -440,7 +440,7 @@ public class Mode1 implements Mode {
             commands.put("4C", new Command("01", "4C", "Commanded throttle actuator0100%", new Aby2point55Parser("41 4C ")));
             commands.put("4D", new Command("01", "4D", "Time run with MIL on065535minutes", new Parser256AplusB("41 4D ")));
             commands.put("4E", new Command("01", "4E", "Time since trouble codes cleared065535minutes", new Parser256AplusB("41 4E ")));
-            commands.put("51", new Command("01", "51", "Fuel Type", new Mide1Pid51Parser("41 51 ")));
+            commands.put("51", new Command("01", "51", "Fuel Type", new Mode1Pid51Parser("41 51 ")));
             commands.put("52", new Command("01", "52", "Ethanol fuel %0100%", new Aby2point55Parser("41 52 ")));
             commands.put("53", new Command("01", "53", "Absoulute Evap system Vapour Pressure0327675kpa", null));
             commands.put("C3", new Command("01", "C3", "????", null));
